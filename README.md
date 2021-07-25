@@ -40,8 +40,6 @@ Seuil min. = 10 000
 
 Fréquence relative min. = 1.0%
 
-<font size="-1">
-
 |n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|
 |--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|
 |1|2 259 130|Marie|1934|1920|1934|26 892|2 232 238|2.631%|1%|99%
@@ -103,7 +101,6 @@ Fréquence relative min. = 1.0%
 |57|10 099|Céleste|1989|1959|1991|653|9 446|0.012%|6%|94%
 |58|10 027|Loïs|2005|2004|2006|6 976|3 051|0.012%|70%|30%
 
-</font>
 
 ## Prénoms mixtes épicènes avec au moins 2 000 occurrences
 
@@ -122,8 +119,6 @@ Nb prénoms ignorés (date 'XXXX') = 821 477 : 1.0%
 Seuil min. = 2 000
 
 Fréquence relative min. = 1.0%
-
-<font size="-1">
 
 |n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|
 |--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|
@@ -340,5 +335,3 @@ Fréquence relative min. = 1.0%
 |211|2 046|Olive|1931|1931|1931|213|1 833|0.002%|10%|90%
 |212|2 040|Ariel|1990|1993|1975|1 698|342|0.002%|83%|17%
 |213|2 031|Jeannick|1958|1963|1955|755|1 276|0.002%|37%|63%
-
-</font>

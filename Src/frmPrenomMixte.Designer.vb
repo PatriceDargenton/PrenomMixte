@@ -2,7 +2,7 @@
 Partial Class frmPrenomMixte
     Inherits System.Windows.Forms.Form
 
-    'Form overrides dispose to clean up the component list.
+    'Form remplace la méthode Dispose pour nettoyer la liste des composants.
     <System.Diagnostics.DebuggerNonUserCode()> _
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
@@ -14,12 +14,12 @@ Partial Class frmPrenomMixte
         End Try
     End Sub
 
-    'Required by the Windows Form Designer
+    'Requise par le Concepteur Windows Form
     Private components As System.ComponentModel.IContainer
 
-    'NOTE: The following procedure is required by the Windows Form Designer
-    'It can be modified using the Windows Form Designer.  
-    'Do not modify it using the code editor.
+    'REMARQUE : la procédure suivante est requise par le Concepteur Windows Form
+    'Elle peut être modifiée à l'aide du Concepteur Windows Form.  
+    'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.cmdAnalyser = New System.Windows.Forms.Button()
@@ -27,24 +27,24 @@ Partial Class frmPrenomMixte
         '
         'cmdAnalyser
         '
-        Me.cmdAnalyser.Location = New System.Drawing.Point(31, 25)
+        Me.cmdAnalyser.Location = New System.Drawing.Point(24, 21)
         Me.cmdAnalyser.Name = "cmdAnalyser"
-        Me.cmdAnalyser.Size = New System.Drawing.Size(76, 39)
+        Me.cmdAnalyser.Size = New System.Drawing.Size(93, 36)
         Me.cmdAnalyser.TabIndex = 0
         Me.cmdAnalyser.Text = "Analyser"
         Me.cmdAnalyser.UseVisualStyleBackColor = True
         '
         'frmPrenomMixte
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 15.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(583, 332)
+        Me.ClientSize = New System.Drawing.Size(287, 178)
         Me.Controls.Add(Me.cmdAnalyser)
         Me.Name = "frmPrenomMixte"
         Me.Text = "Prénom mixte"
         Me.ResumeLayout(False)
 
-    End Sub
+End Sub
+    Friend WithEvents cmdAnalyser As System.Windows.Forms.Button
 
-    Friend WithEvents cmdAnalyser As Button
 End Class

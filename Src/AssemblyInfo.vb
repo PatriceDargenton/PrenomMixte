@@ -13,7 +13,7 @@ Imports System.Runtime.InteropServices
 <Assembly: ComVisible(False)>
 
 'Le GUID suivant est pour l'ID de la typelib si ce projet est exposé à COM
-<Assembly: Guid("501febdc-e766-4e85-ae12-7bd11e6d1045")> 
+<Assembly: Guid("501febdc-e766-4e85-ae12-7bd11e6d1045")>
 
-<Assembly: AssemblyVersion("1.0.1")> 
+<Assembly: AssemblyVersion("1.0.2")>
 <Assembly: AssemblyFileVersion("1.0.1")> 

@@ -67,38 +67,72 @@ Public Class frmPrenomMixte
 
             Dim sPrenom = sPrenomOrig.ToLower
 
-            If sPrenom = "adelaide" Then sPrenom = "adélaide"
+            If sPrenom = "adelaide" Then sPrenom = "adélaïde"
+            If sPrenom = "aimee" Then sPrenom = "aimée"
+            If sPrenom = "aissa" Then sPrenom = "aïssa"
+            If sPrenom = "alois" Then sPrenom = "aloïs"
             If sPrenom = "aloise" Then sPrenom = "aloïse"
             If sPrenom = "amedee" Then sPrenom = "amedée"
             If sPrenom = "anael" Then sPrenom = "anaël"
+            If sPrenom = "anaelle" Then sPrenom = "anaëlle"
+            If sPrenom = "andre" Then sPrenom = "andré"
+            If sPrenom = "andree" Then sPrenom = "andrée"
             If sPrenom = "andrea" Then sPrenom = "andréa"
             If sPrenom = "arsene" Then sPrenom = "arsène"
             If sPrenom = "barthelemy" Then sPrenom = "barthélemy"
+            If sPrenom = "benedict" Then sPrenom = "bénédict"
+            If sPrenom = "benedicte" Then sPrenom = "bénédicte"
             If sPrenom = "celeste" Then sPrenom = "céleste"
             If sPrenom = "cleo" Then sPrenom = "cléo"
             If sPrenom = "come" Then sPrenom = "côme"
+            If sPrenom = "danael" Then sPrenom = "danaël"
+            If sPrenom = "danaelle" Then sPrenom = "danaëlle"
+            If sPrenom = "daniele" Then sPrenom = "danièle"
             If sPrenom = "dorothee" Then sPrenom = "dorothée"
             If sPrenom = "eden" Then sPrenom = "éden"
             If sPrenom = "elia" Then sPrenom = "élia"
             If sPrenom = "elie" Then sPrenom = "élie"
-            If sPrenom = "elisee" Then sPrenom = "elisée"
+            If sPrenom = "elisee" Then sPrenom = "élisée"
+            If sPrenom = "emmanuel" Then sPrenom = "émmanuel"
+            If sPrenom = "emmanuelle" Then sPrenom = "émmanuelle"
             If sPrenom = "esperance" Then sPrenom = "espérance"
             If sPrenom = "evariste" Then sPrenom = "évariste"
             If sPrenom = "felicite" Then sPrenom = "félicité"
+            If sPrenom = "frederic" Then sPrenom = "frédéric"
+            If sPrenom = "frederique" Then sPrenom = "frédérique"
             If sPrenom = "gael" Then sPrenom = "gaël"
+            If sPrenom = "gaelle" Then sPrenom = "gaëlle"
             If sPrenom = "gwenael" Then sPrenom = "gwenaël"
+            If sPrenom = "gwenaelle" Then sPrenom = "gwenaëlle"
+            If sPrenom = "guenaelle" Then sPrenom = "guénaëlle"
             If sPrenom = "heidi" Then sPrenom = "heïdi"
             If sPrenom = "irenee" Then sPrenom = "irenée"
+            If sPrenom = "joel" Then sPrenom = "joël"
+            If sPrenom = "joelle" Then sPrenom = "joëlle"
+            If sPrenom = "jose" Then sPrenom = "josé"
+            If sPrenom = "josee" Then sPrenom = "josée"
+            If sPrenom = "josephe" Then sPrenom = "josèphe"
             If sPrenom = "judicael" Then sPrenom = "judicaël"
             If sPrenom = "leocadie" Then sPrenom = "léocadie"
             If sPrenom = "leonard" Then sPrenom = "léonard"
             If sPrenom = "leonce" Then sPrenom = "léonce"
             If sPrenom = "mae" Then sPrenom = "maé"
             If sPrenom = "mael" Then sPrenom = "maël"
+            If sPrenom = "maelle" Then sPrenom = "maëlle"
             If sPrenom = "mederic" Then sPrenom = "médéric"
             If sPrenom = "medine" Then sPrenom = "médine"
             If sPrenom = "meryl" Then sPrenom = "méryl"
+            If sPrenom = "michele" Then sPrenom = "michèle"
             If sPrenom = "nael" Then sPrenom = "naël"
+            If sPrenom = "nais" Then sPrenom = "naïs"
+            If sPrenom = "noe" Then sPrenom = "noé"
+            If sPrenom = "noee" Then sPrenom = "noée"
+            If sPrenom = "noel" Then sPrenom = "noël"
+            If sPrenom = "noelle" Then sPrenom = "noëlle"
+            If sPrenom = "raphael" Then sPrenom = "raphaël"
+            If sPrenom = "raphaelle" Then sPrenom = "raphaëlle"
+            If sPrenom = "rene" Then sPrenom = "rené"
+            If sPrenom = "renee" Then sPrenom = "renée"
             If sPrenom = "sylvere" Then sPrenom = "sylvère"
             If sPrenom = "thais" Then sPrenom = "thaïs"
             If sPrenom = "theodore" Then sPrenom = "théodore"
@@ -197,11 +231,30 @@ Public Class frmPrenomMixte
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel)
         Dim sbMD As New StringBuilder ' Syntaxe MarkDown
+        sbMD.AppendLine("Synthèse statistique des prénoms mixtes épicènes")
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
 
         sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
         sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
+
+        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)#Exemple_récapitulatif
+        Dim sbWK As New StringBuilder ' Syntaxe Wiki
+        AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+        sbWK.AppendLine("{|class='wikitable sortable' style='text-align:center; width:80%;'")
+        sbWK.AppendLine("|+ Synthèse statistique des prénoms mixtes épicènes")
+        sbWK.AppendLine("! scope='col' | n°")
+        sbWK.AppendLine("! scope='col' | Occurrences")
+        sbWK.AppendLine("! scope='col' | Prénom")
+        sbWK.AppendLine("! scope='col' | Année moyenne")
+        sbWK.AppendLine("! scope='col' | Année moyenne masc.")
+        sbWK.AppendLine("! scope='col' | Année moyenne fém.")
+        sbWK.AppendLine("! scope='col' | Occurrences masc.")
+        sbWK.AppendLine("! scope='col' | Occurrences fém.")
+        sbWK.AppendLine("! scope='col' | Fréq.")
+        sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
+        sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
 
         Dim iNbLignesFin = 0
         For Each prenom In dico.Trier("bMixte desc, rFreqTotale desc")
@@ -238,13 +291,31 @@ Public Class frmPrenomMixte
                 "|" & prenom.rFreqRelativeMasc.ToString("0%") &
                 "|" & prenom.rFreqRelativeFem.ToString("0%"))
 
+            sbWK.AppendLine("|-")
+            sbWK.AppendLine(
+                "|" & iNbPrenomsMixtes &
+                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
+                "|| " & prenom.sPrenom &
+                "||" & prenom.rAnneeMoy.ToString("0") &
+                "||" & prenom.rAnneeMoyMasc.ToString("0") &
+                "||" & prenom.rAnneeMoyFem.ToString("0") &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
+                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
+                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
+                "||" & prenom.rFreqRelativeFem.ToString("0%"))
+
         Next
+        sbWK.AppendLine("|}")
 
         Dim s$
         's = sb.ToString
         'Debug.WriteLine(s)
 
-        s = sbMD.ToString
+        's = sbMD.ToString
+        'Debug.WriteLine(s)
+
+        s = sbWK.ToString
         Debug.WriteLine(s)
 
         MsgBox("Terminé !", MsgBoxStyle.Information, "Prénom mixte")

@@ -5,7 +5,9 @@ Public Class frmPrenomMixte
 
     Private Sub cmdAnalyser_Click(sender As Object, e As EventArgs) Handles cmdAnalyser.Click
 
+        Me.cmdAnalyser.Enabled = False
         AnalyserPrenoms()
+        Me.cmdAnalyser.Enabled = True
 
     End Sub
 
@@ -31,14 +33,18 @@ Public Class frmPrenomMixte
         Public hsVariantes As New HashSet(Of String)
 
         Public Sub Calculer(iNbPrenomsTot%)
-            Me.rFreqTotale = Me.iNbOcc / iNbPrenomsTot
-            Me.rFreqTotaleMasc = Me.iNbOccMasc / iNbPrenomsTot
-            Me.rFreqTotaleFem = Me.iNbOccFem / iNbPrenomsTot
-            Me.rAnneeMoy = Me.rAnneeMoy / Me.iNbOcc
-            Me.rAnneeMoyMasc = Me.rAnneeMoyMasc / Me.iNbOccMasc
-            Me.rAnneeMoyFem = Me.rAnneeMoyFem / Me.iNbOccFem
-            Me.rFreqRelativeMasc = Me.iNbOccMasc / Me.iNbOcc
-            Me.rFreqRelativeFem = Me.iNbOccFem / Me.iNbOcc
+            If iNbPrenomsTot > 0 Then
+                Me.rFreqTotale = Me.iNbOcc / iNbPrenomsTot
+                Me.rFreqTotaleMasc = Me.iNbOccMasc / iNbPrenomsTot
+                Me.rFreqTotaleFem = Me.iNbOccFem / iNbPrenomsTot
+            End If
+            If Me.iNbOccMasc > 0 Then Me.rAnneeMoyMasc = Me.rAnneeMoyMasc / Me.iNbOccMasc
+            If Me.iNbOccFem > 0 Then Me.rAnneeMoyFem = Me.rAnneeMoyFem / Me.iNbOccFem
+            If Me.iNbOcc > 0 Then
+                Me.rAnneeMoy = Me.rAnneeMoy / Me.iNbOcc
+                Me.rFreqRelativeMasc = Me.iNbOccMasc / Me.iNbOcc
+                Me.rFreqRelativeFem = Me.iNbOccFem / Me.iNbOcc
+            End If
         End Sub
 
     End Class
@@ -147,6 +153,12 @@ Public Class frmPrenomMixte
 
         EcrireFichierFiltre(asLignes, dicoE)
 
+        'Const iSeuilMin% = 50000
+        'Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
+        'AfficherSynthesePrenoms(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
+        '    iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
+        'GoTo Fin
+
         Const iNbLignesMax% = 10000
         AfficherSyntheseEpicene(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinEpicene, rSeuilFreqRel, iNbLignesMax)
@@ -154,6 +166,7 @@ Public Class frmPrenomMixte
         AfficherSyntheseHomophone(dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinHomophone, 0, iNbLignesMax)
 
+Fin:
         MsgBox("Terminé !", MsgBoxStyle.Information, "Prénom mixte")
 
     End Sub
@@ -211,6 +224,106 @@ Public Class frmPrenomMixte
 
     End Sub
 
+    Private Sub AfficherSynthesePrenoms(dico As DicoTri(Of String, clsPrenom),
+            iNbPrenomsTotOk%, iNbPrenomsTot%,
+            iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
+            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
+
+        ' Afficher la synthèse statistique des prénoms fréquents dans la fenêtre Debug de Visual Studio
+
+        Dim sb As New StringBuilder
+        AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel)
+        Dim sbMD As New StringBuilder ' Syntaxe MarkDown
+        sbMD.AppendLine("Synthèse statistique des prénoms fréquents")
+        AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+
+        sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
+        sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
+
+        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
+        Dim sbWK As New StringBuilder ' Syntaxe Wiki
+        AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+        sbWK.AppendLine("{|class='wikitable sortable' style='text-align:center; width:80%;'")
+        sbWK.AppendLine("|+ Synthèse statistique des prénoms")
+        sbWK.AppendLine("! scope='col' | n°")
+        sbWK.AppendLine("! scope='col' | Occurrences")
+        sbWK.AppendLine("! scope='col' | Prénom")
+        sbWK.AppendLine("! scope='col' | Année moyenne")
+        sbWK.AppendLine("! scope='col' | Année moyenne masc.")
+        sbWK.AppendLine("! scope='col' | Année moyenne fém.")
+        sbWK.AppendLine("! scope='col' | Occurrences masc.")
+        sbWK.AppendLine("! scope='col' | Occurrences fém.")
+        sbWK.AppendLine("! scope='col' | Fréq.")
+        sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
+        sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
+
+        Dim iNbPrenoms% = 0
+        Dim iNbLignesFin = 0
+        For Each prenom In dico.Trier("sPrenom")
+            iNbLignesFin += 1
+            If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
+
+            iNbPrenoms += 1
+            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
+
+            prenom.bSelect = True
+
+            Dim sGenre$ = "(f) ="
+            If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
+            Const sFormatFreq$ = "0.000%"
+            sb.AppendLine(
+                iNbPrenoms &
+                " : " & sFormaterNum(prenom.iNbOcc) & " : " & prenom.sPrenom &
+                ", " & prenom.rAnneeMoy.ToString("0") &
+                ", " & prenom.rAnneeMoyMasc.ToString("0") & " (m)" &
+                ", " & prenom.rAnneeMoyFem.ToString("0") & " (f)" &
+                ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
+                ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
+                ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
+                ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
+                ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
+                ", mixte=" & prenom.bMixteEpicene)
+
+            sbMD.AppendLine(
+                "|" & iNbPrenoms &
+                "|" & sFormaterNum(prenom.iNbOcc) &
+                "|" & prenom.sPrenom &
+                "|" & prenom.rAnneeMoy.ToString("0") &
+                "|" & prenom.rAnneeMoyMasc.ToString("0") &
+                "|" & prenom.rAnneeMoyFem.ToString("0") &
+                "|" & sFormaterNum(prenom.iNbOccMasc) &
+                "|" & sFormaterNum(prenom.iNbOccFem) &
+                "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
+                "|" & prenom.rFreqRelativeMasc.ToString("0%") &
+                "|" & prenom.rFreqRelativeFem.ToString("0%"))
+
+            sbWK.AppendLine("|-")
+            sbWK.AppendLine(
+                "|" & iNbPrenoms &
+                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
+                "|| " & prenom.sPrenom &
+                "||" & prenom.rAnneeMoy.ToString("0") &
+                "||" & prenom.rAnneeMoyMasc.ToString("0") &
+                "||" & prenom.rAnneeMoyFem.ToString("0") &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
+                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
+                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
+                "||" & prenom.rFreqRelativeFem.ToString("0%"))
+
+        Next
+        sbWK.AppendLine("|}")
+
+        Dim sChemin$ = Application.StartupPath & "\Prenoms.md"
+        EcrireFichier(sChemin, sbMD)
+        Dim sCheminWK$ = Application.StartupPath & "\Prenoms.wiki"
+        EcrireFichier(sCheminWK, sbWK)
+
+    End Sub
+
     Private Sub AfficherSyntheseEpicene(dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
@@ -218,7 +331,7 @@ Public Class frmPrenomMixte
 
         ' Afficher la synthèse statistique des prénoms mixtes épicènes dans la fenêtre Debug de Visual Studio
 
-        Dim iNbPrenomsMixtes% = 0
+
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel)
@@ -230,9 +343,7 @@ Public Class frmPrenomMixte
         sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
         sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
 
-        ' https://fr.wikipedia.org/wiki/Utilisateur:Patrice_Dargenton/Brouillon?venotify=created
-        ' https://fr.wikipedia.org/wiki/Utilisateur:Patrice_Dargenton/Brouillon
-        ' https://fr.wikipedia.org/wiki/Aide:Ins%C3%A9rer_un_tableau_(wikicode,_avanc%C3%A9)
+        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
@@ -250,12 +361,13 @@ Public Class frmPrenomMixte
         sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
         sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
 
+        Dim iNbPrenomsMixtes% = 0
         Dim iNbLignesFin = 0
         For Each prenom In dico.Trier("bMixteEpicene desc, rFreqTotale desc")
             iNbLignesFin += 1
             If Not prenom.bMixteEpicene Then Continue For
             iNbPrenomsMixtes += 1
-            If iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 
@@ -324,7 +436,6 @@ Public Class frmPrenomMixte
 
         ' Afficher la synthèse statistique des prénoms mixtes homophones dans la fenêtre Debug de Visual Studio
 
-        Dim iNbPrenomsMixtes% = 0
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel)
@@ -336,9 +447,7 @@ Public Class frmPrenomMixte
         sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
         sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
 
-        ' https://fr.wikipedia.org/wiki/Utilisateur:Patrice_Dargenton/Brouillon?venotify=created
-        ' https://fr.wikipedia.org/wiki/Utilisateur:Patrice_Dargenton/Brouillon
-        ' https://fr.wikipedia.org/wiki/Aide:Ins%C3%A9rer_un_tableau_(wikicode,_avanc%C3%A9)
+        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
@@ -356,12 +465,13 @@ Public Class frmPrenomMixte
         sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
         sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
 
+        Dim iNbPrenomsMixtes% = 0
         Dim iNbLignesFin = 0
         For Each prenom In dico.Trier("bMixteHomophone desc, rFreqTotale desc")
             iNbLignesFin += 1
             If Not prenom.bMixteHomophone Then Continue For
             iNbPrenomsMixtes += 1
-            If iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 
@@ -670,7 +780,13 @@ Public Class frmPrenomMixte
         Next
 
         Dim sCheminOut$ = Application.StartupPath & "\nat2019_.csv"
-        Using sw As New IO.StreamWriter(sCheminOut, append:=False, encoding:=Encoding.UTF8)
+        EcrireFichier(sCheminOut, sb)
+
+    End Sub
+
+    Private Sub EcrireFichier(sChemin$, sb As StringBuilder)
+
+        Using sw As New IO.StreamWriter(sChemin, append:=False, encoding:=Encoding.UTF8)
             sw.Write(sb.ToString())
         End Using 'sw.Close()
 

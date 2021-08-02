@@ -31,6 +31,7 @@ Public Class frmPrenomMixte
         Public iAnnee%, rAnneeMoy#, rAnneeMoyMasc#, rAnneeMoyFem#
         Public bSelect As Boolean
         Public hsVariantes As New HashSet(Of String)
+        Public dicoVariantes As New DicoTri(Of String, clsPrenom)
 
         Public Sub Calculer(iNbPrenomsTot%)
             If iNbPrenomsTot > 0 Then
@@ -62,6 +63,7 @@ Public Class frmPrenomMixte
 
         Dim dicoE As New DicoTri(Of String, clsPrenom) ' épicène
         Dim dicoH As New DicoTri(Of String, clsPrenom) ' homophone
+        'Dim dicoT As New DicoTri(Of String, String) ' Détection des prénoms homophones 
         Dim iNbLignes% = 0
         Dim iNbLignesOk% = 0
         Dim iNbPrenomsTot% = 0
@@ -113,11 +115,14 @@ Public Class frmPrenomMixte
 
             ' Dico des prénoms homophones
             Dim prenomH = prenom.Clone() ' Il faut faire une copie pour que l'objet soit distinct
-            If prenomH.sPrenomHomophone <> prenomH.sPrenom Then
+            'If prenomH.sPrenomHomophone <> prenomH.sPrenom Then
                 If Not prenomH.hsVariantes.Contains(prenomH.sPrenom) Then
                     prenomH.hsVariantes.Add(prenomH.sPrenom)
                 End If
-            End If
+                If Not prenomH.dicoVariantes.ContainsKey(prenomH.sPrenom) Then
+                    prenomH.dicoVariantes.Add(prenomH.sPrenom, prenom)
+                End If
+            'End If
             Dim sCleH$ = prenomH.sPrenomHomophone
             If dicoH.ContainsKey(sCleH) Then
                 Dim prenom0 = dicoH(sCleH)
@@ -134,13 +139,36 @@ Public Class frmPrenomMixte
                     If Not prenom0.hsVariantes.Contains(variante) Then
                         prenom0.hsVariantes.Add(variante)
                     End If
+                    If Not prenom0.dicoVariantes.ContainsKey(variante) Then
+                        prenom0.dicoVariantes.Add(variante, prenom)
+                    End If
                 Next
 
             Else
                 dicoH.Add(sCleH, prenomH)
             End If
 
+            '' Détection des prénoms homophones 
+            'Dim sPrenomF1$ = prenom.sPrenom & "e"
+            'If dicoE.ContainsKey(sPrenomF1) AndAlso Not dicoT.ContainsKey(sPrenomF1) Then
+            '    dicoT.Add(sPrenomF1, prenom.sPrenom)
+            'End If
+            'Dim sPrenomF2$ = prenom.sPrenom & "le"
+            'If dicoE.ContainsKey(sPrenomF2) AndAlso Not dicoT.ContainsKey(sPrenomF2) Then
+            '    dicoT.Add(sPrenomF2, prenom.sPrenom)
+            'End If
+
         Next
+
+        '' Liste des prénoms homophones trouvées
+        'Dim iNbPrenomU% = 0
+        'For Each kvp In dicoT
+        '    iNbPrenomU += 1
+        '    If iNbPrenomU > 200 Then Exit For
+        '    Dim sPrenom$ = kvp.Key
+        '    Debug.WriteLine(sPrenom & " : " & dicoT(sPrenom))
+        'Next
+        'GoTo Fin
 
         'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
         Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
@@ -218,7 +246,7 @@ Fin:
 
             prenom.Calculer(iNbPrenomsTot)
 
-            If prenom.hsVariantes.Count > 0 Then prenom.bMixteHomophone = True
+            If prenom.hsVariantes.Count > 1 Then prenom.bMixteHomophone = True
 
         Next
 
@@ -238,27 +266,12 @@ Fin:
         sbMD.AppendLine("Synthèse statistique des prénoms fréquents")
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+        sbMD.AppendLine(sEnteteMarkDown())
 
-        sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
-        sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
-
-        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
-        sbWK.AppendLine("{|class='wikitable sortable' style='text-align:center; width:80%;'")
-        sbWK.AppendLine("|+ Synthèse statistique des prénoms")
-        sbWK.AppendLine("! scope='col' | n°")
-        sbWK.AppendLine("! scope='col' | Occurrences")
-        sbWK.AppendLine("! scope='col' | Prénom")
-        sbWK.AppendLine("! scope='col' | Année moyenne")
-        sbWK.AppendLine("! scope='col' | Année moyenne masc.")
-        sbWK.AppendLine("! scope='col' | Année moyenne fém.")
-        sbWK.AppendLine("! scope='col' | Occurrences masc.")
-        sbWK.AppendLine("! scope='col' | Occurrences fém.")
-        sbWK.AppendLine("! scope='col' | Fréq.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
+        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms fréquents"))
 
         Dim iNbPrenoms% = 0
         Dim iNbLignesFin = 0
@@ -271,48 +284,12 @@ Fin:
 
             prenom.bSelect = True
 
-            Dim sGenre$ = "(f) ="
-            If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
             Const sFormatFreq$ = "0.000%"
-            sb.AppendLine(
-                iNbPrenoms &
-                " : " & sFormaterNum(prenom.iNbOcc) & " : " & prenom.sPrenom &
-                ", " & prenom.rAnneeMoy.ToString("0") &
-                ", " & prenom.rAnneeMoyMasc.ToString("0") & " (m)" &
-                ", " & prenom.rAnneeMoyFem.ToString("0") & " (f)" &
-                ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
-                ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
-                ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
-                ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
-                ", mixte=" & prenom.bMixteEpicene)
+            sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
-            sbMD.AppendLine(
-                "|" & iNbPrenoms &
-                "|" & sFormaterNum(prenom.iNbOcc) &
-                "|" & prenom.sPrenom &
-                "|" & prenom.rAnneeMoy.ToString("0") &
-                "|" & prenom.rAnneeMoyMasc.ToString("0") &
-                "|" & prenom.rAnneeMoyFem.ToString("0") &
-                "|" & sFormaterNum(prenom.iNbOccMasc) &
-                "|" & sFormaterNum(prenom.iNbOccFem) &
-                "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "|" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "|" & prenom.rFreqRelativeFem.ToString("0%"))
+            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
-            sbWK.AppendLine("|-")
-            sbWK.AppendLine(
-                "|" & iNbPrenoms &
-                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
-                "|| " & prenom.sPrenom &
-                "||" & prenom.rAnneeMoy.ToString("0") &
-                "||" & prenom.rAnneeMoyMasc.ToString("0") &
-                "||" & prenom.rAnneeMoyFem.ToString("0") &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
-                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "||" & prenom.rFreqRelativeFem.ToString("0%"))
+            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
         Next
         sbWK.AppendLine("|}")
@@ -339,27 +316,12 @@ Fin:
         sbMD.AppendLine("Synthèse statistique des prénoms mixtes épicènes")
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+        sbMD.AppendLine(sEnteteMarkDown())
 
-        sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
-        sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
-
-        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
-        sbWK.AppendLine("{|class='wikitable sortable' style='text-align:center; width:80%;'")
-        sbWK.AppendLine("|+ Synthèse statistique des prénoms mixtes épicènes")
-        sbWK.AppendLine("! scope='col' | n°")
-        sbWK.AppendLine("! scope='col' | Occurrences")
-        sbWK.AppendLine("! scope='col' | Prénom")
-        sbWK.AppendLine("! scope='col' | Année moyenne")
-        sbWK.AppendLine("! scope='col' | Année moyenne masc.")
-        sbWK.AppendLine("! scope='col' | Année moyenne fém.")
-        sbWK.AppendLine("! scope='col' | Occurrences masc.")
-        sbWK.AppendLine("! scope='col' | Occurrences fém.")
-        sbWK.AppendLine("! scope='col' | Fréq.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
+        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes épicènes"))
 
         Dim iNbPrenomsMixtes% = 0
         Dim iNbLignesFin = 0
@@ -371,48 +333,12 @@ Fin:
 
             prenom.bSelect = True
 
-            Dim sGenre$ = "(f) ="
-            If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
             Const sFormatFreq$ = "0.000%"
-            sb.AppendLine(
-                iNbPrenomsMixtes &
-                " : " & sFormaterNum(prenom.iNbOcc) & " : " & prenom.sPrenom &
-                ", " & prenom.rAnneeMoy.ToString("0") &
-                ", " & prenom.rAnneeMoyMasc.ToString("0") & " (m)" &
-                ", " & prenom.rAnneeMoyFem.ToString("0") & " (f)" &
-                ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
-                ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
-                ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
-                ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
-                ", mixte=" & prenom.bMixteEpicene)
+            sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenomsMixtes, sFormatFreq))
 
-            sbMD.AppendLine(
-                "|" & iNbPrenomsMixtes &
-                "|" & sFormaterNum(prenom.iNbOcc) &
-                "|" & prenom.sPrenom &
-                "|" & prenom.rAnneeMoy.ToString("0") &
-                "|" & prenom.rAnneeMoyMasc.ToString("0") &
-                "|" & prenom.rAnneeMoyFem.ToString("0") &
-                "|" & sFormaterNum(prenom.iNbOccMasc) &
-                "|" & sFormaterNum(prenom.iNbOccFem) &
-                "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "|" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "|" & prenom.rFreqRelativeFem.ToString("0%"))
+            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenomsMixtes, sFormatFreq))
 
-            sbWK.AppendLine("|-")
-            sbWK.AppendLine(
-                "|" & iNbPrenomsMixtes &
-                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
-                "|| " & prenom.sPrenom &
-                "||" & prenom.rAnneeMoy.ToString("0") &
-                "||" & prenom.rAnneeMoyMasc.ToString("0") &
-                "||" & prenom.rAnneeMoyFem.ToString("0") &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
-                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "||" & prenom.rFreqRelativeFem.ToString("0%"))
+            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenomsMixtes, sFormatFreq))
 
         Next
         sbWK.AppendLine("|}")
@@ -443,27 +369,12 @@ Fin:
         sbMD.AppendLine("Synthèse statistique des prénoms mixtes homophones")
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+        sbMD.AppendLine(sEnteteMarkDown())
 
-        sbMD.AppendLine("|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|")
-        sbMD.AppendLine("|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|")
-
-        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
-        sbWK.AppendLine("{|class='wikitable sortable' style='text-align:center; width:80%;'")
-        sbWK.AppendLine("|+ Synthèse statistique des prénoms mixtes homophones")
-        sbWK.AppendLine("! scope='col' | n°")
-        sbWK.AppendLine("! scope='col' | Occurrences")
-        sbWK.AppendLine("! scope='col' | Prénom")
-        sbWK.AppendLine("! scope='col' | Année moyenne")
-        sbWK.AppendLine("! scope='col' | Année moyenne masc.")
-        sbWK.AppendLine("! scope='col' | Année moyenne fém.")
-        sbWK.AppendLine("! scope='col' | Occurrences masc.")
-        sbWK.AppendLine("! scope='col' | Occurrences fém.")
-        sbWK.AppendLine("! scope='col' | Fréq.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. masc.")
-        sbWK.AppendLine("! scope='col' | Fréq. rel. fém.")
+        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes homophones"))
 
         Dim iNbPrenomsMixtes% = 0
         Dim iNbLignesFin = 0
@@ -475,56 +386,34 @@ Fin:
 
             prenom.bSelect = True
 
-            Dim sGenre$ = "(f) ="
-            If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
             Const sFormatFreq$ = "0.000%"
 
             Dim sPrenom$ = prenom.sPrenomHomophone
-            If prenom.hsVariantes.Count > 0 Then
+            Dim bVariantes = False
+            If prenom.hsVariantes.Count > 1 Then
+                bVariantes = True
                 Dim lst = prenom.hsVariantes.ToList
-                If Not prenom.hsVariantes.Contains(sPrenom) Then lst.Add(sPrenom)
+                'If Not prenom.hsVariantes.Contains(sPrenom) Then lst.Add(sPrenom)
                 sPrenom = sListerTxt(lst)
             End If
 
-            sb.AppendLine(
-                iNbPrenomsMixtes &
-                " : " & sFormaterNum(prenom.iNbOcc) & " : " & sPrenom &
-                ", " & prenom.rAnneeMoy.ToString("0") &
-                ", " & prenom.rAnneeMoyMasc.ToString("0") & " (m)" &
-                ", " & prenom.rAnneeMoyFem.ToString("0") & " (f)" &
-                ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
-                ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
-                ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
-                ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
-                ", mixte=" & prenom.bMixteEpicene)
+            sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
+            sbMD.AppendLine(sLigneMarkDown(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq,
+                iNumVariante:=0))
+            sbWK.AppendLine(sLigneWiki(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq,
+                iNumVariante:=0))
 
-            sbMD.AppendLine(
-                "|" & iNbPrenomsMixtes &
-                "|" & sFormaterNum(prenom.iNbOcc) &
-                "|" & sPrenom &
-                "|" & prenom.rAnneeMoy.ToString("0") &
-                "|" & prenom.rAnneeMoyMasc.ToString("0") &
-                "|" & prenom.rAnneeMoyFem.ToString("0") &
-                "|" & sFormaterNum(prenom.iNbOccMasc) &
-                "|" & sFormaterNum(prenom.iNbOccFem) &
-                "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "|" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "|" & prenom.rFreqRelativeFem.ToString("0%"))
-
-            sbWK.AppendLine("|-")
-            sbWK.AppendLine(
-                "|" & iNbPrenomsMixtes &
-                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
-                "|| " & sPrenom &
-                "||" & prenom.rAnneeMoy.ToString("0") &
-                "||" & prenom.rAnneeMoyMasc.ToString("0") &
-                "||" & prenom.rAnneeMoyFem.ToString("0") &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
-                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "||" & prenom.rFreqRelativeFem.ToString("0%"))
+            If bVariantes Then
+                Dim iNumVariante% = 0
+                For Each prenomV In prenom.dicoVariantes.Trier("iNbOcc desc")
+                    iNumVariante += 1
+                    sb.AppendLine(sLigneDebug(prenomV, prenomV.sPrenom, iNbPrenomsMixtes, sFormatFreq))
+                    sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
+                        sFormatFreq, iNumVariante))
+                    sbWK.AppendLine(sLigneWiki(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
+                        sFormatFreq, iNumVariante))
+                Next
+            End If
 
         Next
         sbWK.AppendLine("|}")
@@ -540,6 +429,101 @@ Fin:
         'Debug.WriteLine(s)
 
     End Sub
+
+    Private Function sEnteteMarkDown$()
+
+        Dim s$
+        s &= vbLf & "|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|"
+        s &= vbLf & "|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|"
+        Return s
+
+    End Function
+
+    Private Function sEnteteWiki$(sTitre$)
+
+        ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
+
+        Dim s$
+        s &= vbLf & "{|class='wikitable sortable' style='text-align:center; width:80%;'"
+        s &= vbLf & "|+ " & sTitre
+        s &= vbLf & "! scope='col' | n°"
+        s &= vbLf & "! scope='col' | Occurrences"
+        s &= vbLf & "! scope='col' | Prénom"
+        s &= vbLf & "! scope='col' | Année moyenne"
+        s &= vbLf & "! scope='col' | Année moyenne masc."
+        s &= vbLf & "! scope='col' | Année moyenne fém."
+        s &= vbLf & "! scope='col' | Occurrences masc."
+        s &= vbLf & "! scope='col' | Occurrences fém."
+        s &= vbLf & "! scope='col' | Fréq."
+        s &= vbLf & "! scope='col' | Fréq. rel. masc."
+        s &= vbLf & "! scope='col' | Fréq. rel. fém."
+        Return s
+
+    End Function
+
+    Private Function sLigneDebug$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$)
+
+        Dim sGenre$ = "(f) ="
+        If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
+        Dim s$ =
+            iNumPrenom &
+            " : " & sFormaterNum(prenom.iNbOcc) & " : " & sPrenom &
+            ", " & prenom.rAnneeMoy.ToString("0") &
+            ", " & prenom.rAnneeMoyMasc.ToString("0") & " (m)" &
+            ", " & prenom.rAnneeMoyFem.ToString("0") & " (f)" &
+            ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
+            ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
+            ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
+            ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
+            ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
+            ", mixte=" & prenom.bMixteEpicene
+        Return s
+
+    End Function
+
+    Private Function sLigneMarkDown$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
+            Optional iNumVariante% = -1)
+
+        Dim sNumVariante$ = ""
+        If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+
+        Dim s$ =
+            "|" & iNumPrenom & sNumVariante &
+            "|" & sFormaterNum(prenom.iNbOcc) &
+            "|" & sPrenom &
+            "|" & prenom.rAnneeMoy.ToString("0") &
+            "|" & prenom.rAnneeMoyMasc.ToString("0") &
+            "|" & prenom.rAnneeMoyFem.ToString("0") &
+            "|" & sFormaterNum(prenom.iNbOccMasc) &
+            "|" & sFormaterNum(prenom.iNbOccFem) &
+            "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
+            "|" & prenom.rFreqRelativeMasc.ToString("0%") &
+            "|" & prenom.rFreqRelativeFem.ToString("0%")
+        Return s
+
+    End Function
+
+    Private Function sLigneWiki$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
+            Optional iNumVariante% = -1)
+
+        Dim sNumVariante$ = ""
+        If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+
+        Dim s$ = "|-" & vbLf &
+                "|" & iNumPrenom & sNumVariante &
+                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
+                "|| " & sPrenom &
+                "||" & prenom.rAnneeMoy.ToString("0") &
+                "||" & prenom.rAnneeMoyMasc.ToString("0") &
+                "||" & prenom.rAnneeMoyFem.ToString("0") &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
+                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
+                "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
+                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
+                "||" & prenom.rFreqRelativeFem.ToString("0%")
+        Return s
+
+    End Function
 
     Private Function bAnalyserPrenom(sLigne$, prenom As clsPrenom) As Boolean
 
@@ -567,18 +551,19 @@ Fin:
 
         Dim sPrenom = sPrenomOrig.ToLower
 
-        If sPrenom = "adele" Then sPrenom = "adèle"
         If sPrenom = "adelaide" Then sPrenom = "adélaïde"
+        If sPrenom = "adele" Then sPrenom = "adèle"
         If sPrenom = "aimee" Then sPrenom = "aimée"
         If sPrenom = "aissa" Then sPrenom = "aïssa"
+        If sPrenom = "alfrede" Then sPrenom = "alfrède"
         If sPrenom = "alois" Then sPrenom = "aloïs"
         If sPrenom = "aloise" Then sPrenom = "aloïse"
         If sPrenom = "amedee" Then sPrenom = "amedée"
         If sPrenom = "anael" Then sPrenom = "anaël"
         If sPrenom = "anaelle" Then sPrenom = "anaëlle"
         If sPrenom = "andre" Then sPrenom = "andré"
-        If sPrenom = "andree" Then sPrenom = "andrée"
         If sPrenom = "andrea" Then sPrenom = "andréa"
+        If sPrenom = "andree" Then sPrenom = "andrée"
         If sPrenom = "arsene" Then sPrenom = "arsène"
         If sPrenom = "barthelemy" Then sPrenom = "barthélemy"
         If sPrenom = "benedict" Then sPrenom = "bénédict"
@@ -591,6 +576,10 @@ Fin:
         If sPrenom = "daniele" Then sPrenom = "danièle"
         If sPrenom = "dorothee" Then sPrenom = "dorothée"
         If sPrenom = "eden" Then sPrenom = "éden"
+        If sPrenom = "edme" Then sPrenom = "edmé"
+        If sPrenom = "edmee" Then sPrenom = "edmée"
+        If sPrenom = "eleonor" Then sPrenom = "éléonor"
+        If sPrenom = "eleonore" Then sPrenom = "éléonore"
         If sPrenom = "eli" Then sPrenom = "éli"
         If sPrenom = "elia" Then sPrenom = "élia"
         If sPrenom = "elie" Then sPrenom = "élie"
@@ -604,9 +593,9 @@ Fin:
         If sPrenom = "frederique" Then sPrenom = "frédérique"
         If sPrenom = "gael" Then sPrenom = "gaël"
         If sPrenom = "gaelle" Then sPrenom = "gaëlle"
+        If sPrenom = "guenaelle" Then sPrenom = "guénaëlle"
         If sPrenom = "gwenael" Then sPrenom = "gwenaël"
         If sPrenom = "gwenaelle" Then sPrenom = "gwenaëlle"
-        If sPrenom = "guenaelle" Then sPrenom = "guénaëlle"
         If sPrenom = "heidi" Then sPrenom = "heïdi"
         If sPrenom = "irenee" Then sPrenom = "irenée"
         If sPrenom = "joel" Then sPrenom = "joël"
@@ -646,31 +635,47 @@ Fin:
         If sPrenom = "yael" Then sPrenom = "yaël"
         If sPrenom = "yaelle" Then sPrenom = "yaëlle"
 
-        ' Liste complète ici : https://www.little-bottle.fr/prenoms-mixtes
         Dim sPrenomHomophone = sPrenom
+        If sPrenom = "aarone" Then sPrenomHomophone = "aaron"
+        If sPrenom = "achrafe" Then sPrenomHomophone = "achraf"
+        If sPrenom = "adame" Then sPrenomHomophone = "adam"
         If sPrenom = "adèle" Then sPrenomHomophone = "adel"
         If sPrenom = "adrianne" Then sPrenomHomophone = "adrian"
-
         If sPrenom = "aimée" Then sPrenomHomophone = "aimé"
         If sPrenom = "alexie" Then sPrenomHomophone = "alexis"
+        If sPrenom = "alfrède" Then sPrenomHomophone = "alfred"
+        If sPrenom = "amane" Then sPrenomHomophone = "aman"
+        If sPrenom = "amaan" Then sPrenomHomophone = "aman"
         If sPrenom = "anaëlle" Then sPrenomHomophone = "anaël"
         If sPrenom = "andrée" Then sPrenomHomophone = "andré"
         If sPrenom = "andie" Then sPrenomHomophone = "andy"
+        If sPrenom = "anne" Then sPrenomHomophone = "ann"
         If sPrenom = "arielle" Then sPrenomHomophone = "ariel"
         If sPrenom = "armelle" Then sPrenomHomophone = "armel"
         If sPrenom = "axelle" Then sPrenomHomophone = "axel"
+        If sPrenom = "ayane" Then sPrenomHomophone = "ayan"
+        If sPrenom = "aydane" Then sPrenomHomophone = "aydan"
+        If sPrenom = "bayane" Then sPrenomHomophone = "bayan"
         If sPrenom = "bénédicte" Then sPrenomHomophone = "bénédict"
         If sPrenom = "carole" Then sPrenomHomophone = "carol"
+        If sPrenom = "camerone" Then sPrenomHomophone = "cameron"
         If sPrenom = "charly" Then sPrenomHomophone = "charlie"
         If sPrenom = "cyrille" Then sPrenomHomophone = "cyril"
+        If sPrenom = "dane" Then sPrenomHomophone = "dan"
+        If sPrenom = "danie" Then sPrenomHomophone = "dani"
         If sPrenom = "danaëlle" Then sPrenomHomophone = "danaël"
         If sPrenom = "danielle" Then sPrenomHomophone = "daniel"
         If sPrenom = "danièle" Then sPrenomHomophone = "daniel"
+        If sPrenom = "davide" Then sPrenomHomophone = "david"
+        If sPrenom = "dilane" Then sPrenomHomophone = "dilan"
+        If sPrenom = "doctrovee" Then sPrenomHomophone = "doctrove"
         If sPrenom = "dominic" Then sPrenomHomophone = "dominique"
         If sPrenom = "doriane" Then sPrenomHomophone = "dorian"
         If sPrenom = "dorianne" Then sPrenomHomophone = "dorian"
         If sPrenom = "émmanuelle" Then sPrenomHomophone = "émmanuel"
+        If sPrenom = "edmée" Then sPrenomHomophone = "edmé"
         If sPrenom = "élie" Then sPrenomHomophone = "éli"
+        If sPrenom = "éléonore" Then sPrenomHomophone = "éléonor"
         If sPrenom = "frédérique" Then sPrenomHomophone = "frédéric"
         If sPrenom = "gabrielle" Then sPrenomHomophone = "gabriel"
         If sPrenom = "gaëlle" Then sPrenomHomophone = "gaël"
@@ -713,6 +718,7 @@ Fin:
         If sPrenom = "yaëlle" Then sPrenomHomophone = "yaël"
 
         ' 3ème rapport : prénoms féminisés
+        'If sPrenom = "aloïse" Then sPrenomMasc = "aloïs"
         'If sPrenom = "adrienne" Then sPrenomMasc = "adrien"
         'If sPrenom = "antoinnette" Then sPrenomMasc = "antoinne"
         'If sPrenom = "charline" Then sPrenomMasc = "charles"
@@ -721,6 +727,7 @@ Fin:
         'If sPrenom = "claudine" Then sPrenomMasc = "claude"
         'If sPrenom = "claudy" Then sPrenomMasc = "claude"
         'If sPrenom = "denise" Then sPrenomMasc = "denis"
+        'If sPrenom = "edwige" Then sPrenomMasc = "edwig"
 
         prenom.sPrenom = FirstCharToUpper(sPrenom)
         prenom.sPrenomHomophone = FirstCharToUpper(sPrenomHomophone)

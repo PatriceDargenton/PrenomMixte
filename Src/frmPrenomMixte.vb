@@ -422,11 +422,11 @@ Fin:
         's = sb.ToString
         'Debug.WriteLine(s)
 
-        s = sbMD.ToString
-        Debug.WriteLine(s)
-
-        's = sbWK.ToString
+        's = sbMD.ToString
         'Debug.WriteLine(s)
+
+        s = sbWK.ToString
+        Debug.WriteLine(s)
 
     End Sub
 
@@ -511,13 +511,13 @@ Fin:
 
         Dim s$ = "|-" & vbLf &
                 "|" & iNumPrenom & sNumVariante &
-                "|| align='right' | {{formatnum:" & prenom.iNbOcc & "}}" &
+                "|| align='right' | " & sFormaterNumWiki(prenom.iNbOcc) &
                 "|| " & sPrenom &
                 "||" & prenom.rAnneeMoy.ToString("0") &
                 "||" & prenom.rAnneeMoyMasc.ToString("0") &
                 "||" & prenom.rAnneeMoyFem.ToString("0") &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccMasc & "}}" &
-                "|| align='right' | {{formatnum:" & prenom.iNbOccFem & "}}" &
+                "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccMasc) &
+                "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccFem) &
                 "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
                 "||" & prenom.rFreqRelativeMasc.ToString("0%") &
                 "||" & prenom.rFreqRelativeFem.ToString("0%")
@@ -946,6 +946,16 @@ Fin:
 
     Private Function sFormaterNum$(iNum%)
         Return iNum.ToString("n").Replace(".00", "")
+    End Function
+
+    Private Function sFormaterNumWiki$(iNum%)
+
+        ' Pour la syntaxe wiki, éviter d'appliquer un format si le nombre est inférieur à 1000
+        ' (sinon un bot corrigera cela)
+        If Math.Abs(iNum) < 1000 Then Return iNum.ToString
+
+        Return "{{formatnum:" & iNum & "}}"
+
     End Function
 
     Public Function sListerTxt$(lstTxt As List(Of String), Optional iNbMax% = 0)

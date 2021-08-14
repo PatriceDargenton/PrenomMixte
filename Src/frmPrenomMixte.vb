@@ -30,7 +30,6 @@ Public Class frmPrenomMixte
         Public rFreqTotale#, rFreqTotaleMasc#, rFreqTotaleFem#
         Public iAnnee%, rAnneeMoy#, rAnneeMoyMasc#, rAnneeMoyFem#
         Public bSelect As Boolean
-        Public hsVariantes As New HashSet(Of String)
         Public dicoVariantes As New DicoTri(Of String, clsPrenom)
 
         Public Sub Calculer(iNbPrenomsTot%)
@@ -115,14 +114,9 @@ Public Class frmPrenomMixte
 
             ' Dico des prénoms homophones
             Dim prenomH = prenom.Clone() ' Il faut faire une copie pour que l'objet soit distinct
-            'If prenomH.sPrenomHomophone <> prenomH.sPrenom Then
-                If Not prenomH.hsVariantes.Contains(prenomH.sPrenom) Then
-                    prenomH.hsVariantes.Add(prenomH.sPrenom)
-                End If
-                If Not prenomH.dicoVariantes.ContainsKey(prenomH.sPrenom) Then
-                    prenomH.dicoVariantes.Add(prenomH.sPrenom, prenom)
-                End If
-            'End If
+            If Not prenomH.dicoVariantes.ContainsKey(prenomH.sPrenom) Then
+                prenomH.dicoVariantes.Add(prenomH.sPrenom, prenom)
+            End If
             Dim sCleH$ = prenomH.sPrenomHomophone
             If dicoH.ContainsKey(sCleH) Then
                 Dim prenom0 = dicoH(sCleH)
@@ -135,12 +129,9 @@ Public Class frmPrenomMixte
                 prenom0.rAnneeMoyMasc += prenom.rAnneeMoyMasc
                 prenom0.rAnneeMoyFem += prenom.rAnneeMoyFem
 
-                For Each variante In prenomH.hsVariantes
-                    If Not prenom0.hsVariantes.Contains(variante) Then
-                        prenom0.hsVariantes.Add(variante)
-                    End If
-                    If Not prenom0.dicoVariantes.ContainsKey(variante) Then
-                        prenom0.dicoVariantes.Add(variante, prenom)
+                For Each kvp In prenomH.dicoVariantes
+                    If Not prenom0.dicoVariantes.ContainsKey(kvp.Key) Then
+                        prenom0.dicoVariantes.Add(kvp.Key, prenom)
                     End If
                 Next
 
@@ -246,7 +237,7 @@ Fin:
 
             prenom.Calculer(iNbPrenomsTot)
 
-            If prenom.hsVariantes.Count > 1 Then prenom.bMixteHomophone = True
+            If prenom.dicoVariantes.Count > 1 Then prenom.bMixteHomophone = True
 
         Next
 
@@ -390,11 +381,10 @@ Fin:
 
             Dim sPrenom$ = prenom.sPrenomHomophone
             Dim bVariantes = False
-            If prenom.hsVariantes.Count > 1 Then
+            If prenom.dicoVariantes.Count > 1 Then
                 bVariantes = True
-                Dim lst = prenom.hsVariantes.ToList
-                'If Not prenom.hsVariantes.Contains(sPrenom) Then lst.Add(sPrenom)
-                sPrenom = sListerTxt(lst)
+                Dim lst = prenom.dicoVariantes.ToList
+                sPrenom = sListerCleTxt(lst)
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
@@ -425,8 +415,8 @@ Fin:
         's = sbMD.ToString
         'Debug.WriteLine(s)
 
-        s = sbWK.ToString
-        Debug.WriteLine(s)
+        's = sbWK.ToString
+        'Debug.WriteLine(s)
 
     End Sub
 
@@ -555,6 +545,7 @@ Fin:
         If sPrenom = "adele" Then sPrenom = "adèle"
         If sPrenom = "aimee" Then sPrenom = "aimée"
         If sPrenom = "aissa" Then sPrenom = "aïssa"
+        'If sPrenom = "alae" Then sPrenom = "alaé" ' Prononcation à vérifier
         If sPrenom = "alfrede" Then sPrenom = "alfrède"
         If sPrenom = "alois" Then sPrenom = "aloïs"
         If sPrenom = "aloise" Then sPrenom = "aloïse"
@@ -617,6 +608,7 @@ Fin:
         If sPrenom = "leonard" Then sPrenom = "léonard"
         If sPrenom = "leonce" Then sPrenom = "léonce"
         If sPrenom = "mae" Then sPrenom = "maé"
+        If sPrenom = "mahe" Then sPrenom = "mahé"
         If sPrenom = "mael" Then sPrenom = "maël"
         If sPrenom = "maelle" Then sPrenom = "maëlle"
         If sPrenom = "maissan" Then sPrenom = "maïssan"
@@ -794,11 +786,17 @@ Fin:
         If sPrenom = "renée" Then sPrenomHomophone = "rené"
         If sPrenom = "rihane" Then sPrenomHomophone = "rihan"
         If sPrenom = "romane" Then sPrenomHomophone = "roman"
-        If sPrenom = "samuele" Then sPrenomHomophone = "samuel"
+        If sPrenom = "samuele" Then sPrenomHomophone = "samuel" ' Pas d'accent ici, car d'origine italienne
+        If sPrenom = "samuelle" Then sPrenomHomophone = "samuel"
         If sPrenom = "sandie" Then sPrenomHomophone = "sandi"
         If sPrenom = "sandy" Then sPrenomHomophone = "sandi"
+        If sPrenom = "sevan" Then sPrenomHomophone = "sevane" ' Prononciation à vérifier
         If sPrenom = "shane" Then sPrenomHomophone = "shan"
         If sPrenom = "sloane" Then sPrenomHomophone = "sloan"
+        If sPrenom = "sirin" Then sPrenomHomophone = "sirine" ' Prononciation à vérifier
+        If sPrenom = "soan" Then sPrenomHomophone = "soane"
+        If sPrenom = "sohane" Then sPrenomHomophone = "soane" ' Prononciation à vérifier
+        If sPrenom = "sohan" Then sPrenomHomophone = "soane"
         If sPrenom = "stephan" Then sPrenomHomophone = "stéphane"
         If sPrenom = "swan" Then sPrenomHomophone = "swann"
         If sPrenom = "valérie" Then sPrenomHomophone = "valéry"
@@ -809,6 +807,7 @@ Fin:
         If sPrenom = "yane" Then sPrenomHomophone = "yann"
         If sPrenom = "yanne" Then sPrenomHomophone = "yann"
         If sPrenom = "yasmine" Then sPrenomHomophone = "yasmin"
+        If sPrenom = "yakine" Then sPrenomHomophone = "yakin" ' Prononciation à vérifier
 
         ' 3ème rapport : prénoms féminisés
         'If sPrenom = "aloïse" Then sPrenomMasc = "aloïs"
@@ -853,41 +852,80 @@ Fin:
 
     Private Sub EcrireFichierFiltre(asLignes$(), dico As DicoTri(Of String, clsPrenom))
 
-        ' Génération d'un nouveau fichier csv filtré
+        ' Génération d'un nouveau fichier csv filtré ou pas
+
+        ' Vérifier si le traitement appliqué préserve entièrement le fichier d'origine
+        Const bTestPrenomOrig = True
+        Const bFiltrerPrenomEpicene = False
 
         Dim sb As New StringBuilder
         Dim iNbLignes = 0
+        Dim sAjoutEntete$ = ""
+        ' ToDo : Féminisé
+        If Not bTestPrenomOrig Then sAjoutEntete = ";Prénom d'origine;Prénom épicène;Prénom homophone"
         For Each sLigne As String In asLignes
 
             iNbLignes += 1
-            If iNbLignes = 1 Then sb.AppendLine(sLigne) : Continue For
+            If iNbLignes = 1 Then sb.AppendLine(sLigne & sAjoutEntete) : Continue For
 
             Dim prenom As New clsPrenom
             If Not bAnalyserPrenom(sLigne$, prenom) Then Continue For
 
             ConvertirPrenom(prenom)
 
+            Dim sPrenom$ = prenom.sPrenom
+            If bTestPrenomOrig Then
+                ' Si on remet en majuscule et qu'on rétablit les accents corrigés
+                '  on doit retrouver exactement le fichier d'origine
+                sPrenom = sPrenom.ToUpper
+                If prenom.sPrenomOrig <> sPrenom Then
+                    sPrenom = sEnleverAccents(sPrenom, bMinuscule:=False)
+                    If prenom.sPrenomOrig <> sPrenom Then
+                        ' Vérifier si tous les accents sont bien retirés
+                        Debug.WriteLine(sPrenom)
+                        Stop
+                    End If
+                End If
+                If prenom.sPrenomOrig = "_PRENOMS_RARES" Then GoTo Suite
+                If prenom.sAnnee = "XXXX" Then GoTo Suite
+            End If
+
+            Dim sAjout$ = ""
             Dim sCle$ = prenom.sPrenom
             If dico.ContainsKey(sCle) Then
                 Dim prenom0 = dico(sCle)
-                If Not prenom0.bSelect Then Continue For
+                If bFiltrerPrenomEpicene AndAlso Not prenom0.bSelect Then Continue For
+
+                If Not bTestPrenomOrig Then
+                    ' ToDo : Féminisé
+                    sPrenom = prenom0.sPrenom
+                    sAjout = ";" & prenom.sPrenomOrig & ";" & prenom.sPrenom & ";" & prenom.sPrenomHomophone
+                End If
+
             Else
                 Continue For
             End If
 
-            Dim sLigneC$ = prenom.sCodeSexe & ";" & prenom.sPrenom & ";" & prenom.sAnnee & ";" & prenom.iNbOcc
+Suite:
+            Dim sLigneC$ = prenom.sCodeSexe & ";" & sPrenom & ";" & prenom.sAnnee & ";" & prenom.iNbOcc & sAjout
             sb.AppendLine(sLigneC)
 
         Next
 
         Dim sCheminOut$ = Application.StartupPath & "\nat2019_.csv"
-        EcrireFichier(sCheminOut, sb)
+        EcrireFichier(sCheminOut, sb, bConserverFormatOrigine:=bTestPrenomOrig)
 
     End Sub
 
-    Private Sub EcrireFichier(sChemin$, sb As StringBuilder)
+    Private Sub EcrireFichier(sChemin$, sb As StringBuilder,
+            Optional bConserverFormatOrigine As Boolean = False)
 
-        Using sw As New IO.StreamWriter(sChemin, append:=False, encoding:=Encoding.UTF8)
+        ' Encodage classique : encoding:=Encoding.UTF8
+        ' Pour comparer avec le format d'origine du fichier INSEE :
+        '  encoding:=New UTF8Encoding(encoderShouldEmitUTF8Identifier:=False)
+        Dim enc = Encoding.UTF8
+        If bConserverFormatOrigine Then enc = New UTF8Encoding(encoderShouldEmitUTF8Identifier:=False)
+        Using sw As New IO.StreamWriter(sChemin, append:=False, encoding:=enc)
             sw.Write(sb.ToString())
         End Using 'sw.Close()
 
@@ -958,18 +996,83 @@ Fin:
 
     End Function
 
-    Public Function sListerTxt$(lstTxt As List(Of String), Optional iNbMax% = 0)
+    Private Function sListerCleTxt$(lstTxt As List(Of KeyValuePair(Of String, clsPrenom)), Optional iNbMax% = 0)
         Dim sb As New StringBuilder("")
         Dim iNumOcc% = 0
-        For Each sDef0 In lstTxt
+        For Each kvp In lstTxt
             If sb.Length > 0 Then sb.Append(", ")
-            sb.Append(sDef0)
+            sb.Append(kvp.Key)
             iNumOcc += 1
             If iNbMax > 0 Then
                 If iNumOcc >= iNbMax Then sb.Append("..") : Exit For
             End If
         Next
         Return sb.ToString
+    End Function
+
+    Private Function sEnleverAccents$(sChaine$, Optional bMinuscule As Boolean = True)
+
+        ' Enlever les accents
+
+        If sChaine.Length = 0 Then Return ""
+
+        Dim sTexteSansAccents$ = sRemoveDiacritics(sChaine)
+        If bMinuscule Then Return sTexteSansAccents.ToLower
+        Return sTexteSansAccents
+
+    End Function
+
+    Private Function sRemoveDiacritics$(sTexte$)
+
+        Dim sb As StringBuilder = sbRemoveDiacritics(sTexte)
+        Dim sTexteDest$ = sb.ToString
+        Return sTexteDest
+
+    End Function
+
+    Private Function sbRemoveDiacritics(sTexte$) As StringBuilder
+
+        Dim sNormalizedString$ = sTexte.Normalize(NormalizationForm.FormD)
+        Dim sb As New StringBuilder
+        Const cChar_ae As Char = "æ"c
+        Const cChar_oe As Char = "œ"c
+        Const cChar_o As Char = "o"c
+        Const cChar_e As Char = "e"c
+        Const cChar_a As Char = "a"c
+        Const cCharAE As Char = "Æ"c
+        Const cCharOE As Char = "Œ"c
+        Const cCharO As Char = "O"c
+        Const cCharE As Char = "E"c
+        Const cCharA As Char = "A"c
+        Const cChar3P As Char = "…"c
+        For Each c As Char In sNormalizedString
+            Dim unicodeCategory As Globalization.UnicodeCategory = _
+                Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+            If (unicodeCategory <> Globalization.UnicodeCategory.NonSpacingMark) Then
+
+                If c = cCharAE Then
+                    sb.Append(cCharA)
+                    sb.Append(cCharE)
+                ElseIf c = cCharOE Then
+                    sb.Append(cCharO)
+                    sb.Append(cCharE)
+                ElseIf c = cChar_ae Then
+                    sb.Append(cChar_a)
+                    sb.Append(cChar_e)
+                ElseIf c = cChar_oe Then
+                    sb.Append(cChar_o)
+                    sb.Append(cChar_e)
+                ElseIf c = cChar3P Then
+                    sb.Append("...")
+                Else
+                    sb.Append(c)
+                End If
+
+            End If
+        Next
+
+        Return sb
+
     End Function
 
 End Class

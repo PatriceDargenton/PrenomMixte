@@ -265,9 +265,8 @@ Fréquence relative min. = 1.0%
 
 # Synthèse statistique des prénoms mixtes homophones
 
-J'ai commencé à établir cette fois la liste des prénoms mixtes homophones, mais ce n'est pas terminé encore (il reste quelques prénoms à identifier). Il reste aussi la synthèse des prénoms féminisés sur le même modèle (claudette, claudie, claudine, claudy -> claude).
+Pour cette liste il n'y a aucun seuil, car toutes les associations sont programmées explicitement : il faut connaitre la prononciation pour pouvoir regrouper les prénoms qui se prononcent pareil.
 
-Synthèse statistique des prénoms mixtes homophones
 Date début = 1900
 
 Date fin   = 2019
@@ -279,6 +278,7 @@ Nb. total de prénoms = 85 878 884
 Nb. prénoms ignorés ('_PRENOMS_RARES') = 1 613 924 : 1.9%
 
 Nb prénoms ignorés (date 'XXXX') = 821 477 : 1.0%
+
 
 |n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|
 |--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|
@@ -502,9 +502,9 @@ Nb prénoms ignorés (date 'XXXX') = 821 477 : 1.0%
 |68.0|20 797|Éléonor, Éléonore|1977|1918|1977|136|20 661|0.024%|1%|99%
 |68.1|20 193|Éléonore|1976|1922|1977|88|20 105|0.024%|0%|100%
 |68.2|604|Éléonor|1997|1912|2004|48|556|0.001%|8%|92%
-|69.0|17 960|Maé, Mahé|2011|2013|2008|12 481|5 479|0.021%|69%|31%
-|69.1|9 396|Maé|2011|2013|2008|5 169|4 227|0.011%|55%|45%
-|69.2|8 564|Mahé|2012|2013|2007|7 312|1 252|0.010%|85%|15%
+|69.0|18 816|Maé, Mahé|2011|2013|2008|13 266|5 550|0.022%|71%|29%
+|69.1|9 420|Mahé|2012|2013|2007|8 097|1 323|0.011%|86%|14%
+|69.2|9 396|Maé|2011|2013|2008|5 169|4 227|0.011%|55%|45%
 |70.0|16 146|Noam, Noame|2010|2010|2006|15 949|197|0.019%|99%|1%
 |70.1|16 037|Noam|2010|2010|2007|15 923|114|0.019%|99%|1%
 |70.2|109|Noame|2004|2003|2004|26|83|0.000%|24%|76%

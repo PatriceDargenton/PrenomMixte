@@ -13,6 +13,9 @@ Public Class frmPrenomMixte
 
     Public Class clsPrenom : Implements ICloneable
 
+        Public Const sPrenomRare$ = "_PRENOMS_RARES"
+        Public Const sDateXXXX$ = "XXXX"
+
         Private Function IClone() As Object Implements ICloneable.Clone
             Return MemberwiseClone()
         End Function
@@ -60,6 +63,12 @@ Public Class frmPrenomMixte
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
         If IsNothing(asLignes) Then Exit Sub
 
+        Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath & "\PrenomsMixtesEpicenes.csv"
+        Dim dicoCorrectionsPrenomMixteEpicene = LireFichier(sCheminPrenomsMixtesEpicenes)
+
+        Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath & "\PrenomsMixtesHomophones.csv"
+        Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
+
         Dim dicoE As New DicoTri(Of String, clsPrenom) ' épicène
         Dim dicoH As New DicoTri(Of String, clsPrenom) ' homophone
         'Dim dicoT As New DicoTri(Of String, String) ' Détection des prénoms homophones 
@@ -76,15 +85,17 @@ Public Class frmPrenomMixte
             If iNbLignes = 1 Then Continue For ' Entête
 
             Dim prenom As New clsPrenom
-            If Not bAnalyserPrenom(sLigne$, prenom) Then Continue For
+            If Not bAnalyserPrenom(sLigne$, prenom,
+                dicoCorrectionsPrenomMixteEpicene,
+                dicoCorrectionsPrenomMixteHomophone) Then Continue For
             ConvertirPrenom(prenom)
 
-            If prenom.sPrenomOrig = "_PRENOMS_RARES" Then
+            If prenom.sPrenomOrig = clsPrenom.sPrenomRare Then
                 iNbPrenomsIgnores += prenom.iNbOcc
                 iNbPrenomsTot += prenom.iNbOcc
                 Continue For
             End If
-            If prenom.sAnnee = "XXXX" Then
+            If prenom.sAnnee = clsPrenom.sDateXXXX Then
                 iNbPrenomsIgnoresDate += prenom.iNbOcc
                 iNbPrenomsTot += prenom.iNbOcc
                 Continue For
@@ -170,11 +181,12 @@ Public Class frmPrenomMixte
         Const iSeuilMinHomophone% = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
         FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot)
 
-        EcrireFichierFiltre(asLignes, dicoE)
+        'EcrireFichierFiltre(asLignes, dicoE,
+        '    dicoCorrectionsPrenomMixteEpicene, dicoCorrectionsPrenomMixteHomophone)
 
         'Const iSeuilMin% = 50000
         'Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
-        'AfficherSynthesePrenoms(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
+        'AfficherSynthesePrenomsFrequents(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
         '    iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
         'GoTo Fin
 
@@ -189,6 +201,56 @@ Fin:
         MsgBox("Terminé !", MsgBoxStyle.Information, "Prénom mixte")
 
     End Sub
+
+    Private Function LireFichier(sChemin$) As DicoTri(Of String, String)
+
+        ' Lire un fichier de corrections de prénoms et retourner un dictionnaire
+
+        Dim dico As New DicoTri(Of String, String)
+        If Not IO.File.Exists(sChemin) Then
+            MsgBox("Impossible de trouver le fichier suivant :" & vbLf &
+                sChemin, MsgBoxStyle.Exclamation, "Prénom mixte")
+            Return dico
+        End If
+        Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
+        If IsNothing(asLignes) Then Return dico
+
+        Dim iNbLignes% = 0
+        For Each sLigne As String In asLignes
+            iNbLignes += 1
+            If iNbLignes = 1 Then Continue For ' Entête
+            If sLigne.StartsWith("'") Then Continue For ' Commentaire
+            'If sLigne.StartsWith("michel;michelle") Then
+            '    Debug.WriteLine("!")
+            'End If
+            Dim asChamps() As String
+            asChamps = Split(sLigne, ";"c)
+            Dim iNumChampMax% = asChamps.GetUpperBound(0)
+            Dim iNumChamp% = 0
+            Dim sValeurOrig$ = ""
+            Dim sValeurCorrigee$ = ""
+            For Each sChamp As String In asChamps
+                iNumChamp += 1
+                If IsNothing(sChamp) Then sChamp = ""
+                If sChamp.Length = 0 Then Exit For
+                Select Case iNumChamp
+                    Case 1 : sValeurCorrigee = sChamp
+                    Case 2 : sValeurOrig = sChamp
+                End Select
+                If sValeurOrig.Contains("'") Then ' Commentaire à la fin de la ligne
+                    Dim iPosQuote% = sValeurOrig.IndexOf("'")
+                    sValeurOrig = sValeurOrig.Substring(0, iPosQuote)
+                    sValeurOrig = sValeurOrig.TrimEnd
+                End If
+            Next
+            If String.IsNullOrEmpty(sValeurCorrigee) OrElse
+               String.IsNullOrEmpty(sValeurOrig) Then Continue For
+            If Not dico.ContainsKey(sValeurOrig) Then dico.Add(sValeurOrig, sValeurCorrigee)
+        Next
+
+        Return dico
+
+    End Function
 
     Private Sub FiltrerPrenomMixteEpicene(dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTot%, iSeuilMin%, rSeuilFreqRel#)
@@ -243,7 +305,7 @@ Fin:
 
     End Sub
 
-    Private Sub AfficherSynthesePrenoms(dico As DicoTri(Of String, clsPrenom),
+    Private Sub AfficherSynthesePrenomsFrequents(dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
@@ -285,9 +347,9 @@ Fin:
         Next
         sbWK.AppendLine("|}")
 
-        Dim sChemin$ = Application.StartupPath & "\Prenoms.md"
+        Dim sChemin$ = Application.StartupPath & "\PrenomsFrequents.md"
         EcrireFichier(sChemin, sbMD)
-        Dim sCheminWK$ = Application.StartupPath & "\Prenoms.wiki"
+        Dim sCheminWK$ = Application.StartupPath & "\PrenomsFrequents.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
     End Sub
@@ -515,7 +577,9 @@ Fin:
 
     End Function
 
-    Private Function bAnalyserPrenom(sLigne$, prenom As clsPrenom) As Boolean
+    Private Function bAnalyserPrenom(sLigne$, prenom As clsPrenom,
+            dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
+            dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String)) As Boolean
 
         Dim asChamps() As String
         asChamps = Split(sLigne, ";"c)
@@ -541,273 +605,14 @@ Fin:
 
         Dim sPrenom = sPrenomOrig.ToLower
 
-        If sPrenom = "adelaide" Then sPrenom = "adélaïde"
-        If sPrenom = "adele" Then sPrenom = "adèle"
-        If sPrenom = "aimee" Then sPrenom = "aimée"
-        If sPrenom = "aissa" Then sPrenom = "aïssa"
-        'If sPrenom = "alae" Then sPrenom = "alaé" ' Prononcation à vérifier
-        If sPrenom = "alfrede" Then sPrenom = "alfrède"
-        If sPrenom = "alois" Then sPrenom = "aloïs"
-        If sPrenom = "aloise" Then sPrenom = "aloïse"
-        If sPrenom = "amedee" Then sPrenom = "amedée"
-        If sPrenom = "anael" Then sPrenom = "anaël"
-        If sPrenom = "anaelle" Then sPrenom = "anaëlle"
-        If sPrenom = "andre" Then sPrenom = "andré"
-        If sPrenom = "andrea" Then sPrenom = "andréa"
-        If sPrenom = "andree" Then sPrenom = "andrée"
-        If sPrenom = "arsene" Then sPrenom = "arsène"
-        If sPrenom = "barthelemy" Then sPrenom = "barthélemy"
-        If sPrenom = "benedict" Then sPrenom = "bénédict"
-        If sPrenom = "benedicte" Then sPrenom = "bénédicte"
-        If sPrenom = "celeste" Then sPrenom = "céleste"
-        If sPrenom = "cleo" Then sPrenom = "cléo"
-        If sPrenom = "come" Then sPrenom = "côme"
-        If sPrenom = "danael" Then sPrenom = "danaël"
-        If sPrenom = "danaelle" Then sPrenom = "danaëlle"
-        If sPrenom = "daniele" Then sPrenom = "danièle"
-        If sPrenom = "dorothee" Then sPrenom = "dorothée"
-        If sPrenom = "eden" Then sPrenom = "éden"
-        If sPrenom = "edme" Then sPrenom = "edmé"
-        If sPrenom = "edmee" Then sPrenom = "edmée"
-        If sPrenom = "eleonor" Then sPrenom = "éléonor"
-        If sPrenom = "eleonore" Then sPrenom = "éléonore"
-        If sPrenom = "eli" Then sPrenom = "éli"
-        If sPrenom = "elia" Then sPrenom = "élia"
-        If sPrenom = "elie" Then sPrenom = "élie"
-        If sPrenom = "elise" Then sPrenom = "élise"
-        If sPrenom = "elisee" Then sPrenom = "élisée"
-        If sPrenom = "eliz" Then sPrenom = "éliz"
-        If sPrenom = "elize" Then sPrenom = "élize"
-        If sPrenom = "ellie" Then sPrenom = "éllie"
-        If sPrenom = "emilie" Then sPrenom = "émilie"
-        If sPrenom = "emmanuel" Then sPrenom = "émmanuel"
-        If sPrenom = "emmanuelle" Then sPrenom = "émmanuelle"
-        If sPrenom = "esperance" Then sPrenom = "espérance"
-        If sPrenom = "evariste" Then sPrenom = "évariste"
-        If sPrenom = "felicite" Then sPrenom = "félicité"
-        If sPrenom = "frederic" Then sPrenom = "frédéric"
-        If sPrenom = "frederique" Then sPrenom = "frédérique"
-        If sPrenom = "gabriele" Then sPrenom = "gabrièle"
-        If sPrenom = "gael" Then sPrenom = "gaël"
-        If sPrenom = "gaelle" Then sPrenom = "gaëlle"
-        If sPrenom = "guenaelle" Then sPrenom = "guénaëlle"
-        If sPrenom = "gwenael" Then sPrenom = "gwenaël"
-        If sPrenom = "gwenaelle" Then sPrenom = "gwenaëlle"
-        If sPrenom = "honore" Then sPrenom = "honoré"
-        If sPrenom = "honoree" Then sPrenom = "honorée"
-        If sPrenom = "heidi" Then sPrenom = "heïdi"
-        If sPrenom = "irenee" Then sPrenom = "irenée"
-        If sPrenom = "joel" Then sPrenom = "joël"
-        If sPrenom = "joelle" Then sPrenom = "joëlle"
-        If sPrenom = "jose" Then sPrenom = "josé"
-        If sPrenom = "josee" Then sPrenom = "josée"
-        If sPrenom = "josephe" Then sPrenom = "josèphe"
-        If sPrenom = "judicael" Then sPrenom = "judicaël"
-        If sPrenom = "kevin" Then sPrenom = "kévin"
-        If sPrenom = "leocadie" Then sPrenom = "léocadie"
-        If sPrenom = "leonard" Then sPrenom = "léonard"
-        If sPrenom = "leonce" Then sPrenom = "léonce"
-        If sPrenom = "mae" Then sPrenom = "maé"
-        If sPrenom = "mahe" Then sPrenom = "mahé"
-        If sPrenom = "mael" Then sPrenom = "maël"
-        If sPrenom = "maelle" Then sPrenom = "maëlle"
-        If sPrenom = "maissan" Then sPrenom = "maïssan"
-        If sPrenom = "maissane" Then sPrenom = "maïssane"
-        If sPrenom = "maloe" Then sPrenom = "maloé"
-        If sPrenom = "maloee" Then sPrenom = "maloée"
-        If sPrenom = "mederic" Then sPrenom = "médéric"
-        If sPrenom = "medine" Then sPrenom = "médine"
-        If sPrenom = "meissan" Then sPrenom = "meïssan"
-        If sPrenom = "meissane" Then sPrenom = "meïssane"
-        If sPrenom = "meryl" Then sPrenom = "méryl"
-        If sPrenom = "michael" Then sPrenom = "michaël"
-        If sPrenom = "michaelle" Then sPrenom = "michaëlle"
-        If sPrenom = "michele" Then sPrenom = "michèle"
-        If sPrenom = "mickaelle" Then sPrenom = "mickaëlle"
-        If sPrenom = "nael" Then sPrenom = "naël"
-        If sPrenom = "nais" Then sPrenom = "naïs"
-        If sPrenom = "noe" Then sPrenom = "noé"
-        If sPrenom = "noee" Then sPrenom = "noée"
-        If sPrenom = "noel" Then sPrenom = "noël"
-        If sPrenom = "noelle" Then sPrenom = "noëlle"
-        If sPrenom = "raphael" Then sPrenom = "raphaël"
-        If sPrenom = "raphaelle" Then sPrenom = "raphaëlle"
-        If sPrenom = "rene" Then sPrenom = "rené"
-        If sPrenom = "renee" Then sPrenom = "renée"
-        If sPrenom = "stephane" Then sPrenom = "stéphane"
-        If sPrenom = "sylvere" Then sPrenom = "sylvère"
-        If sPrenom = "thais" Then sPrenom = "thaïs"
-        If sPrenom = "theodore" Then sPrenom = "théodore"
-        If sPrenom = "valere" Then sPrenom = "valère"
-        If sPrenom = "valery" Then sPrenom = "valéry" ' Existe aussi sans accent
-        If sPrenom = "yael" Then sPrenom = "yaël"
-        If sPrenom = "yaelle" Then sPrenom = "yaëlle"
+        For Each kvp In dicoCorrectionsPrenomMixteEpicene
+            If sPrenom = kvp.Key Then sPrenom = kvp.Value
+        Next
 
         Dim sPrenomHomophone = sPrenom
-        If sPrenom = "aarone" Then sPrenomHomophone = "aaron"
-        If sPrenom = "achrafe" Then sPrenomHomophone = "achraf"
-        If sPrenom = "adame" Then sPrenomHomophone = "adam"
-        If sPrenom = "adèle" Then sPrenomHomophone = "adel"
-        If sPrenom = "adrianne" Then sPrenomHomophone = "adrian" ' Adrián ?
-        If sPrenom = "aimée" Then sPrenomHomophone = "aimé"
-        If sPrenom = "alexie" Then sPrenomHomophone = "alexis"
-        If sPrenom = "alfrède" Then sPrenomHomophone = "alfred"
-        If sPrenom = "amaan" Then sPrenomHomophone = "aman"
-        If sPrenom = "amane" Then sPrenomHomophone = "aman"
-        If sPrenom = "anaëlle" Then sPrenomHomophone = "anaël"
-        If sPrenom = "andie" Then sPrenomHomophone = "andy"
-        If sPrenom = "andrée" Then sPrenomHomophone = "andré"
-        If sPrenom = "anne" Then sPrenomHomophone = "ann"
-        If sPrenom = "arielle" Then sPrenomHomophone = "ariel"
-        If sPrenom = "armelle" Then sPrenomHomophone = "armel"
-        If sPrenom = "axelle" Then sPrenomHomophone = "axel"
-        If sPrenom = "ayane" Then sPrenomHomophone = "ayan"
-        If sPrenom = "aydane" Then sPrenomHomophone = "aydan"
-        If sPrenom = "bayane" Then sPrenomHomophone = "bayan"
-        If sPrenom = "bénédicte" Then sPrenomHomophone = "bénédict"
-        If sPrenom = "camerone" Then sPrenomHomophone = "cameron"
-        If sPrenom = "carole" Then sPrenomHomophone = "carol"
-        If sPrenom = "charly" Then sPrenomHomophone = "charlie"
-        If sPrenom = "cyrille" Then sPrenomHomophone = "cyril"
-        If sPrenom = "danaëlle" Then sPrenomHomophone = "danaël"
-        If sPrenom = "dane" Then sPrenomHomophone = "dan"
-        If sPrenom = "danie" Then sPrenomHomophone = "dany"
-        If sPrenom = "dannie" Then sPrenomHomophone = "dany"
-        If sPrenom = "dany" Then sPrenomHomophone = "dany"
-        If sPrenom = "danièle" Then sPrenomHomophone = "daniel"
-        If sPrenom = "danielle" Then sPrenomHomophone = "daniel"
-        If sPrenom = "davide" Then sPrenomHomophone = "david"
-        If sPrenom = "dilane" Then sPrenomHomophone = "dilan"
-        If sPrenom = "doctrovee" Then sPrenomHomophone = "doctrove"
-        If sPrenom = "dominic" Then sPrenomHomophone = "dominique"
-        If sPrenom = "doriane" Then sPrenomHomophone = "dorian"
-        If sPrenom = "dorianne" Then sPrenomHomophone = "dorian"
-        If sPrenom = "edmée" Then sPrenomHomophone = "edmé"
-        If sPrenom = "éléonore" Then sPrenomHomophone = "éléonor"
-        If sPrenom = "élie" Then sPrenomHomophone = "éli"
-        If sPrenom = "éliz" Then sPrenomHomophone = "élise"
-        If sPrenom = "élize" Then sPrenomHomophone = "élise"
-        If sPrenom = "éllie" Then sPrenomHomophone = "éli"
-        If sPrenom = "émili" Then sPrenomHomophone = "émilie"
-        If sPrenom = "émmanuelle" Then sPrenomHomophone = "émmanuel"
-        If sPrenom = "émmanuelle" Then sPrenomHomophone = "émmanuel"
-        If sPrenom = "erneste" Then sPrenomHomophone = "ernest"
-        If sPrenom = "erwane" Then sPrenomHomophone = "erwan"
-        If sPrenom = "ethane" Then sPrenomHomophone = "ethan"
-        If sPrenom = "flore" Then sPrenomHomophone = "flor"
-        If sPrenom = "frédérique" Then sPrenomHomophone = "frédéric"
-        If sPrenom = "gabrièle" Then sPrenomHomophone = "gabriel"
-        If sPrenom = "gabrielle" Then sPrenomHomophone = "gabriel"
-        If sPrenom = "gaëlle" Then sPrenomHomophone = "gaël"
-        If sPrenom = "george" Then sPrenomHomophone = "georges"
-        If sPrenom = "gertrude" Then sPrenomHomophone = "gertrud"
-        If sPrenom = "gille" Then sPrenomHomophone = "gil"
-        If sPrenom = "guénaëlle" Then sPrenomHomophone = "guénaël"
-        If sPrenom = "gwenaëlle" Then sPrenomHomophone = "gwenaël"
-        If sPrenom = "henrie" Then sPrenomHomophone = "henri"
-        If sPrenom = "honorée" Then sPrenomHomophone = "honoré"
-        If sPrenom = "ihsane" Then sPrenomHomophone = "ihsan"
-        If sPrenom = "ihssane" Then sPrenomHomophone = "ihssan"
-        If sPrenom = "ikrame" Then sPrenomHomophone = "ikram"
-        If sPrenom = "imane" Then sPrenomHomophone = "iman"
-        If sPrenom = "imrane" Then sPrenomHomophone = "imran"
-        If sPrenom = "isabelle" Then sPrenomHomophone = "isabel"
-        If sPrenom = "islame" Then sPrenomHomophone = "islam"
-        If sPrenom = "jackye" Then sPrenomHomophone = "jacky"
-        If sPrenom = "jad" Then sPrenomHomophone = "jade"
-        'If sPrenom = "jess" Then sPrenomHomophone = "jesse"
-        If sPrenom = "jesse" Then sPrenomHomophone = "jessy"
-        If sPrenom = "jessie" Then sPrenomHomophone = "jessy"
-        If sPrenom = "jo" Then sPrenomHomophone = "joe"
-        If sPrenom = "Joane" Then sPrenomHomophone = "Johan"
-        If sPrenom = "Joanne" Then sPrenomHomophone = "Johan"
-        If sPrenom = "joëlle" Then sPrenomHomophone = "joël"
-        If sPrenom = "Johane" Then sPrenomHomophone = "Johan"
-        If sPrenom = "Johanne" Then sPrenomHomophone = "Johan"
-        If sPrenom = "Jordane" Then sPrenomHomophone = "Jordan"
-        If sPrenom = "josée" Then sPrenomHomophone = "josé"
-        If sPrenom = "josèphe" Then sPrenomHomophone = "joseph"
-        If sPrenom = "joude" Then sPrenomHomophone = "joud"
-        If sPrenom = "kameron" Then sPrenomHomophone = "cameron"
-        If sPrenom = "kamerone" Then sPrenomHomophone = "cameron"
-        If sPrenom = "kanye" Then sPrenomHomophone = "kany"
-        If sPrenom = "karime" Then sPrenomHomophone = "karim"
-        If sPrenom = "kévine" Then sPrenomHomophone = "kévin"
-        If sPrenom = "kiliane" Then sPrenomHomophone = "kilian"
-        If sPrenom = "kiriane" Then sPrenomHomophone = "kirian"
-        If sPrenom = "layane" Then sPrenomHomophone = "layan"
-        If sPrenom = "lie" Then sPrenomHomophone = "li"
-        If sPrenom = "lilianne" Then sPrenomHomophone = "lilian"
-        If sPrenom = "loane" Then sPrenomHomophone = "loan"
-        If sPrenom = "logane" Then sPrenomHomophone = "logan"
-        If sPrenom = "luci" Then sPrenomHomophone = "lucie"
-        If sPrenom = "lyame" Then sPrenomHomophone = "lyam"
-        If sPrenom = "maëlle" Then sPrenomHomophone = "maël"
-        If sPrenom = "mahame" Then sPrenomHomophone = "maham"
-        If sPrenom = "mahé" Then sPrenomHomophone = "maé"
-        If sPrenom = "maïssane" Then sPrenomHomophone = "maïssan"
-        If sPrenom = "malaurie" Then sPrenomHomophone = "mallory"
-        If sPrenom = "mallaurie" Then sPrenomHomophone = "mallory"
-        If sPrenom = "mallorie" Then sPrenomHomophone = "mallory"
-        If sPrenom = "maloée" Then sPrenomHomophone = "maloé"
-        If sPrenom = "malorie" Then sPrenomHomophone = "mallory"
-        If sPrenom = "manuelle" Then sPrenomHomophone = "manuel"
-        If sPrenom = "marcelle" Then sPrenomHomophone = "marcel"
-        If sPrenom = "mari" Then sPrenomHomophone = "marie"
-        If sPrenom = "maud" Then sPrenomHomophone = "maude"
-        If sPrenom = "maxe" Then sPrenomHomophone = "max"
-        If sPrenom = "meïssane" Then sPrenomHomophone = "meïssan"
-        If sPrenom = "michaëlle" Then sPrenomHomophone = "michaël"
-        If sPrenom = "michèle" Then sPrenomHomophone = "michel"
-        If sPrenom = "michelle" Then sPrenomHomophone = "michel"
-        If sPrenom = "mickaëlle" Then sPrenomHomophone = "michaël"
-        If sPrenom = "milan" Then sPrenomHomophone = "milane"
-        If sPrenom = "morgane" Then sPrenomHomophone = "morgan"
-        If sPrenom = "morgann" Then sPrenomHomophone = "morgan"
-        If sPrenom = "murielle" Then sPrenomHomophone = "muriel"
-        If sPrenom = "nathanielle" Then sPrenomHomophone = "nathaniel"
-        If sPrenom = "nile" Then sPrenomHomophone = "nil"
-        If sPrenom = "noame" Then sPrenomHomophone = "noam"
-        If sPrenom = "noane" Then sPrenomHomophone = "noan"
-        If sPrenom = "noée" Then sPrenomHomophone = "noé"
-        If sPrenom = "noëlle" Then sPrenomHomophone = "noël"
-        If sPrenom = "nore" Then sPrenomHomophone = "nor"
-        If sPrenom = "ouissame" Then sPrenomHomophone = "ouissam"
-        If sPrenom = "pascale" Then sPrenomHomophone = "pascal"
-        If sPrenom = "pasquale" Then sPrenomHomophone = "pascal"
-        If sPrenom = "paule" Then sPrenomHomophone = "paul"
-        If sPrenom = "prospere" Then sPrenomHomophone = "prosper"
-        If sPrenom = "raphaëlle" Then sPrenomHomophone = "raphaël"
-        If sPrenom = "rawane" Then sPrenomHomophone = "rawan"
-        If sPrenom = "rayane" Then sPrenomHomophone = "rayan"
-        If sPrenom = "rayene" Then sPrenomHomophone = "rayen"
-        If sPrenom = "rayhan" Then sPrenomHomophone = "rayan"
-        If sPrenom = "rayhane" Then sPrenomHomophone = "rayan"
-        If sPrenom = "renée" Then sPrenomHomophone = "rené"
-        If sPrenom = "rihane" Then sPrenomHomophone = "rihan"
-        If sPrenom = "romane" Then sPrenomHomophone = "roman"
-        If sPrenom = "samuele" Then sPrenomHomophone = "samuel" ' Pas d'accent ici, car d'origine italienne
-        If sPrenom = "samuelle" Then sPrenomHomophone = "samuel"
-        If sPrenom = "sandie" Then sPrenomHomophone = "sandi"
-        If sPrenom = "sandy" Then sPrenomHomophone = "sandi"
-        If sPrenom = "sevan" Then sPrenomHomophone = "sevane" ' Prononciation à vérifier
-        If sPrenom = "shane" Then sPrenomHomophone = "shan"
-        If sPrenom = "sloane" Then sPrenomHomophone = "sloan"
-        If sPrenom = "sirin" Then sPrenomHomophone = "sirine" ' Prononciation à vérifier
-        If sPrenom = "soan" Then sPrenomHomophone = "soane"
-        If sPrenom = "sohane" Then sPrenomHomophone = "soane" ' Prononciation à vérifier
-        If sPrenom = "sohan" Then sPrenomHomophone = "soane"
-        If sPrenom = "stephan" Then sPrenomHomophone = "stéphane"
-        If sPrenom = "swan" Then sPrenomHomophone = "swann"
-        If sPrenom = "valérie" Then sPrenomHomophone = "valéry"
-        If sPrenom = "vivianne" Then sPrenomHomophone = "vivian"
-        If sPrenom = "wissame" Then sPrenomHomophone = "wissam"
-        If sPrenom = "yaëlle" Then sPrenomHomophone = "yaël"
-        If sPrenom = "yan" Then sPrenomHomophone = "yann"
-        If sPrenom = "yane" Then sPrenomHomophone = "yann"
-        If sPrenom = "yanne" Then sPrenomHomophone = "yann"
-        If sPrenom = "yasmine" Then sPrenomHomophone = "yasmin"
-        If sPrenom = "yakine" Then sPrenomHomophone = "yakin" ' Prononciation à vérifier
+        For Each kvp In dicoCorrectionsPrenomMixteHomophone
+            If sPrenom = kvp.Key Then sPrenomHomophone = kvp.Value
+        Next
 
         ' 3ème rapport : prénoms féminisés
         'If sPrenom = "aloïse" Then sPrenomMasc = "aloïs"
@@ -850,12 +655,14 @@ Fin:
 
     End Sub
 
-    Private Sub EcrireFichierFiltre(asLignes$(), dico As DicoTri(Of String, clsPrenom))
+    Private Sub EcrireFichierFiltre(asLignes$(), dico As DicoTri(Of String, clsPrenom),
+        dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
+        dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String))
 
         ' Génération d'un nouveau fichier csv filtré ou pas
 
         ' Vérifier si le traitement appliqué préserve entièrement le fichier d'origine
-        Const bTestPrenomOrig = True
+        Const bTestPrenomOrig = False
         Const bFiltrerPrenomEpicene = False
 
         Dim sb As New StringBuilder
@@ -869,7 +676,8 @@ Fin:
             If iNbLignes = 1 Then sb.AppendLine(sLigne & sAjoutEntete) : Continue For
 
             Dim prenom As New clsPrenom
-            If Not bAnalyserPrenom(sLigne$, prenom) Then Continue For
+            If Not bAnalyserPrenom(sLigne$, prenom,
+                dicoCorrectionsPrenomMixteEpicene, dicoCorrectionsPrenomMixteHomophone) Then Continue For
 
             ConvertirPrenom(prenom)
 
@@ -886,8 +694,8 @@ Fin:
                         Stop
                     End If
                 End If
-                If prenom.sPrenomOrig = "_PRENOMS_RARES" Then GoTo Suite
-                If prenom.sAnnee = "XXXX" Then GoTo Suite
+                If prenom.sPrenomOrig = clsPrenom.sPrenomRare Then GoTo Suite
+                If prenom.sAnnee = clsPrenom.sDateXXXX Then GoTo Suite
             End If
 
             Dim sAjout$ = ""
@@ -912,7 +720,7 @@ Suite:
 
         Next
 
-        Dim sCheminOut$ = Application.StartupPath & "\nat2019_.csv"
+        Dim sCheminOut$ = Application.StartupPath & "\nat2019_corrige.csv"
         EcrireFichier(sCheminOut, sb, bConserverFormatOrigine:=bTestPrenomOrig)
 
     End Sub

@@ -75,7 +75,8 @@ Public Class frmPrenomMixte
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
         If IsNothing(asLignes) Then Exit Sub
 
-        Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath & "\PrenomsMixtesEpicenes.csv"
+        Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath &
+            "\PrenomsMixtesEpicenes.csv"
         Dim dicoCorrectionsPrenomMixteEpicene = LireFichier(sCheminPrenomsMixtesEpicenes)
         Dim dicoCorrectionsPrenomMixteEpiceneUtil As New DicoTri(Of String, String)
 
@@ -89,7 +90,8 @@ Public Class frmPrenomMixte
             End If
         Next
 
-        Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath & "\PrenomsMixtesHomophones.csv"
+        Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath &
+            "\PrenomsMixtesHomophones.csv"
         Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
         Dim dicoCorrectionsPrenomMixteHomophoneUtil As New DicoTri(Of String, String)
 
@@ -202,10 +204,12 @@ Public Class frmPrenomMixte
         Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
         'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
         Const iSeuilMinEpicene% = 2000 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
-        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinEpicene, rSeuilFreqRel)
+        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinEpicene, rSeuilFreqRel,
+            iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
         Const iSeuilMinHomophone% = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
-        FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot)
+        FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot,
+            iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
         If bExporter Then
             EcrireFichierFiltre(asLignes, dicoE,
@@ -289,7 +293,8 @@ Fin:
     End Function
 
     Private Sub FiltrerPrenomMixteEpicene(dico As DicoTri(Of String, clsPrenom),
-            iNbPrenomsTot%, iSeuilMin%, rSeuilFreqRel#)
+            iNbPrenomsTot%, iSeuilMin%, rSeuilFreqRel#,
+            iNbPrenomsTotOk%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%)
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
@@ -312,7 +317,8 @@ Fin:
 
         Next
 
-        'Debug.WriteLine("Tot. Ok : " & sFormaterNum(iNbPrenomsVerif) & "=" & sFormaterNum(iNbPrenomsTotOk))
+        'Debug.WriteLine("Tot. Ok : " & sFormaterNum(iNbPrenomsVerif) & "=" &
+        '    sFormaterNum(iNbPrenomsTotOk))
         'Debug.WriteLine("Tot. Ok : " & sFormaterNum(iNbPrenomsVerifMF) & "=" &
         '    sFormaterNum(iNbPrenomsTotOk))
         'Debug.WriteLine("Tot.: " &
@@ -324,8 +330,10 @@ Fin:
     Private Sub FiltrerPrenomMixteHomophone(
             dicoH As DicoTri(Of String, clsPrenom),
             dico As DicoTri(Of String, clsPrenom),
-            iNbPrenomsTot%)
+            iNbPrenomsTot%, iNbPrenomsTotOk%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%)
 
+        Dim iNbPrenomsVerif% = 0
+        Dim iNbPrenomsVerifMF% = 0
         For Each prenom In dicoH.Trier("")
 
             If dico.ContainsKey(prenom.sPrenom) Then
@@ -334,10 +342,20 @@ Fin:
             End If
 
             prenom.Calculer(iNbPrenomsTot)
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
 
             If prenom.dicoVariantes.Count > 1 Then prenom.bMixteHomophone = True
 
         Next
+
+        'Debug.WriteLine("Tot. Ok : " & sFormaterNum(iNbPrenomsVerif) & "=" &
+        '    sFormaterNum(iNbPrenomsTotOk))
+        'Debug.WriteLine("Tot. Ok : " & sFormaterNum(iNbPrenomsVerifMF) & "=" &
+        '    sFormaterNum(iNbPrenomsTotOk))
+        'Debug.WriteLine("Tot.: " &
+        '    sFormaterNum(iNbPrenomsVerif + iNbPrenomsIgnores + iNbPrenomsIgnoresDate) & "=" &
+        '    sFormaterNum(iNbPrenomsTot))
 
     End Sub
 
@@ -443,15 +461,12 @@ Fin:
             End If
         Next
 
-        Dim s$
-        's = sb.ToString
-        'Debug.WriteLine(s)
+        'Debug.WriteLine(sb.ToString)
 
-        's = sbMD.ToString
-        'Debug.WriteLine(s)
-
-        's = sbWK.ToString
-        'Debug.WriteLine(s)
+        Dim sCheminMD$ = Application.StartupPath & "\PrenomsMixtesEpicenes.md"
+        EcrireFichier(sCheminMD, sbMD)
+        Dim sCheminWK$ = Application.StartupPath & "\PrenomsMixtesEpicenes.wiki"
+        EcrireFichier(sCheminWK, sbWK)
 
     End Sub
 
@@ -495,7 +510,12 @@ Fin:
             If prenom.dicoVariantes.Count > 1 Then
                 bVariantes = True
                 Dim lst = prenom.dicoVariantes.ToList
-                sPrenom = sListerCleTxt(lst)
+                Dim sPrenomMajoritaire$ = ""
+                For Each prenomV In prenom.dicoVariantes.Trier("iNbOcc desc")
+                    sPrenomMajoritaire = prenomV.sPrenom
+                    Exit For
+                Next
+                sPrenom = sListerCleTxt(lst, sPrenomMajoritaire)
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
@@ -528,21 +548,18 @@ Fin:
             End If
         Next
 
-        Dim s$
-        's = sb.ToString
-        'Debug.WriteLine(s)
+        'Debug.WriteLine(sb.ToString)
 
-        's = sbMD.ToString
-        'Debug.WriteLine(s)
-
-        's = sbWK.ToString
-        'Debug.WriteLine(s)
+        Dim sCheminMD$ = Application.StartupPath & "\PrenomsMixtesHomophones.md"
+        EcrireFichier(sCheminMD, sbMD)
+        Dim sCheminWK$ = Application.StartupPath & "\PrenomsMixtesHomophones.wiki"
+        EcrireFichier(sCheminWK, sbWK)
 
     End Sub
 
     Private Function sEnteteMarkDown$()
 
-        Dim s$
+        Dim s$ = ""
         s &= vbLf & "|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|"
         s &= vbLf & "|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|"
         Return s
@@ -553,7 +570,7 @@ Fin:
 
         ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
 
-        Dim s$
+        Dim s$ = ""
         s &= vbLf & "{|class='wikitable sortable' style='text-align:center; width:80%;'"
         s &= vbLf & "|+ " & sTitre
         s &= vbLf & "! scope='col' | n°"
@@ -594,13 +611,15 @@ Fin:
     Private Function sLigneMarkDown$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
             Optional iNumVariante% = -1)
 
+        Dim sGras$ = ""
         Dim sNumVariante$ = ""
         If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+        If iNumVariante = 1 Then sGras = "**"
 
         Dim s$ =
             "|" & iNumPrenom & sNumVariante &
             "|" & sFormaterNum(prenom.iNbOcc) &
-            "|" & sPrenom &
+            "|" & sGras & sPrenom & sGras &
             "|" & prenom.rAnneeMoy.ToString("0") &
             "|" & prenom.rAnneeMoyMasc.ToString("0") &
             "|" & prenom.rAnneeMoyFem.ToString("0") &
@@ -756,6 +775,7 @@ Fin:
 
             ConvertirPrenom(prenom)
 
+            Dim sAjout$ = ""
             Dim sPrenom$ = prenom.sPrenom
             If bTestPrenomOrig Then
                 ' Si on remet en majuscule et qu'on rétablit les accents corrigés
@@ -773,7 +793,6 @@ Fin:
                 If prenom.sAnnee = clsPrenom.sDateXXXX Then GoTo Suite
             End If
 
-            Dim sAjout$ = ""
             Dim sCle$ = prenom.sPrenom
             If dico.ContainsKey(sCle) Then
                 Dim prenom0 = dico(sCle)
@@ -879,18 +898,26 @@ Suite:
 
     End Function
 
-    Private Function sListerCleTxt$(lstTxt As List(Of KeyValuePair(Of String, clsPrenom)), Optional iNbMax% = 0)
+    Private Function sListerCleTxt$(
+            lstTxt As List(Of KeyValuePair(Of String, clsPrenom)),
+            sPrenomMajoritaire$,
+            Optional iNbMax% = 0)
+
         Dim sb As New StringBuilder("")
         Dim iNumOcc% = 0
         For Each kvp In lstTxt
             If sb.Length > 0 Then sb.Append(", ")
-            sb.Append(kvp.Key)
+            Dim sPrenom$ = kvp.Key
+            If sPrenom = sPrenomMajoritaire Then sPrenom = "**" & sPrenom & "**" ' Gras
+            sb.Append(sPrenom)
             iNumOcc += 1
             If iNbMax > 0 Then
-                If iNumOcc >= iNbMax Then sb.Append("..") : Exit For
+                If iNumOcc >= iNbMax Then sb.Append("...") : Exit For
             End If
         Next
+
         Return sb.ToString
+
     End Function
 
     Private Function sEnleverAccents$(sChaine$, Optional bMinuscule As Boolean = True)

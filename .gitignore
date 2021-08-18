@@ -339,8 +339,11 @@ Archive/
 /PrenomMixte.exe.config
 /PrenomMixte.exe
 /nat2019.csv
-/PrenomsFrequents.md
-/PrenomsFrequents.wiki
-/nat2019_corrige.csv
-/nat2019_corrige.xlsx
-/nat2019_corrige.xls
+/PrenomsFrequents.*
+/nat2019_corrige.*
+/PrenomsMixtesHomophones.md
+/PrenomsMixtesHomophones.wiki
+/PrenomsMixtesHomophones.bak
+/PrenomsMixtesEpicenes.md
+/PrenomsMixtesEpicenes.wiki
+/PrenomsMixtesEpicenes.bak

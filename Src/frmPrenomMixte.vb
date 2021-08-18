@@ -76,7 +76,7 @@ Public Class frmPrenomMixte
         If IsNothing(asLignes) Then Exit Sub
 
         Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath &
-            "\PrenomsMixtesEpicenes.csv"
+            "\CorrectionsPrenomsMixtesEpicenes.csv"
         Dim dicoCorrectionsPrenomMixteEpicene = LireFichier(sCheminPrenomsMixtesEpicenes)
         Dim dicoCorrectionsPrenomMixteEpiceneUtil As New DicoTri(Of String, String)
 
@@ -91,7 +91,7 @@ Public Class frmPrenomMixte
         Next
 
         Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath &
-            "\PrenomsMixtesHomophones.csv"
+            "\CorrectionsPrenomsMixtesHomophones.csv"
         Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
         Dim dicoCorrectionsPrenomMixteHomophoneUtil As New DicoTri(Of String, String)
 

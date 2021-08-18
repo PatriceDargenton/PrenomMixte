@@ -222,7 +222,7 @@ Public Class frmPrenomMixte
 
         Const iSeuilMin% = 50000
         Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
-        AfficherSynthesePrenomsFrequents(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
+        AfficherSynthesePrenomsFrequents(dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
 
         Const iNbLignesMax% = 10000
@@ -358,7 +358,9 @@ Fin:
 
     End Sub
 
-    Private Sub AfficherSynthesePrenomsFrequents(dico As DicoTri(Of String, clsPrenom),
+    Private Sub AfficherSynthesePrenomsFrequents(
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoH As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
@@ -381,7 +383,7 @@ Fin:
 
         Dim iNbPrenoms% = 0
         Dim iNbLignesFin = 0
-        For Each prenom In dico.Trier("iNbOcc desc") '"sPrenom" : Ordre alphabétique
+        For Each prenom In dicoE.Trier("iNbOcc desc") '"sPrenom" : Ordre alphabétique
             iNbLignesFin += 1
             If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
 
@@ -393,11 +395,18 @@ Fin:
             Const sFormatFreq$ = "0.000%"
             sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
+            Dim bItalique = False
             Dim iNumVariante% = -1
             If prenom.bMixteEpicene Then iNumVariante = 1 ' Gras
-            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq, iNumVariante))
+            If dicoH.ContainsKey(prenom.sPrenom) Then
+                Dim prenomH = dicoH(prenom.sPrenom)
+                If prenomH.bMixteHomophone Then bItalique = True
+            End If
+            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq,
+                iNumVariante, bItalique))
 
-            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq, iNumVariante))
+            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq,
+                iNumVariante, bItalique))
 
         Next
         sbWK.AppendLine("|}")
@@ -523,9 +532,9 @@ Fin:
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
             sbMD.AppendLine(sLigneMarkDown(prenom, sPrenomMD, iNbPrenomsMixtes, sFormatFreq,
-                iNumVariante:=0))
+                iNumVariante:=0, bSuffixeNumVariante:=True))
             sbWK.AppendLine(sLigneWiki(prenom, sPrenomWiki, iNbPrenomsMixtes, sFormatFreq,
-                iNumVariante:=0))
+                iNumVariante:=0, bSuffixeNumVariante:=True))
 
             If bVariantes Then
                 Dim iNumVariante% = 0
@@ -533,9 +542,9 @@ Fin:
                     iNumVariante += 1
                     sb.AppendLine(sLigneDebug(prenomV, prenomV.sPrenom, iNbPrenomsMixtes, sFormatFreq))
                     sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante))
+                        sFormatFreq, iNumVariante, bSuffixeNumVariante:=True))
                     sbWK.AppendLine(sLigneWiki(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante))
+                        sFormatFreq, iNumVariante, bSuffixeNumVariante:=True))
                 Next
             End If
 
@@ -612,17 +621,20 @@ Fin:
     End Function
 
     Private Function sLigneMarkDown$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
-            Optional iNumVariante% = -1)
+            Optional iNumVariante% = -1, Optional bItalique As Boolean = False,
+            Optional bSuffixeNumVariante As Boolean = False)
 
-        Dim sGras$ = ""
+        Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
-        If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
-        If iNumVariante = 1 Then sGras = "**"
+        If bSuffixeNumVariante AndAlso iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+        If iNumVariante = 1 Then sMiseEnForme = "**" ' Gras
+        If bItalique Then sMiseEnForme = "*" ' Italique
+        If iNumVariante = 1 AndAlso bItalique Then sMiseEnForme = "***" ' Italique en gras
 
         Dim s$ =
             "|" & iNumPrenom & sNumVariante &
             "|" & sFormaterNum(prenom.iNbOcc) &
-            "|" & sGras & sPrenom & sGras &
+            "|" & sMiseEnForme & sPrenom & sMiseEnForme &
             "|" & prenom.rAnneeMoy.ToString("0") &
             "|" & prenom.rAnneeMoyMasc.ToString("0") &
             "|" & prenom.rAnneeMoyFem.ToString("0") &
@@ -636,17 +648,20 @@ Fin:
     End Function
 
     Private Function sLigneWiki$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
-            Optional iNumVariante% = -1)
+            Optional iNumVariante% = -1, Optional bItalique As Boolean = False,
+            Optional bSuffixeNumVariante As Boolean = False)
 
-        Dim sGras$ = ""
+        Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
-        If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
-        If iNumVariante = 1 Then sGras = "'''"
+        If bSuffixeNumVariante AndAlso iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+        If iNumVariante = 1 Then sMiseEnForme = "'''" ' Gras
+        If bItalique Then sMiseEnForme = "''" ' Italique
+        If iNumVariante = 1 AndAlso bItalique Then sMiseEnForme = "'''''" ' Italique en gras
 
         Dim s$ = "|-" & vbLf &
                 "|" & iNumPrenom & sNumVariante &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOcc) &
-                "|| " & sGras & sPrenom & sGras &
+                "|| " & sMiseEnForme & sPrenom & sMiseEnForme &
                 "||" & prenom.rAnneeMoy.ToString("0") &
                 "||" & prenom.rAnneeMoyMasc.ToString("0") &
                 "||" & prenom.rAnneeMoyFem.ToString("0") &

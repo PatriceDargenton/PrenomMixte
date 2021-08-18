@@ -220,11 +220,10 @@ Public Class frmPrenomMixte
             GoTo Fin
         End If
 
-        'Const iSeuilMin% = 50000
-        'Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
-        'AfficherSynthesePrenomsFrequents(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-        '    iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
-        'GoTo Fin
+        Const iSeuilMin% = 50000
+        Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
+        AfficherSynthesePrenomsFrequents(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
 
         Const iNbLignesMax% = 10000
         AfficherSyntheseEpicene(dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
@@ -364,7 +363,7 @@ Fin:
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
 
-        ' Afficher la synthèse statistique des prénoms fréquents dans la fenêtre Debug de Visual Studio
+        ' Produire la synthèse statistique des prénoms fréquents
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
@@ -382,7 +381,7 @@ Fin:
 
         Dim iNbPrenoms% = 0
         Dim iNbLignesFin = 0
-        For Each prenom In dico.Trier("sPrenom")
+        For Each prenom In dico.Trier("iNbOcc desc") '"sPrenom" : Ordre alphabétique
             iNbLignesFin += 1
             If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
 
@@ -394,9 +393,11 @@ Fin:
             Const sFormatFreq$ = "0.000%"
             sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
-            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
+            Dim iNumVariante% = -1
+            If prenom.bMixteEpicene Then iNumVariante = 1 ' Gras
+            sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq, iNumVariante))
 
-            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
+            sbWK.AppendLine(sLigneWiki(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq, iNumVariante))
 
         Next
         sbWK.AppendLine("|}")
@@ -415,8 +416,7 @@ Fin:
             dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
             dicoCorrectionsPrenomMixteEpiceneUtil As DicoTri(Of String, String))
 
-        ' Afficher la synthèse statistique des prénoms mixtes épicènes dans la fenêtre Debug de Visual Studio
-
+        ' Produire la synthèse statistique des prénoms mixtes épicènes
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
@@ -477,7 +477,7 @@ Fin:
             dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String),
             dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String))
 
-        ' Afficher la synthèse statistique des prénoms mixtes homophones dans la fenêtre Debug de Visual Studio
+        ' Produire la synthèse statistique des prénoms mixtes homophones
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
@@ -506,6 +506,8 @@ Fin:
             Const sFormatFreq$ = "0.000%"
 
             Dim sPrenom$ = prenom.sPrenomHomophone
+            Dim sPrenomMD$ = sPrenom
+            Dim sPrenomWiki$ = sPrenom
             Dim bVariantes = False
             If prenom.dicoVariantes.Count > 1 Then
                 bVariantes = True
@@ -515,13 +517,14 @@ Fin:
                     sPrenomMajoritaire = prenomV.sPrenom
                     Exit For
                 Next
-                sPrenom = sListerCleTxt(lst, sPrenomMajoritaire)
+                sPrenomMD = sListerCleTxt(lst, sPrenomMajoritaire, "**")
+                sPrenomWiki = sListerCleTxt(lst, sPrenomMajoritaire, "'''")
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
-            sbMD.AppendLine(sLigneMarkDown(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq,
+            sbMD.AppendLine(sLigneMarkDown(prenom, sPrenomMD, iNbPrenomsMixtes, sFormatFreq,
                 iNumVariante:=0))
-            sbWK.AppendLine(sLigneWiki(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq,
+            sbWK.AppendLine(sLigneWiki(prenom, sPrenomWiki, iNbPrenomsMixtes, sFormatFreq,
                 iNumVariante:=0))
 
             If bVariantes Then
@@ -635,13 +638,15 @@ Fin:
     Private Function sLigneWiki$(prenom As clsPrenom, sPrenom$, iNumPrenom%, sFormatFreq$,
             Optional iNumVariante% = -1)
 
+        Dim sGras$ = ""
         Dim sNumVariante$ = ""
         If iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
+        If iNumVariante = 1 Then sGras = "'''"
 
         Dim s$ = "|-" & vbLf &
                 "|" & iNumPrenom & sNumVariante &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOcc) &
-                "|| " & sPrenom &
+                "|| " & sGras & sPrenom & sGras &
                 "||" & prenom.rAnneeMoy.ToString("0") &
                 "||" & prenom.rAnneeMoyMasc.ToString("0") &
                 "||" & prenom.rAnneeMoyFem.ToString("0") &
@@ -900,7 +905,7 @@ Suite:
 
     Private Function sListerCleTxt$(
             lstTxt As List(Of KeyValuePair(Of String, clsPrenom)),
-            sPrenomMajoritaire$,
+            sPrenomMajoritaire$, sGras$,
             Optional iNbMax% = 0)
 
         Dim sb As New StringBuilder("")
@@ -908,7 +913,7 @@ Suite:
         For Each kvp In lstTxt
             If sb.Length > 0 Then sb.Append(", ")
             Dim sPrenom$ = kvp.Key
-            If sPrenom = sPrenomMajoritaire Then sPrenom = "**" & sPrenom & "**" ' Gras
+            If sPrenom = sPrenomMajoritaire Then sPrenom = sGras & sPrenom & sGras
             sb.Append(sPrenom)
             iNumOcc += 1
             If iNbMax > 0 Then

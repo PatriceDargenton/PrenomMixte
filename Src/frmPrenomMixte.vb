@@ -6,8 +6,20 @@ Public Class frmPrenomMixte
     Private Sub cmdAnalyser_Click(sender As Object, e As EventArgs) Handles cmdAnalyser.Click
 
         Me.cmdAnalyser.Enabled = False
+        Me.cmdExporter.Enabled = False
         AnalyserPrenoms()
         Me.cmdAnalyser.Enabled = True
+        Me.cmdExporter.Enabled = True
+
+    End Sub
+
+    Private Sub cmdExporter_Click(sender As Object, e As EventArgs) Handles cmdExporter.Click
+
+        Me.cmdAnalyser.Enabled = False
+        Me.cmdExporter.Enabled = False
+        AnalyserPrenoms(bExporter:=True)
+        Me.cmdAnalyser.Enabled = True
+        Me.cmdExporter.Enabled = True
 
     End Sub
 
@@ -52,7 +64,7 @@ Public Class frmPrenomMixte
 
     End Class
 
-    Private Sub AnalyserPrenoms()
+    Private Sub AnalyserPrenoms(Optional bExporter As Boolean = False)
 
         Dim sChemin = Application.StartupPath & "\nat2019.csv"
         If Not IO.File.Exists(sChemin) Then
@@ -65,9 +77,21 @@ Public Class frmPrenomMixte
 
         Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath & "\PrenomsMixtesEpicenes.csv"
         Dim dicoCorrectionsPrenomMixteEpicene = LireFichier(sCheminPrenomsMixtesEpicenes)
+        Dim dicoCorrectionsPrenomMixteEpiceneUtil As New DicoTri(Of String, String)
+
+        ' Vérifier si le fichier de correction des prénoms mixtes épicènes corrige bien uniquement les accents
+        For Each kvp In dicoCorrectionsPrenomMixteEpicene
+            Dim sPrenomOrig$ = kvp.Key
+            Dim sPrenomCorrige$ = kvp.Value
+            Dim sVerif$ = sEnleverAccents(sPrenomCorrige)
+            If sVerif <> sPrenomOrig Then
+                Debug.WriteLine(sVerif & "<>" & sPrenomOrig)
+            End If
+        Next
 
         Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath & "\PrenomsMixtesHomophones.csv"
         Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
+        Dim dicoCorrectionsPrenomMixteHomophoneUtil As New DicoTri(Of String, String)
 
         Dim dicoE As New DicoTri(Of String, clsPrenom) ' épicène
         Dim dicoH As New DicoTri(Of String, clsPrenom) ' homophone
@@ -87,7 +111,9 @@ Public Class frmPrenomMixte
             Dim prenom As New clsPrenom
             If Not bAnalyserPrenom(sLigne$, prenom,
                 dicoCorrectionsPrenomMixteEpicene,
-                dicoCorrectionsPrenomMixteHomophone) Then Continue For
+                dicoCorrectionsPrenomMixteHomophone,
+                dicoCorrectionsPrenomMixteEpiceneUtil,
+                dicoCorrectionsPrenomMixteHomophoneUtil) Then Continue For
             ConvertirPrenom(prenom)
 
             If prenom.sPrenomOrig = clsPrenom.sPrenomRare Then
@@ -181,8 +207,14 @@ Public Class frmPrenomMixte
         Const iSeuilMinHomophone% = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
         FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot)
 
-        'EcrireFichierFiltre(asLignes, dicoE,
-        '    dicoCorrectionsPrenomMixteEpicene, dicoCorrectionsPrenomMixteHomophone)
+        If bExporter Then
+            EcrireFichierFiltre(asLignes, dicoE,
+                dicoCorrectionsPrenomMixteEpicene,
+                dicoCorrectionsPrenomMixteHomophone,
+                dicoCorrectionsPrenomMixteEpiceneUtil,
+                dicoCorrectionsPrenomMixteHomophoneUtil)
+            GoTo Fin
+        End If
 
         'Const iSeuilMin% = 50000
         'Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
@@ -191,11 +223,15 @@ Public Class frmPrenomMixte
         'GoTo Fin
 
         Const iNbLignesMax% = 10000
-        AfficherSyntheseEpicene(dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinEpicene, rSeuilFreqRel, iNbLignesMax)
+        AfficherSyntheseEpicene(dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
+            iNbPrenomsIgnoresDate, iSeuilMinEpicene, rSeuilFreqRel, iNbLignesMax,
+            dicoCorrectionsPrenomMixteEpicene,
+            dicoCorrectionsPrenomMixteEpiceneUtil)
 
         AfficherSyntheseHomophone(dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinHomophone, 0, iNbLignesMax)
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinHomophone, 0, iNbLignesMax,
+            dicoCorrectionsPrenomMixteHomophone,
+            dicoCorrectionsPrenomMixteHomophoneUtil)
 
 Fin:
         MsgBox("Terminé !", MsgBoxStyle.Information, "Prénom mixte")
@@ -357,7 +393,9 @@ Fin:
     Private Sub AfficherSyntheseEpicene(dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
-            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
+            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
+            dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
+            dicoCorrectionsPrenomMixteEpiceneUtil As DicoTri(Of String, String))
 
         ' Afficher la synthèse statistique des prénoms mixtes épicènes dans la fenêtre Debug de Visual Studio
 
@@ -396,6 +434,15 @@ Fin:
         Next
         sbWK.AppendLine("|}")
 
+        For Each kvp In dicoCorrectionsPrenomMixteEpicene
+            If Not dicoCorrectionsPrenomMixteEpiceneUtil.ContainsKey(kvp.Key) Then
+                Dim sLigne$ = "Correction de prénom épicène non trouvée : " & kvp.Key
+                sb.AppendLine(sLigne)
+                sbMD.AppendLine(sLigne)
+                sbWK.AppendLine(sLigne)
+            End If
+        Next
+
         Dim s$
         's = sb.ToString
         'Debug.WriteLine(s)
@@ -411,7 +458,9 @@ Fin:
     Private Sub AfficherSyntheseHomophone(dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
-            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%)
+            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
+            dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String),
+            dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String))
 
         ' Afficher la synthèse statistique des prénoms mixtes homophones dans la fenêtre Debug de Visual Studio
 
@@ -469,6 +518,15 @@ Fin:
 
         Next
         sbWK.AppendLine("|}")
+
+        For Each kvp In dicoCorrectionsPrenomMixteHomophone
+            If Not dicoCorrectionsPrenomMixteHomophoneUtil.ContainsKey(kvp.Key) Then
+                Dim sLigne$ = "Correction de prénom homophone non trouvée : " & kvp.Key
+                sb.AppendLine(sLigne)
+                sbMD.AppendLine(sLigne)
+                sbWK.AppendLine(sLigne)
+            End If
+        Next
 
         Dim s$
         's = sb.ToString
@@ -579,7 +637,9 @@ Fin:
 
     Private Function bAnalyserPrenom(sLigne$, prenom As clsPrenom,
             dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
-            dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String)) As Boolean
+            dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String),
+            dicoCorrectionsPrenomMixteEpiceneUtil As DicoTri(Of String, String),
+            dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String)) As Boolean
 
         Dim asChamps() As String
         asChamps = Split(sLigne, ";"c)
@@ -606,12 +666,22 @@ Fin:
         Dim sPrenom = sPrenomOrig.ToLower
 
         For Each kvp In dicoCorrectionsPrenomMixteEpicene
-            If sPrenom = kvp.Key Then sPrenom = kvp.Value
+            If sPrenom = kvp.Key Then
+                If Not dicoCorrectionsPrenomMixteEpiceneUtil.ContainsKey(sPrenom) Then
+                    dicoCorrectionsPrenomMixteEpiceneUtil.Add(sPrenom, kvp.Value)
+                End If
+                sPrenom = kvp.Value
+            End If
         Next
 
         Dim sPrenomHomophone = sPrenom
         For Each kvp In dicoCorrectionsPrenomMixteHomophone
-            If sPrenom = kvp.Key Then sPrenomHomophone = kvp.Value
+            If sPrenom = kvp.Key Then
+                If Not dicoCorrectionsPrenomMixteHomophoneUtil.ContainsKey(sPrenom) Then
+                    dicoCorrectionsPrenomMixteHomophoneUtil.Add(sPrenom, kvp.Value)
+                End If
+                sPrenomHomophone = kvp.Value
+            End If
         Next
 
         ' 3ème rapport : prénoms féminisés
@@ -657,7 +727,9 @@ Fin:
 
     Private Sub EcrireFichierFiltre(asLignes$(), dico As DicoTri(Of String, clsPrenom),
         dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
-        dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String))
+        dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String),
+        dicoCorrectionsPrenomMixteEpiceneUtil As DicoTri(Of String, String),
+        dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String))
 
         ' Génération d'un nouveau fichier csv filtré ou pas
 
@@ -677,7 +749,10 @@ Fin:
 
             Dim prenom As New clsPrenom
             If Not bAnalyserPrenom(sLigne$, prenom,
-                dicoCorrectionsPrenomMixteEpicene, dicoCorrectionsPrenomMixteHomophone) Then Continue For
+                dicoCorrectionsPrenomMixteEpicene,
+                dicoCorrectionsPrenomMixteHomophone,
+                dicoCorrectionsPrenomMixteEpiceneUtil,
+                dicoCorrectionsPrenomMixteHomophoneUtil) Then Continue For
 
             ConvertirPrenom(prenom)
 

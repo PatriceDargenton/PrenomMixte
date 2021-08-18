@@ -23,6 +23,7 @@ Partial Class frmPrenomMixte
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.cmdAnalyser = New System.Windows.Forms.Button()
+        Me.cmdExporter = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'cmdAnalyser
@@ -34,11 +35,21 @@ Partial Class frmPrenomMixte
         Me.cmdAnalyser.Text = "Analyser"
         Me.cmdAnalyser.UseVisualStyleBackColor = True
         '
+        'cmdExporter
+        '
+        Me.cmdExporter.Location = New System.Drawing.Point(24, 76)
+        Me.cmdExporter.Name = "cmdExporter"
+        Me.cmdExporter.Size = New System.Drawing.Size(93, 36)
+        Me.cmdExporter.TabIndex = 1
+        Me.cmdExporter.Text = "Exporter"
+        Me.cmdExporter.UseVisualStyleBackColor = True
+        '
         'frmPrenomMixte
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(287, 178)
+        Me.Controls.Add(Me.cmdExporter)
         Me.Controls.Add(Me.cmdAnalyser)
         Me.Name = "frmPrenomMixte"
         Me.Text = "Prénom mixte"
@@ -46,5 +57,6 @@ Partial Class frmPrenomMixte
 
 End Sub
     Friend WithEvents cmdAnalyser As System.Windows.Forms.Button
+    Friend WithEvents cmdExporter As System.Windows.Forms.Button
 
 End Class

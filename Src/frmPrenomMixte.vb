@@ -254,6 +254,7 @@ Fin:
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
         If IsNothing(asLignes) Then Return dico
 
+        Dim hsDoublons As New HashSet(Of String)
         Dim iNbLignes% = 0
         For Each sLigne As String In asLignes
             iNbLignes += 1
@@ -282,6 +283,16 @@ Fin:
                     sValeurOrig = sValeurOrig.TrimEnd
                 End If
             Next
+
+            ' Vérifier les doublons
+            Dim sCle$ = sValeurCorrigee & ";" & sValeurOrig
+            If hsDoublons.Contains(sCle) Then
+                MsgBox("Doublon : " & sCle & vbLf & IO.Path.GetFileName(sChemin),
+                    MsgBoxStyle.Information, "Prénom Mixte")
+            Else
+                hsDoublons.Add(sCle)
+            End If
+
             If String.IsNullOrEmpty(sValeurCorrigee) OrElse
                String.IsNullOrEmpty(sValeurOrig) Then Continue For
             If Not dico.ContainsKey(sValeurOrig) Then dico.Add(sValeurOrig, sValeurCorrigee)

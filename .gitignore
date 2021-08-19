@@ -343,3 +343,6 @@ Archive/
 /nat2019_corrige.*
 /PrenomsMixtesHomophones.*
 /PrenomsMixtesEpicenes.*
+/fr
+/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.*
+/Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.*

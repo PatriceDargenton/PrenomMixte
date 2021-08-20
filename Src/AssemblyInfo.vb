@@ -1,10 +1,13 @@
 ﻿
+' AssemblyInfo.vb
+' ---------------
+
 Imports System
 Imports System.Reflection
 Imports System.Runtime.InteropServices
 
-<Assembly: AssemblyTitle("PrenomMixte")> 
-<Assembly: AssemblyDescription("Synthèse statistique des prénoms mixtes")> 
+<Assembly: AssemblyTitle("PrenomMixte")>
+<Assembly: AssemblyDescription("Synthèse statistique des prénoms mixtes et prénoms fréquents")>
 <Assembly: AssemblyCompany("ORS Production")> 
 <Assembly: AssemblyProduct("PrenomMixte")> 
 <Assembly: AssemblyCopyright("Copyright © 2021 ORS Production")> 

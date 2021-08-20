@@ -1,4 +1,7 @@
 ﻿
+' clsPrenom.vb
+' ------------
+
 Public Class clsPrenom : Implements ICloneable
 
     Public Const sPrenomRare$ = "_PRENOMS_RARES"

@@ -1,9 +1,47 @@
 ﻿
+' modPrenom.vb : module pour le traitement des prénoms mixtes et prénoms fréquents
+' ------------
+
+' Conventions de nommage des variables :
+' ------------------------------------
+' b pour Boolean (booléen vrai ou faux)
+' i pour Integer : % (en VB .Net, l'entier a la capacité du VB6.Long)
+' l pour Long : &
+' r pour nombre Réel (Single!, Double# ou Decimal : D)
+' s pour String : $
+' c pour Char ou Byte
+' d pour Date
+' a pour Array (tableau) : ()
+' o pour Object : objet instancié localement
+' refX pour reference à un objet X préexistant qui n'est pas sensé être fermé
+' m_ pour variable Membre de la classe ou de la feuille (Form)
+'  (mais pas pour les constantes)
+' frm pour Form
+' cls pour Classe
+' mod pour Module
+' ...
+' ------------------------------------
+
 Imports System.Text
 
 Public Module modPrenom
 
+#If DEBUG Then
+    Public Const bDebug As Boolean = True
+    Public Const bRelease As Boolean = False
+#Else
+    Public Const bDebug As Boolean = False
+    Public Const bRelease As Boolean = True
+#End If
+
     Public Const sTitreAppli$ = "Prénom mixte"
+    Public Const sDateVersionAppli$ = "20/08/2021"
+
+    Public ReadOnly sVersionAppli$ =
+        My.Application.Info.Version.Major & "." &
+        My.Application.Info.Version.Minor &
+        My.Application.Info.Version.Build
+
     Public Const sFichierPrenomsInsee$ = "nat2019.csv"
     Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
     Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"

@@ -52,6 +52,9 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Src\PrenomMixte.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -128,6 +131,9 @@
     </None>
     <None Include="packages.config" />
     <None Include="Src\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Src\PrenomMixte.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

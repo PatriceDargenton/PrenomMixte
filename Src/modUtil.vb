@@ -1,7 +1,19 @@
 ﻿
 Imports System.Text
 
-Module modUtil
+Public Module modUtil
+
+    Public Function sLireFichier$(sChemin$)
+
+        Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
+        If IsNothing(asLignes) Then Return ""
+        Dim sb As New StringBuilder
+        For Each sLigne As String In asLignes
+            sb.AppendLine(sLigne)
+        Next
+        Return sb.ToString
+
+    End Function
 
     Public Function sEnleverAccents$(sChaine$, Optional bMinuscule As Boolean = True)
 

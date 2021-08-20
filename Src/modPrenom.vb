@@ -1,20 +1,26 @@
 ﻿
 Imports System.Text
 
-Module modPrenom
+Public Module modPrenom
 
-    Public Sub AnalyserPrenoms(Optional bExporter As Boolean = False)
+    Public Const sTitreAppli$ = "Prénom mixte"
+    Public Const sFichierPrenomsInsee$ = "nat2019.csv"
+    Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
+    Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"
 
-        Dim sChemin = Application.StartupPath & "\nat2019.csv"
+    Public Sub AnalyserPrenoms(sDossierAppli$,
+            Optional bExporter As Boolean = False, Optional bTest As Boolean = False)
+
+        Dim sChemin = sDossierAppli & "\" & sFichierPrenomsInsee
         If Not IO.File.Exists(sChemin) Then
-            MsgBox("Veuillez télécharger nat2019_csv.zip !" & vbLf & sChemin,
-                MsgBoxStyle.Exclamation, "Prénom mixte")
+            MsgBox("Veuillez télécharger " & sFichierPrenomsInseeZip & " !" & vbLf & sChemin,
+                MsgBoxStyle.Exclamation, sTitreAppli)
             Exit Sub
         End If
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
         If IsNothing(asLignes) Then Exit Sub
 
-        Dim sCheminPrenomsMixtesEpicenes$ = Application.StartupPath &
+        Dim sCheminPrenomsMixtesEpicenes$ = sDossierAppli &
             "\CorrectionsPrenomsMixtesEpicenes.csv"
         Dim dicoCorrectionsPrenomMixteEpicene = LireFichier(sCheminPrenomsMixtesEpicenes)
         Dim dicoCorrectionsPrenomMixteEpiceneUtil As New DicoTri(Of String, String)
@@ -29,7 +35,7 @@ Module modPrenom
             End If
         Next
 
-        Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath &
+        Dim sCheminPrenomsMixtesHomophones$ = sDossierAppli &
             "\DefinitionsPrenomsMixtesHomophones.csv"
         Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
         Dim dicoCorrectionsPrenomMixteHomophoneUtil As New DicoTri(Of String, String)
@@ -151,32 +157,32 @@ Module modPrenom
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
         If bExporter Then
-            EcrireFichierFiltre(asLignes, dicoE,
+            EcrireFichierFiltre(sDossierAppli, asLignes, dicoE,
                 dicoCorrectionsPrenomMixteEpicene,
                 dicoCorrectionsPrenomMixteHomophone,
                 dicoCorrectionsPrenomMixteEpiceneUtil,
-                dicoCorrectionsPrenomMixteHomophoneUtil)
+                dicoCorrectionsPrenomMixteHomophoneUtil, bTest)
             GoTo Fin
         End If
 
         Const iSeuilMin% = 50000
         Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
-        AfficherSynthesePrenomsFrequents(dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
 
         Const iNbLignesMax% = 10000
-        AfficherSyntheseEpicene(dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
+        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
             iNbPrenomsIgnoresDate, iSeuilMinEpicene, rSeuilFreqRel, iNbLignesMax,
             dicoCorrectionsPrenomMixteEpicene,
             dicoCorrectionsPrenomMixteEpiceneUtil)
 
-        AfficherSyntheseHomophone(dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinHomophone, 0, iNbLignesMax,
             dicoCorrectionsPrenomMixteHomophone,
             dicoCorrectionsPrenomMixteHomophoneUtil)
 
 Fin:
-        MsgBox("Terminé !", MsgBoxStyle.Information, "Prénom mixte")
+        If Not bTest Then MsgBox("Terminé !", MsgBoxStyle.Information, sTitreAppli)
 
     End Sub
 
@@ -187,7 +193,7 @@ Fin:
         Dim dico As New DicoTri(Of String, String)
         If Not IO.File.Exists(sChemin) Then
             MsgBox("Impossible de trouver le fichier suivant :" & vbLf &
-                sChemin, MsgBoxStyle.Exclamation, "Prénom mixte")
+                sChemin, MsgBoxStyle.Exclamation, sTitreAppli)
             Return dico
         End If
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
@@ -308,7 +314,7 @@ Fin:
 
     End Sub
 
-    Private Sub AfficherSynthesePrenomsFrequents(
+    Private Sub AfficherSynthesePrenomsFrequents(sDossierAppli$,
             dicoE As DicoTri(Of String, clsPrenom),
             dicoH As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
@@ -361,14 +367,15 @@ Fin:
         Next
         sbWK.AppendLine("|}")
 
-        Dim sChemin$ = Application.StartupPath & "\PrenomsFrequents.md"
+        Dim sChemin$ = sDossierAppli & "\PrenomsFrequents.md"
         EcrireFichier(sChemin, sbMD)
-        Dim sCheminWK$ = Application.StartupPath & "\PrenomsFrequents.wiki"
+        Dim sCheminWK$ = sDossierAppli & "\PrenomsFrequents.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
     End Sub
 
-    Private Sub AfficherSyntheseEpicene(dico As DicoTri(Of String, clsPrenom),
+    Private Sub AfficherSyntheseEpicene(sDossierAppli$,
+            dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
@@ -422,14 +429,15 @@ Fin:
 
         'Debug.WriteLine(sb.ToString)
 
-        Dim sCheminMD$ = Application.StartupPath & "\PrenomsMixtesEpicenes.md"
+        Dim sCheminMD$ = sDossierAppli & "\PrenomsMixtesEpicenes.md"
         EcrireFichier(sCheminMD, sbMD)
-        Dim sCheminWK$ = Application.StartupPath & "\PrenomsMixtesEpicenes.wiki"
+        Dim sCheminWK$ = sDossierAppli & "\PrenomsMixtesEpicenes.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
     End Sub
 
-    Private Sub AfficherSyntheseHomophone(dico As DicoTri(Of String, clsPrenom),
+    Private Sub AfficherSyntheseHomophone(sDossierAppli$,
+            dico As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
@@ -512,9 +520,9 @@ Fin:
 
         'Debug.WriteLine(sb.ToString)
 
-        Dim sCheminMD$ = Application.StartupPath & "\PrenomsMixtesHomophones.md"
+        Dim sCheminMD$ = sDossierAppli & "\PrenomsMixtesHomophones.md"
         EcrireFichier(sCheminMD, sbMD)
-        Dim sCheminWK$ = Application.StartupPath & "\PrenomsMixtesHomophones.wiki"
+        Dim sCheminWK$ = sDossierAppli & "\PrenomsMixtesHomophones.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
     End Sub
@@ -714,16 +722,16 @@ Fin:
 
     End Sub
 
-    Private Sub EcrireFichierFiltre(asLignes$(), dico As DicoTri(Of String, clsPrenom),
+    Private Sub EcrireFichierFiltre(sDossierAppli$, asLignes$(), dico As DicoTri(Of String, clsPrenom),
         dicoCorrectionsPrenomMixteEpicene As DicoTri(Of String, String),
         dicoCorrectionsPrenomMixteHomophone As DicoTri(Of String, String),
         dicoCorrectionsPrenomMixteEpiceneUtil As DicoTri(Of String, String),
-        dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String))
+        dicoCorrectionsPrenomMixteHomophoneUtil As DicoTri(Of String, String),
+        bTestPrenomOrig As Boolean)
 
         ' Génération d'un nouveau fichier csv filtré ou pas
 
-        ' Vérifier si le traitement appliqué préserve entièrement le fichier d'origine
-        Const bTestPrenomOrig = False
+        ' bTestPrenomOrig : Vérifier si le traitement appliqué préserve entièrement le fichier d'origine
         Const bFiltrerPrenomEpicene = False
 
         Dim sb As New StringBuilder
@@ -784,7 +792,7 @@ Suite:
 
         Next
 
-        Dim sCheminOut$ = Application.StartupPath & "\nat2019_corrige.csv"
+        Dim sCheminOut$ = sDossierAppli & "\" & sFichierPrenomsInseeCorrige
         EcrireFichier(sCheminOut, sb, bConserverFormatOrigine:=bTestPrenomOrig)
 
     End Sub

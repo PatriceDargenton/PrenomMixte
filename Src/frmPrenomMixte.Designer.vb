@@ -22,8 +22,10 @@ Partial Class frmPrenomMixte
     'Ne la modifiez pas à l'aide de l'éditeur de code.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.cmdAnalyser = New System.Windows.Forms.Button()
         Me.cmdExporter = New System.Windows.Forms.Button()
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.SuspendLayout()
         '
         'cmdAnalyser
@@ -33,6 +35,8 @@ Partial Class frmPrenomMixte
         Me.cmdAnalyser.Size = New System.Drawing.Size(93, 36)
         Me.cmdAnalyser.TabIndex = 0
         Me.cmdAnalyser.Text = "Analyser"
+        Me.ToolTip1.SetToolTip(Me.cmdAnalyser, "Analyser le fichier des prénoms de l'INSEE et produire les rapports sur les préno" & _
+        "ms mixtes et prénoms fréquents")
         Me.cmdAnalyser.UseVisualStyleBackColor = True
         '
         'cmdExporter
@@ -42,6 +46,8 @@ Partial Class frmPrenomMixte
         Me.cmdExporter.Size = New System.Drawing.Size(93, 36)
         Me.cmdExporter.TabIndex = 1
         Me.cmdExporter.Text = "Exporter"
+        Me.ToolTip1.SetToolTip(Me.cmdExporter, "Exporter le fichier des prénoms de l'INSEE en y ajoutant les colonnes corresponda" & _
+        "ntes à l'identification des prénoms mixtes")
         Me.cmdExporter.UseVisualStyleBackColor = True
         '
         'frmPrenomMixte
@@ -58,5 +64,6 @@ Partial Class frmPrenomMixte
 End Sub
     Friend WithEvents cmdAnalyser As System.Windows.Forms.Button
     Friend WithEvents cmdExporter As System.Windows.Forms.Button
+    Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
 
 End Class

@@ -5,7 +5,7 @@ Public Class frmPrenomMixte
 
         Me.cmdAnalyser.Enabled = False
         Me.cmdExporter.Enabled = False
-        AnalyserPrenoms()
+        AnalyserPrenoms(Application.StartupPath)
         Me.cmdAnalyser.Enabled = True
         Me.cmdExporter.Enabled = True
 
@@ -15,7 +15,7 @@ Public Class frmPrenomMixte
 
         Me.cmdAnalyser.Enabled = False
         Me.cmdExporter.Enabled = False
-        AnalyserPrenoms(bExporter:=True)
+        AnalyserPrenoms(Application.StartupPath, bExporter:=True)
         Me.cmdAnalyser.Enabled = True
         Me.cmdExporter.Enabled = True
 

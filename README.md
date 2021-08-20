@@ -21,7 +21,7 @@ https://www.insee.fr/fr/statistiques/2540004
 
 https://www.insee.fr/fr/statistiques/fichier/2540004/nat2019_csv.zip
 
-et doit être placé dézipé dans le dossier courant de la solution.
+et doit être placé dézipé dans le dossier PrenomMixte\bin de la solution.
 
 # Synthèse statistique des prénoms mixtes épicènes
 

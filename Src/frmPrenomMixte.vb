@@ -91,7 +91,7 @@ Public Class frmPrenomMixte
         Next
 
         Dim sCheminPrenomsMixtesHomophones$ = Application.StartupPath &
-            "\CorrectionsPrenomsMixtesHomophones.csv"
+            "\DefinitionsPrenomsMixtesHomophones.csv"
         Dim dicoCorrectionsPrenomMixteHomophone = LireFichier(sCheminPrenomsMixtesHomophones)
         Dim dicoCorrectionsPrenomMixteHomophoneUtil As New DicoTri(Of String, String)
 

@@ -335,14 +335,3 @@ ASALocalRun/
 
 # Ignore Archive subdirectory
 Archive/
-/PrenomMixte.xml
-/PrenomMixte.exe.config
-/PrenomMixte.exe
-/nat2019.csv
-/PrenomsFrequents.*
-/nat2019_corrige.*
-/PrenomsMixtesHomophones.*
-/PrenomsMixtesEpicenes.*
-/fr
-/Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.*
-/Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.*

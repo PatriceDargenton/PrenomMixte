@@ -46,6 +46,15 @@ Public Module modPrenom
     Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
     Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"
 
+    'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
+    Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
+    'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
+
+    Const iSeuilMinPrenomsFrequents = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
+    Const iSeuilMinPrenomsEpicenes = 2000 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
+    Const iSeuilMinPrenomsHomophones = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
+    Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
+
     Public Sub AnalyserPrenoms(sDossierAppli$,
             Optional bExporter As Boolean = False, Optional bTest As Boolean = False)
 
@@ -183,14 +192,9 @@ Public Module modPrenom
         'Next
         'GoTo Fin
 
-        'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
-        Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
-        'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
-        Const iSeuilMinEpicene% = 2000 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
-        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinEpicene, rSeuilFreqRel,
+        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
-        Const iSeuilMinHomophone% = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
         FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
@@ -203,19 +207,16 @@ Public Module modPrenom
             GoTo Fin
         End If
 
-        Const iSeuilMin% = 50000
-        Const iNbLignesMaxPrenom% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
         AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMin, 0, iNbLignesMaxPrenom)
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms)
 
-        Const iNbLignesMax% = 10000
         AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinEpicene, rSeuilFreqRel, iNbLignesMax,
+            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms,
             dicoCorrectionsPrenomsUtil)
 
         AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinHomophone, 0, iNbLignesMax,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil)
 

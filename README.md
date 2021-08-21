@@ -25,7 +25,7 @@ et doit être placé dézipé dans le dossier PrenomMixte\bin de la solution.
 
 # Synthèse statistique des prénoms mixtes épicènes
 
-On ne peut pas définir le type mixte sans prendre en compte au moins un seuil. D'une part un seuil concernant le nombre minimal d'occurrences du prénom parmi les 85 millions de prénoms attribués en France en un peu plus d'un siècle, et d'autre part la fréquence relative minimale entre masculin et féminin : un prénom vraiment mixte devrait au moins concerner par exemple plus de 1% des cas (1% de masculin et 99% de féminin, ou alors l'inverse), ou peut-être 10 % des cas (10% de masculin et 90% de féminin) en étant plus strict, pour avoir une véritable signification statistique. Si on n'applique aucun seuil, on arrive à près de 2 000 prénoms mixtes épicènes, mais chaque occurrence devient pratiquement une exception en soi. Voici les résultats avec un réglage du premier seuil à 2 000 occurrences minimum (avec une fréquence relative minimale de 1 %), soit 211 prénoms mixtes épicènes.
+On ne peut pas définir le type mixte sans prendre en compte au moins un seuil. D'une part un seuil concernant le nombre minimal d'occurrences du prénom parmi les 85 millions de prénoms attribués en France en un peu plus d'un siècle, et d'autre part la fréquence relative minimale entre masculin et féminin : un prénom vraiment mixte devrait au moins concerner par exemple plus de 1% des cas (1% de masculin et 99% de féminin, ou alors l'inverse), ou peut-être 10 % des cas (10% de masculin et 90% de féminin) en étant plus strict, pour avoir une véritable signification statistique. Si on n'applique aucun seuil, on arrive à près de 2 000 prénoms mixtes épicènes, mais chaque occurrence devient pratiquement une exception en soi. Voici les résultats avec un réglage du premier seuil à 2 000 occurrences minimum (avec une fréquence relative minimale de 1 %), soit 211 prénoms mixtes épicènes (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_mixtes_épicènes) pour une liste sans seuil avec 1479 prenoms).
 
 ## Prénoms mixtes épicènes avec au moins 2 000 occurrences
 
@@ -707,7 +707,7 @@ Nb prénoms ignorés (date 'XXXX') = 821 477 : 1.0%
 
 # Synthèse statistique des prénoms fréquents
 
-En appliquant aucun seuil, on trouve 32 346 prénoms distincts, mais un peu moins si on corrige quelques accents. Et 359 prénoms avec au moins 50 000 occurrences :
+En appliquant aucun seuil, on trouve 32 346 prénoms distincts, mais un peu moins si on corrige quelques accents. Et 359 prénoms avec au moins 50 000 occurrences (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_fréquents) pour un seuil à 4000 avec 1376 prenoms) :
 
 Date début = 1900
 

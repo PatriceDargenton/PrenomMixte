@@ -55,11 +55,13 @@ Public Module modPrenom
     Const iSeuilMinPrenomsHomophones = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
 
-    Const sGras$ = "**"
+    Const sGras$ = "**" ' MarkDown et Wiki
     Const sItaliqueMD$ = "*"
     Const sItaliqueWiki$ = "''"
     Const sItaliqueGrasMD$ = "***"
     Const sItaliqueGrasWiki$ = "'''''"
+
+    Const sFormatFreq$ = "0.000%"
 
     Public Sub AnalyserPrenoms(sDossierAppli$,
             Optional bExporter As Boolean = False, Optional bTest As Boolean = False)
@@ -93,7 +95,8 @@ Public Module modPrenom
         Dim dicoDefinitionsPrenomsMixtesHomophones = LireFichier(sCheminDefPrenomsMixtesHomophones)
         Dim dicoDefinitionsPrenomsMixtesHomophonesUtil As New DicoTri(Of String, String)
 
-        Dim sCheminDefPrenomsGenres$ = sDossierAppli & "\DefinitionsPrenomsGenres.csv"
+        Dim sCheminDefPrenomsGenres$ = sDossierAppli &
+            "\DefinitionsPrenomsSpecifiquementGenres.csv"
         Dim dicoDefinitionsPrenomsGenres = LireFichier(sCheminDefPrenomsGenres)
         Dim dicoDefinitionsPrenomsGenresUtil As New DicoTri(Of String, String)
 
@@ -599,7 +602,6 @@ Fin:
 
             prenom.bSelect = True
 
-            Const sFormatFreq$ = "0.000%"
             sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
             Dim bGras = False
@@ -610,8 +612,6 @@ Fin:
                 Dim prenomH = dicoH(prenom.sPrenom)
                 If prenomH.bMixteHomophone Then bItalique = True
             End If
-            'sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq,
-             '   iNumVariante, bItalique))
             sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq,
                 iNumVariante, bGras, bItalique))
 
@@ -667,7 +667,6 @@ Fin:
 
             prenom.bSelect = True
 
-            Const sFormatFreq$ = "0.000%"
             sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenomsMixtes, sFormatFreq))
 
             sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenomsMixtes, sFormatFreq))
@@ -733,8 +732,6 @@ Fin:
             If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
-
-            Const sFormatFreq$ = "0.000%"
 
             Dim sPrenom$ = prenom.sPrenomHomophone
             Dim sPrenomMD$ = sPrenom
@@ -835,8 +832,6 @@ Fin:
 
             prenom.bSelect = True
 
-            Const sFormatFreq$ = "0.000%"
-
             Dim sPrenom$ = prenom.sPrenomSpecifiquementGenre
             Dim sPrenomMD$ = sPrenom
             Dim sPrenomWiki$ = sPrenom
@@ -849,31 +844,36 @@ Fin:
                 ' Gras : épicène
                 ' Italique : homophone
                 ' Gras+Italique : épicène + homophone
-                Dim bGras = False
-                Dim bItalique = False
-                ' Un seul prénom mis en forme pour le moment (le plus fréquent)
-                ' ToDo : mettre en forme chaque prénom
-                For Each prenomV In prenom.dicoVariantesG.Trier("iNbOcc desc")
-                    If dicoE.ContainsKey(prenomV.sPrenom) Then
-                        Dim prenomE = dicoE(prenomV.sPrenom)
-                        If prenomE.bMixteEpicene Then sPrenomMEF = prenomV.sPrenom : bGras = True
-                    End If
-                    If dicoH.ContainsKey(prenomV.sPrenom) Then
-                        Dim prenomH = dicoH(prenomV.sPrenom)
-                        If prenomH.bMixteHomophone Then sPrenomMEF = prenomV.sPrenom : bItalique = True
-                    End If
-                    Exit For ' Un seul prénom, le plus fréquent
-                Next
-                Dim sMEF$ = ""
-                If bGras Then sMEF = sGras
-                If bItalique Then sMEF = sItaliqueMD
-                If bItalique AndAlso bGras Then sMEF = sItaliqueGrasMD
-                sPrenomMD = sListerCleTxt(lst, sPrenomMEF, sMEF)
-                sMEF = ""
-                If bGras Then sMEF = sGras
-                If bItalique Then sMEF = sItaliqueWiki
-                If bItalique AndAlso bGras Then sMEF = sItaliqueGrasWiki
-                sPrenomWiki = sListerCleTxt(lst, sPrenomMEF, sMEF)
+
+                'Dim bGras = False
+                'Dim bItalique = False
+                '' Un seul prénom mis en forme pour le moment (le plus fréquent)
+                '' ToDo : mettre en forme chaque prénom
+                'For Each prenomV In prenom.dicoVariantesG.Trier("iNbOcc desc")
+                '    If dicoE.ContainsKey(prenomV.sPrenom) Then
+                '        Dim prenomE = dicoE(prenomV.sPrenom)
+                '        If prenomE.bMixteEpicene Then sPrenomMEF = prenomV.sPrenom : bGras = True
+                '    End If
+                '    If dicoH.ContainsKey(prenomV.sPrenom) Then
+                '        Dim prenomH = dicoH(prenomV.sPrenom)
+                '        If prenomH.bMixteHomophone Then sPrenomMEF = prenomV.sPrenom : bItalique = True
+                '    End If
+                '    Exit For ' Un seul prénom, le plus fréquent
+                'Next
+                'Dim sMEF$ = ""
+                'If bGras Then sMEF = sGras
+                'If bItalique Then sMEF = sItaliqueMD
+                'If bItalique AndAlso bGras Then sMEF = sItaliqueGrasMD
+                'sPrenomMD = sListerCleTxt(lst, sPrenomMEF, sMEF)
+                'sMEF = ""
+                'If bGras Then sMEF = sGras
+                'If bItalique Then sMEF = sItaliqueWiki
+                'If bItalique AndAlso bGras Then sMEF = sItaliqueGrasWiki
+                'sPrenomWiki = sListerCleTxt(lst, sPrenomMEF, sMEF)
+
+                sPrenomMD = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=False)
+                sPrenomWiki = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=True)
+
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsGenres, sFormatFreq))
@@ -983,15 +983,12 @@ Fin:
             Optional bGras As Boolean = False,
             Optional bItalique As Boolean = False,
             Optional bSuffixeNumVariante As Boolean = False)
-            'Optional bVariante1EnGras As Boolean = True)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
         If bSuffixeNumVariante AndAlso iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
-        'If bVariante1EnGras AndAlso iNumVariante = 1 Then sMiseEnForme = sGras ' Gras
         If bGras Then sMiseEnForme = sGras ' Gras
         If bItalique Then sMiseEnForme = sItaliqueMD ' Italique
-        'If bVariante1EnGras AndAlso iNumVariante = 1 AndAlso bItalique Then sMiseEnForme = sItaliqueGrasMD ' Italique en gras
         If bGras AndAlso bItalique Then sMiseEnForme = sItaliqueGrasMD ' Italique en gras
 
         Dim s$ =
@@ -1015,15 +1012,12 @@ Fin:
             Optional bGras As Boolean = False,
             Optional bItalique As Boolean = False,
             Optional bSuffixeNumVariante As Boolean = False)
-            'Optional bVariante1EnGras As Boolean = True)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
         If bSuffixeNumVariante AndAlso iNumVariante >= 0 Then sNumVariante = "." & iNumVariante
-        'If bVariante1EnGras AndAlso iNumVariante = 1 Then sMiseEnForme = "'''" ' Gras
         If bGras Then sMiseEnForme = sGras ' Gras
         If bItalique Then sMiseEnForme = sItaliqueWiki ' Italique
-        'If bVariante1EnGras AndAlso iNumVariante = 1 AndAlso bItalique Then sMiseEnForme = sItaliqueGrasWiki ' Italique en gras
         If bGras AndAlso bItalique Then sMiseEnForme = sItaliqueGrasWiki ' Italique en gras
 
         Dim s$ = "|-" & vbLf &
@@ -1308,6 +1302,42 @@ Suite:
             If iNbMax > 0 Then
                 If iNumOcc >= iNbMax Then sb.Append("...") : Exit For
             End If
+        Next
+
+        Return sb.ToString
+
+    End Function
+
+    Private Function sListerCleTxtDico$(
+            lstTxt As List(Of KeyValuePair(Of String, clsPrenom)),
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoH As DicoTri(Of String, clsPrenom),
+            bWiki As Boolean)
+
+        Dim sb As New StringBuilder("")
+        Dim iNumOcc% = 0
+        For Each kvp In lstTxt
+            If sb.Length > 0 Then sb.Append(", ")
+            Dim sPrenom$ = kvp.Key
+
+            Dim bGras = False
+            If dicoE.ContainsKey(sPrenom) AndAlso dicoE(sPrenom).bMixteEpicene Then bGras = True
+            Dim bItalique = False
+            If dicoH.ContainsKey(sPrenom) AndAlso dicoH(sPrenom).bMixteHomophone Then bItalique = True
+
+            Dim sMEF$ = ""
+            If bGras Then sMEF = sGras
+            If bWiki Then
+                If bItalique Then sMEF = sItaliqueWiki
+                If bItalique AndAlso bGras Then sMEF = sItaliqueGrasWiki
+            Else
+                If bItalique Then sMEF = sItaliqueMD
+                If bItalique AndAlso bGras Then sMEF = sItaliqueGrasMD
+            End If
+            sPrenom = sMEF & sPrenom & sMEF
+
+            sb.Append(sPrenom)
+            iNumOcc += 1
         Next
 
         Return sb.ToString

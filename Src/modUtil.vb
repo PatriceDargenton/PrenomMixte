@@ -6,15 +6,28 @@ Imports System.Text
 
 Public Module modUtil
 
-    Public Function sLireFichier$(sChemin$)
+    Public Function sbLireFichier(sChemin$, Optional bDoublerRAL As Boolean = False) As StringBuilder
 
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
-        If IsNothing(asLignes) Then Return ""
+        If IsNothing(asLignes) Then Return New StringBuilder
         Dim sb As New StringBuilder
         For Each sLigne As String In asLignes
             sb.AppendLine(sLigne)
+            If bDoublerRAL Then sb.AppendLine()
         Next
-        Return sb.ToString
+        Return sb
+
+    End Function
+
+    Public Function sLireFichier$(sChemin$)
+
+        'Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
+        'If IsNothing(asLignes) Then Return ""
+        'Dim sb As New StringBuilder
+        'For Each sLigne As String In asLignes
+        '    sb.AppendLine(sLigne)
+        'Next
+        Return sbLireFichier(sChemin).ToString
 
     End Function
 

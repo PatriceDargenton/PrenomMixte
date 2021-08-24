@@ -21,12 +21,6 @@ Public Module modUtil
 
     Public Function sLireFichier$(sChemin$)
 
-        'Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
-        'If IsNothing(asLignes) Then Return ""
-        'Dim sb As New StringBuilder
-        'For Each sLigne As String In asLignes
-        '    sb.AppendLine(sLigne)
-        'Next
         Return sbLireFichier(sChemin).ToString
 
     End Function
@@ -93,6 +87,16 @@ Public Module modUtil
         Next
 
         Return sb
+
+    End Function
+
+    Public Function asTrierDicoStringString(dico As DicoTri(Of String, String)) As String()
+
+        Dim asTable$(0 To dico.Count - 1)
+        dico.Keys.CopyTo(asTable, 0)
+        Array.Sort(asTable)
+
+        Return asTable
 
     End Function
 

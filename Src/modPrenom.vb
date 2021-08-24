@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "23/08/2021"
+    Public Const sDateVersionAppli$ = "24/08/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -60,6 +60,7 @@ Public Module modPrenom
     Const sItaliqueWiki$ = "''"
     Const sItaliqueGrasMD$ = "***"
     Const sItaliqueGrasWiki$ = "'''''"
+    Const sSautDeLigneMD$ = "<br>"
 
     Const sFormatFreq$ = "0.000%"
 
@@ -213,14 +214,31 @@ Public Module modPrenom
                 End If
             End If
 
-            ' Détection des prénoms homophones potentiels
-            ' ToDo : restant
-            Dim sPrenomF1$ = prenom.sPrenom & "e" ' Ex.: Denise : Denis
-            If dicoE.ContainsKey(sPrenomF1) AndAlso Not dicoHP.ContainsKey(sPrenomF1) Then
+            ' Détection des prénoms homophones potentiels restants
+            Dim sPrenomF1$ = prenom.sPrenom & "e" ' Ex.: Renée : René
+            Dim sPrenomF1Min$ = sPrenomF1.ToLower
+            'If sPrenomF1Min = "stéphane" Then
+            '    Debug.WriteLine("!")
+            'End If
+            ' ToDo : retirer aussi les déf épicènes ?
+            'If dicoE.ContainsKey(sPrenomF1) AndAlso Not dicoHP.ContainsKey(sPrenomF1) Then
+            '    dicoHP.Add(sPrenomF1, prenom.sPrenom)
+            'End If
+            If dicoE.ContainsKey(sPrenomF1) AndAlso
+               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF1Min) AndAlso
+               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF1Min) AndAlso
+               Not dicoHP.ContainsKey(sPrenomF1) Then
                 dicoHP.Add(sPrenomF1, prenom.sPrenom)
             End If
             Dim sPrenomF2$ = prenom.sPrenom & "le" ' Ex.: Gabrielle : Gabriel
-            If dicoE.ContainsKey(sPrenomF2) AndAlso Not dicoHP.ContainsKey(sPrenomF2) Then
+            Dim sPrenomF2Min$ = sPrenomF2.ToLower
+            'If dicoE.ContainsKey(sPrenomF2) AndAlso Not dicoHP.ContainsKey(sPrenomF2) Then
+            '    dicoHP.Add(sPrenomF2, prenom.sPrenom)
+            'End If
+            If dicoE.ContainsKey(sPrenomF2) AndAlso
+                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF2Min) AndAlso
+                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF2Min) AndAlso
+                Not dicoHP.ContainsKey(sPrenomF2) Then
                 dicoHP.Add(sPrenomF2, prenom.sPrenom)
             End If
 
@@ -235,37 +253,37 @@ Public Module modPrenom
         Next
 
         Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")
-        sbCP.AppendLine().AppendLine()
-        'Dim iNbPrenomCP% = 0
-        For Each kvp In dicoCP
-            'iNbPrenomCP += 1
-            'If iNbPrenomCP > 200 Then Exit For
-            Dim sPrenom$ = kvp.Key
-            sbCP.AppendLine(sPrenom & " : " & dicoCP(sPrenom)).AppendLine()
+        Dim sbCPMD As New StringBuilder("Liste des corrections potentielles d'accent")
+        sbCP.AppendLine()
+        sbCPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        Dim asTableCP = asTrierDicoStringString(dicoCP)
+        For Each sPrenom In asTableCP
+            sbCP.AppendLine(dicoCP(sPrenom).ToLower & ";" & sPrenom.ToLower)
+            sbCPMD.AppendLine(sPrenom & " : " & dicoCP(sPrenom)).AppendLine()
         Next
         Dim sCheminCP$ = sDossierAppli & "\CorrectionsPotentielles.txt"
         EcrireFichier(sCheminCP, sbCP)
 
-        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels")
-        sbHP.AppendLine().AppendLine()
-        'Dim iNbPrenomHP% = 0
-        For Each kvp In dicoHP
-            'iNbPrenomHP += 1
-            'If iNbPrenomHP > 200 Then Exit For
-            Dim sPrenom$ = kvp.Key
-            sbHP.AppendLine(sPrenom & " : " & dicoHP(sPrenom)).AppendLine()
+        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels restants")
+        Dim sbHPMD As New StringBuilder("Liste des prénoms homophones potentiels restants")
+        sbHP.AppendLine()
+        sbHPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        Dim asTableHP = asTrierDicoStringString(dicoHP)
+        For Each sPrenom In asTableHP
+            sbHP.AppendLine(dicoHP(sPrenom).ToLower & ";" & sPrenom.ToLower)
+            sbHPMD.AppendLine(sPrenom & " : " & dicoHP(sPrenom)).AppendLine()
         Next
         Dim sCheminHP$ = sDossierAppli & "\PrenomsMixtesHomophonesPotentiels.txt"
         EcrireFichier(sCheminHP, sbHP)
 
         Dim sbGP As New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
-        sbGP.AppendLine().AppendLine()
-        'Dim iNbPrenomGP% = 0
-        For Each kvp In dicoGP
-            'iNbPrenomGP += 1
-            'If iNbPrenomGP > 200 Then Exit For
-            Dim sPrenom$ = kvp.Key
-            sbGP.AppendLine(dicoGP(sPrenom).ToLower & ";" & sPrenom.ToLower).AppendLine()
+        Dim sbGPMD As New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
+        sbGP.AppendLine()
+        sbGPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        Dim asTableGP = asTrierDicoStringString(dicoGP)
+        For Each sPrenom In asTableGP
+            sbGP.AppendLine(dicoGP(sPrenom).ToLower & ";" & sPrenom.ToLower)
+            sbGPMD.AppendLine(sPrenom & " : " & dicoGP(sPrenom)).AppendLine()
         Next
         Dim sCheminGP$ = sDossierAppli & "\PrenomsGenresPotentielsRestants.txt"
         EcrireFichier(sCheminGP, sbGP)
@@ -312,19 +330,25 @@ Public Module modPrenom
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil, sbBilan)
 
-        sbBilan.AppendLine("Liste des corrections d'accent").AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminCorrectionsPrenoms, bDoublerRAL:=True)).AppendLine().AppendLine()
+        sbBilan.AppendLine("Liste des corrections d'accent").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminCorrectionsPrenoms, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
-        sbBilan.AppendLine("Liste des définitions de prénoms mixtes homophones").AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminDefPrenomsMixtesHomophones, bDoublerRAL:=True)).AppendLine().AppendLine()
+        sbBilan.AppendLine("Liste des définitions de prénoms mixtes homophones").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminDefPrenomsMixtesHomophones, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
         sbBilan.AppendLine(
-            "Liste des définitions de prénoms masculins ou féminins (spécifiquement genrés)").AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminDefPrenomsGenres, bDoublerRAL:=True)).AppendLine().AppendLine()
+            "Liste des définitions de prénoms masculins ou féminins (spécifiquement genrés)").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminDefPrenomsGenres, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
-        sbBilan.Append(sbCP)
-        sbBilan.Append(sbHP)
-        sbBilan.Append(sbGP)
+        sbBilan.Append(sbCPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbHPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbGPMD)
 
         Dim sCheminBilan$ = sDossierAppli & "\Bilan.md"
         EcrireFichier(sCheminBilan, sbBilan)
@@ -341,11 +365,10 @@ Fin:
 
         Dim sbPG As New StringBuilder(
             "Dictionnaire des prénoms spécifiquement genrés + mixtes homophones")
-        sbPG.AppendLine().AppendLine()
-        Dim aTable$(0 To dicoDefinitionsPrenomsGenres.Count - 1)
-        dicoDefinitionsPrenomsGenres.Keys.CopyTo(aTable, 0)
-        Array.Sort(aTable)
-        For Each sPrenom In aTable
+        sbPG.AppendLine()
+
+        Dim asTable = asTrierDicoStringString(dicoDefinitionsPrenomsGenres)
+        For Each sPrenom In asTable
             sbPG.AppendLine(dicoDefinitionsPrenomsGenres(sPrenom).ToLower & ";" & sPrenom.ToLower)
         Next
 
@@ -626,7 +649,7 @@ Fin:
         Dim sCheminWK$ = sDossierAppli & "\PrenomsFrequents.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
-        sbBilan.Append(sbMD).AppendLine()
+        sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
     End Sub
 
@@ -692,7 +715,7 @@ Fin:
         Dim sCheminWK$ = sDossierAppli & "\PrenomsMixtesEpicenes.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
-        sbBilan.Append(sbMD).AppendLine()
+        sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
     End Sub
 
@@ -788,7 +811,7 @@ Fin:
         Dim sCheminWK$ = sDossierAppli & "\PrenomsMixtesHomophones.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
-        sbBilan.Append(sbMD).AppendLine()
+        sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
     End Sub
 
@@ -844,36 +867,8 @@ Fin:
                 ' Gras : épicène
                 ' Italique : homophone
                 ' Gras+Italique : épicène + homophone
-
-                'Dim bGras = False
-                'Dim bItalique = False
-                '' Un seul prénom mis en forme pour le moment (le plus fréquent)
-                '' ToDo : mettre en forme chaque prénom
-                'For Each prenomV In prenom.dicoVariantesG.Trier("iNbOcc desc")
-                '    If dicoE.ContainsKey(prenomV.sPrenom) Then
-                '        Dim prenomE = dicoE(prenomV.sPrenom)
-                '        If prenomE.bMixteEpicene Then sPrenomMEF = prenomV.sPrenom : bGras = True
-                '    End If
-                '    If dicoH.ContainsKey(prenomV.sPrenom) Then
-                '        Dim prenomH = dicoH(prenomV.sPrenom)
-                '        If prenomH.bMixteHomophone Then sPrenomMEF = prenomV.sPrenom : bItalique = True
-                '    End If
-                '    Exit For ' Un seul prénom, le plus fréquent
-                'Next
-                'Dim sMEF$ = ""
-                'If bGras Then sMEF = sGras
-                'If bItalique Then sMEF = sItaliqueMD
-                'If bItalique AndAlso bGras Then sMEF = sItaliqueGrasMD
-                'sPrenomMD = sListerCleTxt(lst, sPrenomMEF, sMEF)
-                'sMEF = ""
-                'If bGras Then sMEF = sGras
-                'If bItalique Then sMEF = sItaliqueWiki
-                'If bItalique AndAlso bGras Then sMEF = sItaliqueGrasWiki
-                'sPrenomWiki = sListerCleTxt(lst, sPrenomMEF, sMEF)
-
                 sPrenomMD = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=False)
                 sPrenomWiki = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=True)
-
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsGenres, sFormatFreq))
@@ -923,7 +918,7 @@ Fin:
         Dim sCheminWK$ = sDossierAppli & "\PrenomsSpecifiquementGenres.wiki"
         EcrireFichier(sCheminWK, sbWK)
 
-        sbBilan.Append(sbMD).AppendLine()
+        sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
 
     End Sub
 

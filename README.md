@@ -33,7 +33,7 @@ On ne peut pas définir le type mixte sans prendre en compte au moins un seuil. 
 Le fichier de l'INSEE commence en 1900 et fini en 2019, certains prénoms n'ont pas les accents, d'autres n'ont pas de date (on trouve 'XXXX' à la place, soit 1 % des cas), ou bien ne sont pas identifiés (on trouve '_PRENOMS_RARES' à la place du prénom, soit 1.9 % des cas). On a 83 443 483 prénoms correctement identifiés sur 85 878 884 naissances répertoriées en France sur un peu plus d'un siècle.
 
 Les colonnes sont Sexe (1:Garçon, 2:Fille);Prénom usuel;Année;Nombre d'occurrence, il contient 652 057 lignes de prénoms, par exemple :
-2;BERANGERE;2010;5, soit 5 naissances de Bérangère en 2010. L'année moyenne est logiquement pondérée par le nombre d'occurrences pour chaque année.
+2;BERANGERE;2010;5, soit 5 naissances de Bérangère en 2010. L'année moyenne est logiquement pondérée par le nombre d'occurrences pour chaque année. On corrige toujours les accents dans ces listes, même si parfois la version sans accent est majoritaire (mais on ne les distingue pas pour le moment).
 
 Date début = 1900
 

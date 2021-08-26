@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "25/08/2021"
+    Public Const sDateVersionAppli$ = "26/08/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -110,12 +110,10 @@ Public Module modPrenom
             End If
         Next
 
-        Dim sdCP As New SortedDictionary(Of String, String) ' Correction de prénoms potentiels
         Dim dicoE As New DicoTri(Of String, clsPrenom) ' épicène
         Dim dicoH As New DicoTri(Of String, clsPrenom) ' homophone
-        Dim sdHP As New SortedDictionary(Of String, String) ' Prénoms homophones potentiels
         Dim dicoG As New DicoTri(Of String, clsPrenom) ' masc. ou fém. (spécifiquement genrés)
-        Dim sdGP As New SortedDictionary(Of String, String) ' Prénoms spécifiquement genrés potentiels
+
         Dim iNbLignes% = 0
         Dim iNbLignesOk% = 0
         Dim iNbPrenomsTot% = 0
@@ -123,163 +121,28 @@ Public Module modPrenom
         Dim iNbPrenomsIgnores% = 0
         Dim iNbPrenomsIgnoresDate% = 0
 
-        For Each sLigne As String In asLignes
+        AnalyseFichierINSEE(asLignes,
+            dicoCorrectionsPrenoms,
+            dicoCorrectionsPrenomsUtil,
+            dicoDefinitionsPrenomsMixtesHomophones,
+            dicoDefinitionsPrenomsMixtesHomophonesUtil,
+            dicoDefinitionsPrenomsGenres,
+            dicoDefinitionsPrenomsGenresUtil,
+            dicoE, dicoH, dicoG, bTest,
+            iNbLignes, iNbLignesOk, iNbPrenomsTot, iNbPrenomsTotOk,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
-            iNbLignes += 1
-            If iNbLignes = 1 Then Continue For ' Entête
+        Dim sbCPMD As New StringBuilder
+        Dim sbHPMD As New StringBuilder
+        Dim sbGPMD As New StringBuilder
 
-            Dim prenom As New clsPrenom
-            If Not bAnalyserPrenom(sLigne$, prenom,
-                dicoCorrectionsPrenoms,
-                dicoCorrectionsPrenomsUtil,
-                dicoDefinitionsPrenomsMixtesHomophones,
-                dicoDefinitionsPrenomsMixtesHomophonesUtil,
-                dicoDefinitionsPrenomsGenres,
-                dicoDefinitionsPrenomsGenresUtil) Then Continue For
-            ConvertirPrenom(prenom)
+        If bTest Then GoTo Export
 
-            If prenom.sPrenomOrig = clsPrenom.sPrenomRare Then
-                iNbPrenomsIgnores += prenom.iNbOcc
-                iNbPrenomsTot += prenom.iNbOcc
-                Continue For
-            End If
-            If prenom.sAnnee = clsPrenom.sDateXXXX Then
-                iNbPrenomsIgnoresDate += prenom.iNbOcc
-                iNbPrenomsTot += prenom.iNbOcc
-                Continue For
-            End If
-            iNbLignesOk += 1
-            iNbPrenomsTotOk += prenom.iNbOcc
-            iNbPrenomsTot += prenom.iNbOcc
-
-            prenom.rAnneeMoy = prenom.iAnnee * prenom.iNbOcc
-            If prenom.bMasc Then prenom.rAnneeMoyMasc = prenom.iAnnee * prenom.iNbOcc
-            If prenom.bFem Then prenom.rAnneeMoyFem = prenom.iAnnee * prenom.iNbOcc
-
-            Dim sCle$ = prenom.sPrenom
-            If dicoE.ContainsKey(sCle) Then
-                Dim prenom0 = dicoE(sCle)
-                prenom0.Ajouter(prenom)
-            Else
-                dicoE.Add(sCle, prenom)
-            End If
-
-            ' Dico des prénoms homophones
-            Dim prenomH = prenom.Clone() ' Il faut faire une copie pour que l'objet soit distinct
-            If Not prenomH.dicoVariantesH.ContainsKey(prenomH.sPrenom) Then
-                prenomH.dicoVariantesH.Add(prenomH.sPrenom, prenom)
-            End If
-            Dim sCleH$ = prenomH.sPrenomHomophone
-            If dicoH.ContainsKey(sCleH) Then
-                Dim prenom0 = dicoH(sCleH)
-                prenom0.Ajouter(prenom)
-                For Each kvp In prenomH.dicoVariantesH
-                    If Not prenom0.dicoVariantesH.ContainsKey(kvp.Key) Then
-                        prenom0.dicoVariantesH.Add(kvp.Key, prenom)
-                    End If
-                Next
-            Else
-                dicoH.Add(sCleH, prenomH)
-            End If
-
-            ' Dico des prénoms masc. ou fém. (spécifiquement genrés)
-            Dim prenomG = prenom.Clone()
-            If Not prenomG.dicoVariantesG.ContainsKey(prenomG.sPrenom) Then
-                prenomG.dicoVariantesG.Add(prenomG.sPrenom, prenom)
-            End If
-            Dim sCleG$ = prenomG.sPrenomSpecifiquementGenre
-            If dicoG.ContainsKey(sCleG) Then
-                Dim prenom0 = dicoG(sCleG)
-                prenom0.Ajouter(prenom)
-                For Each kvp In prenomG.dicoVariantesG
-                    If Not prenom0.dicoVariantesG.ContainsKey(kvp.Key) Then
-                        prenom0.dicoVariantesG.Add(kvp.Key, prenom)
-                    End If
-                Next
-            Else
-                dicoG.Add(sCleG, prenomG)
-            End If
-
-        Next
-
-        For Each prenom In dicoE.Trier("")
-
-            ' Détection des corrections d'accent potentielles restantes
-            Dim sPrenomSansAccent$ = sEnleverAccents(prenom.sPrenom, bMinuscule:=False)
-            If sPrenomSansAccent <> prenom.sPrenom Then
-                If dicoE.ContainsKey(sPrenomSansAccent) AndAlso
-                   Not dicoCorrectionsPrenoms.ContainsKey(sPrenomSansAccent) AndAlso
-                    Not sdCP.ContainsKey(sPrenomSansAccent) Then
-                    sdCP.Add(sPrenomSansAccent, prenom.sPrenom)
-                End If
-            End If
-
-            ' Détection des prénoms homophones potentiels restants
-            Dim sPrenomF1$ = prenom.sPrenom & "e" ' Ex.: Renée : René
-            Dim sPrenomF1Min$ = sPrenomF1.ToLower
-            If dicoE.ContainsKey(sPrenomF1) AndAlso
-               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF1Min) AndAlso
-               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF1Min) AndAlso
-               Not sdHP.ContainsKey(sPrenomF1) Then
-                sdHP.Add(sPrenomF1, prenom.sPrenom)
-            End If
-            Dim sPrenomF2$ = prenom.sPrenom & "le" ' Ex.: Gabrielle : Gabriel
-            Dim sPrenomF2Min$ = sPrenomF2.ToLower
-            If dicoE.ContainsKey(sPrenomF2) AndAlso
-                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF2Min) AndAlso
-                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF2Min) AndAlso
-                Not sdHP.ContainsKey(sPrenomF2) Then
-                sdHP.Add(sPrenomF2, prenom.sPrenom)
-            End If
-
-            ' Détection des prénoms spécifiquement genrés potentiels restants
-            Dim sPrenomF3$ = prenom.sPrenom & "tte" ' Ex.: Antoinette : Antoine
-            Dim sPrenomF3Min = sPrenomF3.ToLower
-            If dicoE.ContainsKey(sPrenomF3) AndAlso
-                Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF3Min) AndAlso
-                Not sdGP.ContainsKey(sPrenomF3) Then
-                sdGP.Add(sPrenomF3, prenom.sPrenom)
-            End If
-        Next
-
-        Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")
-        Dim sbCPMD As New StringBuilder("Liste des corrections potentielles d'accent")
-        sbCP.AppendLine()
-        sbCPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        For Each kvp In sdCP
-            Dim sPrenom = kvp.Key
-            Dim sPrenomC = kvp.Value
-            sbCP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbCPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
-        Next
-        Dim sCheminCP$ = sDossierAppli & "\CorrectionsPotentielles.txt"
-        EcrireFichier(sCheminCP, sbCP)
-
-        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels restants")
-        Dim sbHPMD As New StringBuilder("Liste des prénoms homophones potentiels restants")
-        sbHP.AppendLine()
-        sbHPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        For Each kvp In sdHP
-            Dim sPrenom = kvp.Key
-            Dim sPrenomC = kvp.Value
-            sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
-        Next
-        Dim sCheminHP$ = sDossierAppli & "\PrenomsMixtesHomophonesPotentiels.txt"
-        EcrireFichier(sCheminHP, sbHP)
-
-        Dim sbGP As New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
-        Dim sbGPMD As New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
-        sbGP.AppendLine()
-        sbGPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        For Each kvp In sdGP
-            Dim sPrenom = kvp.Key
-            Dim sPrenomC = kvp.Value
-            sbGP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbGPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
-        Next
-        Dim sCheminGP$ = sDossierAppli & "\PrenomsGenresPotentielsRestants.txt"
-        EcrireFichier(sCheminGP, sbGP)
+        DetectionAnomalies(sDossierAppli,
+            dicoCorrectionsPrenoms,
+            dicoDefinitionsPrenomsMixtesHomophones,
+            dicoDefinitionsPrenomsGenres,
+            dicoE, sbCPMD, sbHPMD, sbGPMD)
 
         FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
@@ -290,6 +153,7 @@ Public Module modPrenom
         FiltrerPrenomSpecifiquementGenre(dicoG, dicoE, dicoH, iNbPrenomsTot,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
+Export:
         If bExporter Then
             EcrireFichierFiltre(sDossierAppli, asLignes, dicoE, dicoH, dicoG,
                 dicoCorrectionsPrenoms,
@@ -365,6 +229,197 @@ Public Module modPrenom
 
 Fin:
         If Not bTest Then MsgBox("Terminé !", MsgBoxStyle.Information, sTitreAppli)
+
+    End Sub
+
+    Private Sub AnalyseFichierINSEE(asLignes$(),
+            dicoCorrectionsPrenoms As DicoTri(Of String, String),
+            dicoCorrectionsPrenomsUtil As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsMixtesHomophones As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsMixtesHomophonesUtil As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsGenres As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsGenresUtil As DicoTri(Of String, String),
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoH As DicoTri(Of String, clsPrenom),
+            dicoG As DicoTri(Of String, clsPrenom),
+            bTest As Boolean,
+            ByRef iNbLignes%, ByRef iNbLignesOk%,
+            ByRef iNbPrenomsTot%, ByRef iNbPrenomsTotOk%,
+            ByRef iNbPrenomsIgnores%, ByRef iNbPrenomsIgnoresDate%)
+
+        For Each sLigne As String In asLignes
+
+            iNbLignes += 1
+            If iNbLignes = 1 Then Continue For ' Entête
+
+            Dim prenom As New clsPrenom
+            If Not bAnalyserPrenom(sLigne$, prenom,
+                dicoCorrectionsPrenoms,
+                dicoCorrectionsPrenomsUtil,
+                dicoDefinitionsPrenomsMixtesHomophones,
+                dicoDefinitionsPrenomsMixtesHomophonesUtil,
+                dicoDefinitionsPrenomsGenres,
+                dicoDefinitionsPrenomsGenresUtil) Then Continue For
+            ConvertirPrenom(prenom)
+
+            If prenom.sPrenomOrig = clsPrenom.sPrenomRare Then
+                iNbPrenomsIgnores += prenom.iNbOcc
+                iNbPrenomsTot += prenom.iNbOcc
+                Continue For
+            End If
+            If prenom.sAnnee = clsPrenom.sDateXXXX Then
+                iNbPrenomsIgnoresDate += prenom.iNbOcc
+                iNbPrenomsTot += prenom.iNbOcc
+                Continue For
+            End If
+            iNbLignesOk += 1
+            iNbPrenomsTotOk += prenom.iNbOcc
+            iNbPrenomsTot += prenom.iNbOcc
+
+            prenom.rAnneeMoy = prenom.iAnnee * prenom.iNbOcc
+            If prenom.bMasc Then prenom.rAnneeMoyMasc = prenom.iAnnee * prenom.iNbOcc
+            If prenom.bFem Then prenom.rAnneeMoyFem = prenom.iAnnee * prenom.iNbOcc
+
+            Dim sCle$ = prenom.sPrenom
+            If dicoE.ContainsKey(sCle) Then
+                Dim prenom0 = dicoE(sCle)
+                prenom0.Ajouter(prenom)
+            Else
+                dicoE.Add(sCle, prenom)
+            End If
+
+            If bTest Then Continue For
+            'If bDebug Then Continue For
+
+            ' Dico des prénoms homophones
+            Dim prenomH = prenom.Clone() ' Il faut faire une copie pour que l'objet soit distinct
+            If Not prenomH.dicoVariantesH.ContainsKey(prenomH.sPrenom) Then
+                prenomH.dicoVariantesH.Add(prenomH.sPrenom, prenom)
+            End If
+            Dim sCleH$ = prenomH.sPrenomHomophone
+            If dicoH.ContainsKey(sCleH) Then
+                Dim prenom0 = dicoH(sCleH)
+                prenom0.Ajouter(prenom)
+                For Each kvp In prenomH.dicoVariantesH
+                    If Not prenom0.dicoVariantesH.ContainsKey(kvp.Key) Then
+                        prenom0.dicoVariantesH.Add(kvp.Key, prenom)
+                    End If
+                Next
+            Else
+                dicoH.Add(sCleH, prenomH)
+            End If
+
+            ' Dico des prénoms masc. ou fém. (spécifiquement genrés)
+            Dim prenomG = prenom.Clone()
+            If Not prenomG.dicoVariantesG.ContainsKey(prenomG.sPrenom) Then
+                prenomG.dicoVariantesG.Add(prenomG.sPrenom, prenom)
+            End If
+            Dim sCleG$ = prenomG.sPrenomSpecifiquementGenre
+            If dicoG.ContainsKey(sCleG) Then
+                Dim prenom0 = dicoG(sCleG)
+                prenom0.Ajouter(prenom)
+                For Each kvp In prenomG.dicoVariantesG
+                    If Not prenom0.dicoVariantesG.ContainsKey(kvp.Key) Then
+                        prenom0.dicoVariantesG.Add(kvp.Key, prenom)
+                    End If
+                Next
+            Else
+                dicoG.Add(sCleG, prenomG)
+            End If
+
+        Next
+
+    End Sub
+
+    Private Sub DetectionAnomalies(sDossierAppli$,
+        dicoCorrectionsPrenoms As DicoTri(Of String, String),
+        dicoDefinitionsPrenomsMixtesHomophones As DicoTri(Of String, String),
+        dicoDefinitionsPrenomsGenres As DicoTri(Of String, String),
+        dicoE As DicoTri(Of String, clsPrenom),
+        ByRef sbCPMD As StringBuilder, ByRef sbHPMD As StringBuilder, ByRef sbGPMD As StringBuilder)
+
+        Dim sdCP As New SortedDictionary(Of String, String) ' Correction de prénoms potentiels
+        Dim sdHP As New SortedDictionary(Of String, String) ' Prénoms homophones potentiels
+        Dim sdGP As New SortedDictionary(Of String, String) ' Prénoms spécifiquement genrés potentiels
+
+        For Each prenom In dicoE.Trier("")
+
+            ' Détection des corrections d'accent potentielles restantes
+            Dim sPrenomSansAccent$ = sEnleverAccents(prenom.sPrenom, bMinuscule:=False)
+            If sPrenomSansAccent <> prenom.sPrenom Then
+                If dicoE.ContainsKey(sPrenomSansAccent) AndAlso
+                   Not dicoCorrectionsPrenoms.ContainsKey(sPrenomSansAccent) AndAlso
+                    Not sdCP.ContainsKey(sPrenomSansAccent) Then
+                    sdCP.Add(sPrenomSansAccent, prenom.sPrenom)
+                End If
+            End If
+
+            ' Détection des prénoms homophones potentiels restants
+            Dim sPrenomF1$ = prenom.sPrenom & "e" ' Ex.: Renée : René
+            Dim sPrenomF1Min$ = sPrenomF1.ToLower
+            If dicoE.ContainsKey(sPrenomF1) AndAlso
+               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF1Min) AndAlso
+               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF1Min) AndAlso
+               Not sdHP.ContainsKey(sPrenomF1) Then
+                sdHP.Add(sPrenomF1, prenom.sPrenom)
+            End If
+            Dim sPrenomF2$ = prenom.sPrenom & "le" ' Ex.: Gabrielle : Gabriel
+            Dim sPrenomF2Min$ = sPrenomF2.ToLower
+            If dicoE.ContainsKey(sPrenomF2) AndAlso
+                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF2Min) AndAlso
+                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF2Min) AndAlso
+                Not sdHP.ContainsKey(sPrenomF2) Then
+                sdHP.Add(sPrenomF2, prenom.sPrenom)
+            End If
+
+            ' Détection des prénoms spécifiquement genrés potentiels restants
+            Dim sPrenomF3$ = prenom.sPrenom & "tte" ' Ex.: Antoinette : Antoine
+            Dim sPrenomF3Min = sPrenomF3.ToLower
+            If dicoE.ContainsKey(sPrenomF3) AndAlso
+                Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF3Min) AndAlso
+                Not sdGP.ContainsKey(sPrenomF3) Then
+                sdGP.Add(sPrenomF3, prenom.sPrenom)
+            End If
+        Next
+
+        Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")
+        sbCPMD = New StringBuilder("Liste des corrections potentielles d'accent")
+        sbCP.AppendLine()
+        sbCPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        For Each kvp In sdCP
+            Dim sPrenom = kvp.Key
+            Dim sPrenomC = kvp.Value
+            sbCP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+            sbCPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+        Next
+        Dim sCheminCP$ = sDossierAppli & "\CorrectionsPotentielles.txt"
+        EcrireFichier(sCheminCP, sbCP)
+
+        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels restants")
+        sbHPMD = New StringBuilder("Liste des prénoms homophones potentiels restants")
+        sbHP.AppendLine()
+        sbHPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        For Each kvp In sdHP
+            Dim sPrenom = kvp.Key
+            Dim sPrenomC = kvp.Value
+            sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+            sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+        Next
+        Dim sCheminHP$ = sDossierAppli & "\PrenomsMixtesHomophonesPotentiels.txt"
+        EcrireFichier(sCheminHP, sbHP)
+
+        Dim sbGP As New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
+        sbGPMD = New StringBuilder("Liste des prénoms spécifiquement genrés potentiels restants")
+        sbGP.AppendLine()
+        sbGPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        For Each kvp In sdGP
+            Dim sPrenom = kvp.Key
+            Dim sPrenomC = kvp.Value
+            sbGP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+            sbGPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+        Next
+        Dim sCheminGP$ = sDossierAppli & "\PrenomsGenresPotentielsRestants.txt"
+        EcrireFichier(sCheminGP, sbGP)
 
     End Sub
 

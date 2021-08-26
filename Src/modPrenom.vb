@@ -1167,35 +1167,32 @@ Fin:
 
         Dim sPrenom = sPrenomOrig.ToLower
 
-        For Each kvp In dicoCorrectionsPrenoms
-            If sPrenom = kvp.Key Then
-                If Not dicoCorrectionsPrenomsUtil.ContainsKey(sPrenom) Then
-                    dicoCorrectionsPrenomsUtil.Add(sPrenom, kvp.Value)
-                End If
-                sPrenom = kvp.Value
+        If dicoCorrectionsPrenoms.ContainsKey(sPrenom) Then
+            Dim sPrenomCorrige$ = dicoCorrectionsPrenoms(sPrenom)
+            If Not dicoCorrectionsPrenomsUtil.ContainsKey(sPrenom) Then
+                dicoCorrectionsPrenomsUtil.Add(sPrenom, sPrenomCorrige)
             End If
-        Next
+            sPrenom = sPrenomCorrige
+        End If
 
         Dim sPrenomHomophone = sPrenom
-        For Each kvp In dicoDefinitionsPrenomsMixtesHomophones
-            If sPrenom = kvp.Key Then
-                If Not dicoDefinitionsPrenomsMixtesHomophonesUtil.ContainsKey(sPrenom) Then
-                    dicoDefinitionsPrenomsMixtesHomophonesUtil.Add(sPrenom, kvp.Value)
-                End If
-                sPrenomHomophone = kvp.Value
+        If dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenom) Then
+            Dim sPrenomH$ = dicoDefinitionsPrenomsMixtesHomophones(sPrenom)
+            If Not dicoDefinitionsPrenomsMixtesHomophonesUtil.ContainsKey(sPrenom) Then
+                dicoDefinitionsPrenomsMixtesHomophonesUtil.Add(sPrenom, sPrenomH)
             End If
-        Next
+            sPrenomHomophone = sPrenomH
+        End If
 
         ' Prénoms spécifiquement genrés (par ex.: antoinette : féminin de antoine)
         Dim sPrenomSpecifiquementGenre = sPrenom
-        For Each kvp In dicoDefinitionsPrenomsGenres
-            If sPrenom = kvp.Key Then
-                If Not dicoDefinitionsPrenomsGenresUtil.ContainsKey(sPrenom) Then
-                    dicoDefinitionsPrenomsGenresUtil.Add(sPrenom, kvp.Value)
-                End If
-                sPrenomSpecifiquementGenre = kvp.Value
+        If dicoDefinitionsPrenomsGenres.ContainsKey(sPrenom) Then
+            Dim sPrenomG$ = dicoDefinitionsPrenomsGenres(sPrenom)
+            If Not dicoDefinitionsPrenomsGenresUtil.ContainsKey(sPrenom) Then
+                dicoDefinitionsPrenomsGenresUtil.Add(sPrenom, sPrenomG)
             End If
-        Next
+            sPrenomSpecifiquementGenre = sPrenomG
+        End If
 
         prenom.sPrenom = FirstCharToUpper(sPrenom)
         prenom.sPrenomHomophone = FirstCharToUpper(sPrenomHomophone)

@@ -50,9 +50,11 @@ Public Module modPrenom
     Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
     'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
 
-    Const iSeuilMinPrenomsFrequents = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
-    Const iSeuilMinPrenomsEpicenes = 2000 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
-    Const iSeuilMinPrenomsHomophones = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
+    Const iSeuilMinPrenomsFrequents% = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
+    ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
+    Const iSeuilMinPrenomsEpicenes% = 2000
+    Const iSeuilMinPrenomsHomophones% = 5000
+    Const iSeuilMinPrenomsSpecifiquementGenres% = 500
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
@@ -195,12 +197,12 @@ Export:
 
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
             dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil)
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
             dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil, sbBilan, bTriAlphab:=True)
 
@@ -698,15 +700,14 @@ Fin:
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms fréquents"))
 
         Dim iNbPrenoms% = 0
-        Dim iNbLignesFin = 0
         Dim sTri$ = "iNbOcc desc"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoE.Trier(sTri)
-            iNbLignesFin += 1
+
             If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
 
             iNbPrenoms += 1
-            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbPrenoms > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 
@@ -770,14 +771,14 @@ Fin:
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes épicènes"))
 
         Dim iNbPrenomsMixtes% = 0
-        Dim iNbLignesFin = 0
         Dim sTri$ = "bMixteEpicene desc, rFreqTotale desc"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoE.Trier(sTri)
-            iNbLignesFin += 1
+
             If Not prenom.bMixteEpicene Then Continue For
+
             iNbPrenomsMixtes += 1
-            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbPrenomsMixtes > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 
@@ -843,14 +844,15 @@ Fin:
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes homophones"))
 
         Dim iNbPrenomsMixtes% = 0
-        Dim iNbLignesFin = 0
         Dim sTri$ = "bMixteHomophone desc, rFreqTotale desc"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoH.Trier(sTri)
-            iNbLignesFin += 1
+
             If Not prenom.bMixteHomophone Then Continue For
+            If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
+
             iNbPrenomsMixtes += 1
-            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbPrenomsMixtes > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 
@@ -950,14 +952,15 @@ Fin:
             "Synthèse statistique des prénoms masculins ou féminins (spécifiquement genrés)"))
 
         Dim iNbPrenomsGenres% = 0
-        Dim iNbLignesFin = 0
         Dim sTri$ = "bSpecifiquementGenre desc, rFreqTotale desc"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoG.Trier(sTri)
-            iNbLignesFin += 1
+
             If Not prenom.bSpecifiquementGenre Then Continue For
+            If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
+
             iNbPrenomsGenres += 1
-            If iNbLignesMax > 0 AndAlso iNbLignesFin > iNbLignesMax Then Exit For
+            If iNbLignesMax > 0 AndAlso iNbPrenomsGenres > iNbLignesMax Then Exit For
 
             prenom.bSelect = True
 

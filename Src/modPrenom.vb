@@ -53,6 +53,8 @@ Public Module modPrenom
     Const iSeuilMinPrenomsFrequents = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
     Const iSeuilMinPrenomsEpicenes = 2000 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
     Const iSeuilMinPrenomsHomophones = 1 ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
+    ' Seuil min. pour la détection des prénoms homophones potentiels
+    Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
 
     Const sGras$ = "**" ' MarkDown et Wiki
@@ -402,6 +404,11 @@ Fin:
         For Each kvp In sdHP
             Dim sPrenom = kvp.Key
             Dim sPrenomC = kvp.Value
+            Dim iNbOcc% = 0, iNbOccC% = 0, iNbOccM% = 0
+            If dicoE.ContainsKey(sPrenom) Then iNbOcc = dicoE(sPrenom).iNbOcc
+            If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
+            iNbOccM = Math.Max(iNbOcc, iNbOccC)
+            If iNbOccM < iSeuilMinPrenomsHomophonesPotentiels Then Continue For
             sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
             sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
         Next

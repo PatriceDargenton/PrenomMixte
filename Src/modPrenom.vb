@@ -169,65 +169,19 @@ Export:
             GoTo Fin
         End If
 
-        Dim sbBilan As New StringBuilder
-
-        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
-            iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms)
-        ' Pour le bilan général, conserver l'ordre alphab. pour vérifier la non régression
-        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
-            iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
-
-        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
-            dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil)
-        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
-            dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil, sbBilan, bTriAlphab:=True)
-
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+        Syntheses(sDossierAppli,
+            dicoCorrectionsPrenoms,
+            dicoCorrectionsPrenomsUtil,
             dicoDefinitionsPrenomsMixtesHomophones,
-            dicoDefinitionsPrenomsMixtesHomophonesUtil)
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
-            dicoDefinitionsPrenomsMixtesHomophones,
-            dicoDefinitionsPrenomsMixtesHomophonesUtil, sbBilan, bTriAlphab:=True)
-
-        AfficherSyntheseSpecifiquementGenre(sDossierAppli,
-            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
+            dicoDefinitionsPrenomsMixtesHomophonesUtil,
             dicoDefinitionsPrenomsGenres,
-            dicoDefinitionsPrenomsGenresUtil)
-        AfficherSyntheseSpecifiquementGenre(sDossierAppli,
-            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
-            dicoDefinitionsPrenomsGenres,
-            dicoDefinitionsPrenomsGenresUtil, sbBilan, bTriAlphab:=True)
-
-        sbBilan.AppendLine("Liste des corrections d'accent").
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminCorrectionsPrenoms, bDoublerRAL:=True)).
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-
-        sbBilan.AppendLine("Liste des définitions de prénoms mixtes homophones").
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminDefPrenomsMixtesHomophones, bDoublerRAL:=True)).
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-
-        sbBilan.AppendLine(
-            "Liste des définitions de prénoms masculins ou féminins (spécifiquement genrés)").
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
-        sbBilan.Append(sbLireFichier(sCheminDefPrenomsGenres, bDoublerRAL:=True)).
-            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-
-        sbBilan.Append(sbCPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-        sbBilan.Append(sbHPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-        sbBilan.Append(sbGPMD)
-
-        Dim sCheminBilan$ = sDossierAppli & "\Bilan.md"
-        EcrireFichier(sCheminBilan, sbBilan)
+            dicoDefinitionsPrenomsGenresUtil,
+            dicoE, dicoH, dicoG,
+            iNbLignes, iNbLignesOk, iNbPrenomsTot, iNbPrenomsTotOk,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            sbCPMD, sbHPMD, sbGPMD,
+            sCheminCorrectionsPrenoms,
+            sCheminDefPrenomsMixtesHomophones, sCheminDefPrenomsGenres)
 
         AnalysePrenomsGenres(sDossierAppli, dicoDefinitionsPrenomsGenres)
 
@@ -429,6 +383,86 @@ Fin:
         Next
         Dim sCheminGP$ = sDossierAppli & "\PrenomsGenresPotentielsRestants.txt"
         EcrireFichier(sCheminGP, sbGP)
+
+    End Sub
+
+    Private Sub Syntheses(sDossierAppli$,
+            dicoCorrectionsPrenoms As DicoTri(Of String, String),
+            dicoCorrectionsPrenomsUtil As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsMixtesHomophones As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsMixtesHomophonesUtil As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsGenres As DicoTri(Of String, String),
+            dicoDefinitionsPrenomsGenresUtil As DicoTri(Of String, String),
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoH As DicoTri(Of String, clsPrenom),
+            dicoG As DicoTri(Of String, clsPrenom),
+            iNbLignes%, iNbLignesOk%,
+            iNbPrenomsTot%, iNbPrenomsTotOk%,
+            iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
+            sbCPMD As StringBuilder, sbHPMD As StringBuilder, sbGPMD As StringBuilder,
+            sCheminCorrectionsPrenoms$,
+            sCheminDefPrenomsMixtesHomophones$,
+            sCheminDefPrenomsGenres$)
+
+        Dim sbBilan As New StringBuilder
+
+        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
+            iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms)
+        ' Pour le bilan général, conserver l'ordre alphab. pour vérifier la non régression
+        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
+            iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
+
+        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
+            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
+            dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil)
+        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
+            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
+            dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil, sbBilan, bTriAlphab:=True)
+
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            dicoDefinitionsPrenomsMixtesHomophones,
+            dicoDefinitionsPrenomsMixtesHomophonesUtil)
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            dicoDefinitionsPrenomsMixtesHomophones,
+            dicoDefinitionsPrenomsMixtesHomophonesUtil, sbBilan, bTriAlphab:=True)
+
+        AfficherSyntheseSpecifiquementGenre(sDossierAppli,
+            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
+            dicoDefinitionsPrenomsGenres,
+            dicoDefinitionsPrenomsGenresUtil)
+        AfficherSyntheseSpecifiquementGenre(sDossierAppli,
+            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
+            dicoDefinitionsPrenomsGenres,
+            dicoDefinitionsPrenomsGenresUtil, sbBilan, bTriAlphab:=True)
+
+        sbBilan.AppendLine("Liste des corrections d'accent").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminCorrectionsPrenoms, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+
+        sbBilan.AppendLine("Liste des définitions de prénoms mixtes homophones").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminDefPrenomsMixtesHomophones, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+
+        sbBilan.AppendLine(
+            "Liste des définitions de prénoms masculins ou féminins (spécifiquement genrés)").
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbLireFichier(sCheminDefPrenomsGenres, bDoublerRAL:=True)).
+            AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+
+        sbBilan.Append(sbCPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbHPMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+        sbBilan.Append(sbGPMD)
+
+        Dim sCheminBilan$ = sDossierAppli & "\Bilan.md"
+        EcrireFichier(sCheminBilan, sbBilan)
 
     End Sub
 

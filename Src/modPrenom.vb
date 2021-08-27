@@ -776,14 +776,15 @@ Fin:
         Next
         sbWK.AppendLine("|}")
 
+        Dim sSuffixe$ = ""
         If bTriAlphab Then
             sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
-        Else
-            Dim sChemin$ = sDossierAppli & "\PrenomsFrequents.md"
-            EcrireFichier(sChemin, sbMD)
-            Dim sCheminWK$ = sDossierAppli & "\PrenomsFrequents.wiki"
-            EcrireFichier(sCheminWK, sbWK)
+            sSuffixe = "Alphab"
         End If
+        Dim sChemin$ = sDossierAppli & "\PrenomsFrequents" & sSuffixe & ".md"
+        EcrireFichier(sChemin, sbMD)
+        Dim sCheminWK$ = sDossierAppli & "\PrenomsFrequents" & sSuffixe & ".wiki"
+        EcrireFichier(sCheminWK, sbWK)
 
     End Sub
 

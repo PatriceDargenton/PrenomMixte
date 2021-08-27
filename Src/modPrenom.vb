@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "26/08/2021"
+    Public Const sDateVersionAppli$ = "27/08/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -58,6 +58,8 @@ Public Module modPrenom
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
+    Const iDateMinExport% = 1900
+    Const iDateMaxExport% = 2019
 
     Const sGras$ = "**" ' MarkDown et Wiki
     Const sItaliqueMD$ = "*"
@@ -633,7 +635,14 @@ Fin:
             iNbPrenomsVerif += prenom.iNbOcc
             iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
 
-            If prenom.dicoVariantesH.Count > 1 Then prenom.bMixteHomophone = True
+            If prenom.dicoVariantesH.Count > 1 Then
+                prenom.bMixteHomophone = True
+                ' Marquer aussi l'original pour l'export
+                If dicoE.ContainsKey(prenom.sPrenomHomophone) Then
+                    Dim prenomG = dicoE(prenom.sPrenomHomophone)
+                    prenomG.bMixteHomophone = True
+                End If
+            End If
 
         Next
 
@@ -688,7 +697,14 @@ Fin:
                            Not prenom1.bMixteEpicene Then bTousbMixtesHOuE = False : Exit For
                     End If
                 Next
-                If Not bTousbMixtesHOuE Then prenom.bSpecifiquementGenre = True
+                If Not bTousbMixtesHOuE Then
+                    prenom.bSpecifiquementGenre = True
+                    ' Marquer aussi l'original pour l'export
+                    If dicoE.ContainsKey(prenom.sPrenomSpecifiquementGenre) Then
+                        Dim prenomG = dicoE(prenom.sPrenomSpecifiquementGenre)
+                        prenomG.bSpecifiquementGenre = True
+                    End If
+                End If
             End If
 
         Next
@@ -1304,6 +1320,9 @@ Fin:
 
             ConvertirPrenom(prenom)
 
+            If prenom.iAnnee < iDateMinExport Then Continue For
+            If prenom.iAnnee > iDateMaxExport Then Continue For
+
             Dim sAjout$ = ""
             Dim sPrenom$ = prenom.sPrenom
             If bTestPrenomOrig Then
@@ -1328,26 +1347,34 @@ Fin:
             Dim sCleE$ = prenom.sPrenom
             Dim bMixteEpicene = False
             Dim bMixteHomophone = False
+            'Dim bSpecifiquementGenre = False
             If dicoE.ContainsKey(sCleE) Then
                 Dim prenom0 = dicoE(sCleE)
                 If bFiltrerPrenomEpicene AndAlso Not prenom0.bSelect Then Continue For
                 If prenom0.bMixteEpicene Then sPrenomE = "1" : bMixteEpicene = True
+                If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone : bMixteHomophone = True
+                If prenom0.bSpecifiquementGenre Then
+                    sPrenomG = prenom0.sPrenomSpecifiquementGenre ': bSpecifiquementGenre = True
+                End If
             Else
                 Continue For
             End If
-            If bMixteEpicene Then GoTo Ajout
+            'If bMixteEpicene Then GoTo Ajout
 
             Dim sCleH$ = prenom.sPrenomHomophone
             If dicoH.ContainsKey(sCleH) Then
                 Dim prenom0 = dicoH(sCleH)
                 If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone : bMixteHomophone = True
             End If
-            If bMixteHomophone Then GoTo Ajout
+            'If bMixteHomophone Then GoTo Ajout
 
             Dim sCleG$ = prenom.sPrenomSpecifiquementGenre
             If dicoG.ContainsKey(sCleG) Then
                 Dim prenom0 = dicoG(sCleG)
-                If prenom0.bSpecifiquementGenre Then sPrenomG = prenom0.sPrenomSpecifiquementGenre
+                If prenom0.bSpecifiquementGenre Then
+                    sPrenomG = prenom0.sPrenomSpecifiquementGenre
+                    ' bSpecifiquementGenre = True
+                End If
             End If
 
 Ajout:

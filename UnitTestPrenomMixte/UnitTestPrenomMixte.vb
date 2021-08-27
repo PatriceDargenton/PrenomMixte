@@ -22,7 +22,9 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         Dim sCopie$ = PrenomMixte.modUtil.sLireFichier(sDossierAppli & "\" &
             PrenomMixte.sFichierPrenomsInseeCorrige)
 
-        Assert.AreEqual(sOriginal, sCopie)
+        ' Trop gros pour le mettre directement dans l'Assert : ça fait planter VS en cas d'échec !
+        Dim bIdentique = (sOriginal = sCopie)
+        Assert.AreEqual(bIdentique, True)
 
     End Sub
 

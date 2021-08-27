@@ -408,11 +408,11 @@ Fin:
 
         Dim sbBilan As New StringBuilder
 
-        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
+        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms)
         ' Pour le bilan général, conserver l'ordre alphab. pour vérifier la non régression
-        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, dicoH, iNbPrenomsTotOk,
+        AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
 
@@ -726,7 +726,6 @@ Fin:
 
     Private Sub AfficherSynthesePrenomsFrequents(sDossierAppli$,
             dicoE As DicoTri(Of String, clsPrenom),
-            dicoH As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
@@ -767,12 +766,7 @@ Fin:
             Dim bItalique = False
             Dim iNumVariante% = -1
             If prenom.bMixteEpicene Then bGras = True
-            ' Ne marche pas car la clé n'est pas toujours la même
-            'If prenom.bMixteHomophone Then bItalique = True
-            If dicoH.ContainsKey(prenom.sPrenom) Then
-                Dim prenomH = dicoH(prenom.sPrenom)
-                If prenomH.bMixteHomophone Then bItalique = True
-            End If
+            If prenom.bMixteHomophone Then bItalique = True
             sbMD.AppendLine(sLigneMarkDown(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq,
                 iNumVariante, bGras, bItalique))
 

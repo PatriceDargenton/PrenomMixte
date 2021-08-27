@@ -423,11 +423,11 @@ Fin:
             iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil, sbBilan, bTriAlphab:=True)
 
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil)
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil, sbBilan, bTriAlphab:=True)
@@ -628,7 +628,7 @@ Fin:
 
             If dicoE.ContainsKey(prenom.sPrenom) Then
                 Dim prenom0 = dicoE(prenom.sPrenom)
-                prenom.bMixteEpicene = prenom0.bMixteEpicene
+                If prenom0.bMixteEpicene Then prenom.bMixteEpicene = prenom0.bMixteEpicene
             End If
 
             prenom.Calculer(iNbPrenomsTot)
@@ -673,7 +673,7 @@ Fin:
 
             If dicoE.ContainsKey(prenom.sPrenom) Then
                 Dim prenom0 = dicoE(prenom.sPrenom)
-                prenom.bMixteEpicene = prenom0.bMixteEpicene
+                If prenom0.bMixteEpicene Then prenom.bMixteEpicene = prenom0.bMixteEpicene
             End If
 
             If dicoH.ContainsKey(prenom.sPrenomHomophone) Then
@@ -868,6 +868,7 @@ Fin:
 
     Private Sub AfficherSyntheseHomophone(sDossierAppli$,
             dicoH As DicoTri(Of String, clsPrenom),
+            dicoE As DicoTri(Of String, clsPrenom),
             iNbPrenomsTotOk%, iNbPrenomsTot%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
@@ -913,13 +914,23 @@ Fin:
             If prenom.dicoVariantesH.Count > 1 Then
                 bVariantes = True
                 Dim lst = prenom.dicoVariantesH.ToList
-                Dim sPrenomMajoritaire$ = ""
-                For Each prenomV In prenom.dicoVariantesH.Trier("iNbOcc desc")
-                    sPrenomMajoritaire = prenomV.sPrenom
-                    Exit For
-                Next
-                sPrenomMD = sListerCleTxt(lst, sPrenomMajoritaire, sGras)
-                sPrenomWiki = sListerCleTxt(lst, sPrenomMajoritaire, "'''")
+
+                ' Mettre en gras le plus fréquent
+                'Dim sPrenomMajoritaire$ = ""
+                'For Each prenomV In prenom.dicoVariantesH.Trier("iNbOcc desc")
+                '    sPrenomMajoritaire = prenomV.sPrenom
+                '    Exit For
+                'Next
+                'sPrenomMD = sListerCleTxt(lst, sPrenomMajoritaire, sGras)
+                'sPrenomWiki = sListerCleTxt(lst, sPrenomMajoritaire, "'''")
+
+                ' Mêmes conditions que pour la liste des prénoms fréquents :
+                ' Gras : épicène
+                ' Italique : homophone
+                ' Gras+Italique : épicène + homophone
+                sPrenomMD = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=False)
+                sPrenomWiki = sListerCleTxtDico(lst, dicoE, dicoH, bWiki:=True)
+
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsMixtes, sFormatFreq))
@@ -934,11 +945,20 @@ Fin:
                     iNumVariante += 1
                     sb.AppendLine(sLigneDebug(prenomV, prenomV.sPrenom, iNbPrenomsMixtes, sFormatFreq))
                     Dim bGras = False
-                    If iNumVariante = 1 Then bGras = True
+                    'If iNumVariante = 1 Then bGras = True ' Le plus fréquent
+                    If dicoE.ContainsKey(prenomV.sPrenom) Then
+                        Dim prenomE = dicoE(prenomV.sPrenom)
+                        If prenomE.bMixteEpicene Then bGras = True
+                    End If
+                    Dim bItalique = False
+                    If dicoH.ContainsKey(prenomV.sPrenom) Then
+                        Dim prenomH = dicoH(prenomV.sPrenom)
+                        If prenomH.bMixteHomophone Then bItalique = True
+                    End If
                     sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante, bGras, bSuffixeNumVariante:=True))
+                        sFormatFreq, iNumVariante, bGras, bItalique, bSuffixeNumVariante:=True))
                     sbWK.AppendLine(sLigneWiki(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante, bGras, bSuffixeNumVariante:=True))
+                        sFormatFreq, iNumVariante, bGras, bItalique, bSuffixeNumVariante:=True))
                 Next
             End If
 
@@ -1018,7 +1038,6 @@ Fin:
             Dim sPrenomMD$ = sPrenom
             Dim sPrenomWiki$ = sPrenom
             Dim bVariantes = False
-            Dim sPrenomMEF$ = "" ' Mise en forme (Gras ou Italique)
             If prenom.dicoVariantesG.Count > 1 Then
                 bVariantes = True
                 Dim lst = prenom.dicoVariantesG.ToList
@@ -1044,12 +1063,12 @@ Fin:
                     Dim bGras = False
                     If dicoE.ContainsKey(prenomV.sPrenom) Then
                         Dim prenomE = dicoE(prenomV.sPrenom)
-                        If prenomE.bMixteEpicene Then sPrenomMEF = prenomV.sPrenom : bGras = True
+                        If prenomE.bMixteEpicene Then bGras = True
                     End If
                     Dim bItalique = False
                     If dicoH.ContainsKey(prenomV.sPrenom) Then
                         Dim prenomH = dicoH(prenomV.sPrenom)
-                        If prenomH.bMixteHomophone Then sPrenomMEF = prenomV.sPrenom : bItalique = True
+                        If prenomH.bMixteHomophone Then bItalique = True
                     End If
                     sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsGenres,
                         sFormatFreq, iNumVariante, bGras, bItalique, bSuffixeNumVariante:=True))
@@ -1320,8 +1339,10 @@ Fin:
 
             ConvertirPrenom(prenom)
 
-            If prenom.iAnnee < iDateMinExport Then Continue For
-            If prenom.iAnnee > iDateMaxExport Then Continue For
+            If Not bTestPrenomOrig Then
+                If prenom.iAnnee < iDateMinExport Then Continue For
+                If prenom.iAnnee > iDateMaxExport Then Continue For
+            End If
 
             Dim sAjout$ = ""
             Dim sPrenom$ = prenom.sPrenom
@@ -1345,14 +1366,14 @@ Fin:
             Dim sPrenomH$ = ""
             Dim sPrenomG$ = ""
             Dim sCleE$ = prenom.sPrenom
-            Dim bMixteEpicene = False
-            Dim bMixteHomophone = False
+            'Dim bMixteEpicene = False
+            'Dim bMixteHomophone = False
             'Dim bSpecifiquementGenre = False
             If dicoE.ContainsKey(sCleE) Then
                 Dim prenom0 = dicoE(sCleE)
                 If bFiltrerPrenomEpicene AndAlso Not prenom0.bSelect Then Continue For
-                If prenom0.bMixteEpicene Then sPrenomE = "1" : bMixteEpicene = True
-                If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone : bMixteHomophone = True
+                If prenom0.bMixteEpicene Then sPrenomE = "1" ': bMixteEpicene = True
+                If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone ': bMixteHomophone = True
                 If prenom0.bSpecifiquementGenre Then
                     sPrenomG = prenom0.sPrenomSpecifiquementGenre ': bSpecifiquementGenre = True
                 End If
@@ -1364,7 +1385,7 @@ Fin:
             Dim sCleH$ = prenom.sPrenomHomophone
             If dicoH.ContainsKey(sCleH) Then
                 Dim prenom0 = dicoH(sCleH)
-                If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone : bMixteHomophone = True
+                If prenom0.bMixteHomophone Then sPrenomH = prenom0.sPrenomHomophone ': bMixteHomophone = True
             End If
             'If bMixteHomophone Then GoTo Ajout
 

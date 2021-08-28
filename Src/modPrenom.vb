@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "27/08/2021"
+    Public Const sDateVersionAppli$ = "28/08/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -337,8 +337,18 @@ Fin:
             Dim sPrenomF3Min = sPrenomF3.ToLower
             If dicoE.ContainsKey(sPrenomF3) AndAlso
                 Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF3Min) AndAlso
+                Not dicoDefinitionsPrenomsGenres.ContainsValue(sPrenomF3Min) AndAlso
                 Not sdGP.ContainsKey(sPrenomF3) Then
                 sdGP.Add(sPrenomF3, prenom.sPrenom)
+            End If
+
+            Dim sPrenomF4$ = prenom.sPrenom & "ne" ' Ex.: Fabien : Fabienne
+            Dim sPrenomF4Min = sPrenomF4.ToLower
+            If dicoE.ContainsKey(sPrenomF4) AndAlso
+                Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF4Min) AndAlso
+                Not dicoDefinitionsPrenomsGenres.ContainsValue(sPrenomF4Min) AndAlso
+                Not sdGP.ContainsKey(sPrenomF4) Then
+                sdGP.Add(sPrenomF4, prenom.sPrenom)
             End If
         Next
 

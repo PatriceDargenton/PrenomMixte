@@ -2,9 +2,9 @@ PrénomHomophoneMajoritaire;PrénomHomophoneMinoritaire
 aaron;aarone
 abel;abelle
 abi;abie
-abigaël;abigaëlle
 abigaël;abbygaël
 abigaël;abbygaëlle
+abigaël;abigaëlle
 abigaël;abygaël
 abigaël;abygaëlle
 achil;achile
@@ -37,7 +37,7 @@ amauri;amaurie
 amayel;amayelle
 amédé;amédée
 amel;amelle
-anabel;anabele
+'anabel;anabele ' 3 occurrences seulement pour anabele
 anabel;anabelle
 anaé;anaée
 anaël;anaële
@@ -57,7 +57,7 @@ aniel;anielle
 anis;anise
 aniss;anisse
 anjali;anjalie
-annabel;annabele
+'annabel;annabele ' 3 occurrences seulement pour annabele
 annabel;annabelle
 annaël;annaëlle
 anne;ann
@@ -94,8 +94,8 @@ ayoub;ayoube
 azel;azelle
 azur;azure
 baptist;baptiste
-baptist;batiste
 baptist;batist
+baptist;batiste
 basil;basile
 bayane;bayan
 bayron;bayrone
@@ -149,13 +149,14 @@ channel;channelle
 chantal;chantale
 chantal;chantalle
 charlie;charly
-charlie;charlye
+charlie;charlye ' 114 occurrences seulement pour charlye
 charlyn;charlyne
 chloé;chloée
 christabel;christabelle
 christelle;christel
 christelle;chrystel
 christelle;chrystelle
+christiane;christianne
 christoph;christophe
 cindy;cindi
 cindy;cindie
@@ -206,25 +207,25 @@ elon;elone
 elvin;elvine
 elvir;elvire
 elwin;elwine
-émil;émile
+émile;émil
 émmanuel;émmanuelle
 émmy;émy
-ernest;erneste
+ernest;erneste ' 94 occurrences seulement pour erneste
 erwan;erwane
 estéban;estébane
 estelle;estel
 estelle;esthel
 estelle;esthelle
-esther;esthere
+esther;esthere ' 22 occurrences seulement pour esthere
 ethan;ethane
 évelyne;éveline
 fannie;fani
 fannie;fanie
 fannie;fanni
-farid;faride
+farid;faride ' 518 occurrences seulement pour faride
 fay;faye
 fidel;fidele
-flore;flor
+flore;flor ' 112 occurrences seulement pour flor
 francky;francki
 francky;franckie
 francky;franki
@@ -253,7 +254,7 @@ guilherm;guilherme
 gustav;gustave
 gwenaëlle;gwenaël
 gwendolyn;gwendolyne
-henri;henrie
+henri;henrie ' 49 occurrences seulement pour henrie
 honoré;honorée
 ihsan;ihsane
 ihssane;ihssan
@@ -266,14 +267,15 @@ isabelle;isabel
 isidor;isidore
 islam;islame
 ismaël;ismaëlle
-jacques;jack
 jacky;jacki
 jacky;jackie
 jacky;jackye
+jacques;jack
 jade;jad
 janick;jannick
 jean-cyril;jean-cyrille
 jéhan;jéhane
+jéhan;jéhanne
 jérémi;jérémie
 jesabel;jesabelle
 jessy;jesse
@@ -317,7 +319,7 @@ léoni;léonie
 lie;li
 lilian;lilianne
 lilou;liloue
-lily;lilye
+lily;lilye ' 28 occurrences seulement pour lilye
 lionel;lionelle
 loan;loane
 loann;loanne
@@ -366,7 +368,7 @@ mariel;marielle
 marie-noël;marie-noële
 marie-noël;marie-noëlle
 marie-pascal;marie-pascale
-marie-paule;marie-paul
+marie-paule;marie-paul ' 65 occurrences seulement pour marie-paul
 marilyn;marilyne
 mariyam;mariyame
 marlon;marlone
@@ -416,7 +418,7 @@ nassim;nassime
 nathaël;nathaëlle
 nathanaël;nathanaëlle
 nathaniel;nathanielle
-nicole;nicol
+nicole;nicol ' 100 occurrences seulement pour nicol
 nicole;nicolle
 nil;nile
 noam;noame
@@ -430,6 +432,7 @@ noémie;noëmie
 noham;nohame
 nolwenn;nolwenne
 nor;nore
+nordine;nordinne ' 13 occurrences seulement pour nordinne
 nour;noure
 odile;odil
 odile;odille
@@ -441,8 +444,8 @@ oryan;oryane
 ouissam;ouissame
 palmyr;palmyre
 pascal;pascale
-pascal;pascalle
-pascal;pasquale
+pascal;pascalle  ' 68 occurrences seulement pour pascalle
+pascal;pasquale ' 505 occurrences seulement pour pasquale
 paul;paule
 philippe;philip
 philippe;philipe
@@ -469,8 +472,8 @@ romane;roman
 romann;romanne
 romuald;romualde
 romul;romule
-roxane;roxan
-roxane;roxann
+roxane;roxan  ' 27 occurrences seulement pour roxan
+roxane;roxann ' 19 occurrences seulement pour roxann
 roxane;roxanne
 rudolph;rudolphe
 'rufin;rufine ' Prononciation à vérifier
@@ -482,9 +485,9 @@ sami;samie
 samir;samire
 samuel;samuele ' Pas d'accent ici, car d'origine italienne
 samuel;samuelle
-sandy;sandi
+sandy;sandi ' 28 occurrences seulement pour sandi
 sandy;sandie
-sandy;sandye
+sandy;sandye  ' 7 occurrences seulement pour sandye
 scarlett;scarlette
 selenn;selenne
 sevan;sevane ' Prononciation à vérifier
@@ -542,9 +545,9 @@ tiffen;tiffene
 timothée;thimoté
 timothée;thimotée
 timothée;timoté
-timothée;timotée
+timothée;timotée  ' 41 occurrences seulement pour timotée
 timothée;tymothé
-timothée;tymothée
+timothée;tymothée ' 37 occurrences seulement pour tymothée
 tiphen;tiphene
 tony;toni
 tony;tonie
@@ -586,10 +589,9 @@ yoane;yoan
 yoane;yoann
 yoane;yoanne
 yoane;yohane
-yoane;yohanne
 yoane;yohann
+yoane;yohanne
 yoni;yonie
-yvon;yvone
 zacchari;zaccharie
 zachari;zacharie
 zackari;zackarie

@@ -28,8 +28,8 @@ Public Class clsPrenom : Implements ICloneable
 
     ' Fréquence relative de la variante (homophone ou spécifiquement genré)
     '  par rapport à la somme des variantes
-    Public rFreqRelativeVariante#
-    Public bVarianteDecomptee As Boolean
+    Public rFreqRelativeVarianteH#, rFreqRelativeVarianteG#
+    Public bVarianteDecompteeH, bVarianteDecompteeG As Boolean
 
     Public rFreqTotale#, rFreqTotaleMasc#, rFreqTotaleFem#
     Public iAnnee%

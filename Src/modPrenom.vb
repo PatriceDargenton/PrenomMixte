@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "28/08/2021"
+    Public Const sDateVersionAppli$ = "29/08/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -46,14 +46,20 @@ Public Module modPrenom
     Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
     Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"
 
+    ' Seuils de fréquence relative min.
     'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
     Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
     'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
 
+    Const sFormatFreqRelVariante$ = "0%"
+    Const rSeuilFreqRelVariante# = 0.01 ' 1%
+    'Const sFormatFreqRelVariante$ = "0.0%"
+    'Const rSeuilFreqRelVariante# = 0.001 ' 0.1%
+
     Const iSeuilMinPrenomsFrequents% = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
     ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
     Const iSeuilMinPrenomsEpicenes% = 2000
-    Const iSeuilMinPrenomsHomophones% = 5000
+    Const iSeuilMinPrenomsHomophones% = 20000
     Const iSeuilMinPrenomsSpecifiquementGenres% = 500
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
@@ -236,9 +242,9 @@ Fin:
             iNbPrenomsTotOk += prenom.iNbOcc
             iNbPrenomsTot += prenom.iNbOcc
 
-            prenom.rAnneeMoy = prenom.iAnnee * prenom.iNbOcc
-            If prenom.bMasc Then prenom.rAnneeMoyMasc = prenom.iAnnee * prenom.iNbOcc
-            If prenom.bFem Then prenom.rAnneeMoyFem = prenom.iAnnee * prenom.iNbOcc
+            prenom.rAnneeTot = prenom.iAnnee * prenom.iNbOcc
+            If prenom.bMasc Then prenom.rAnneeTotMasc = prenom.iAnnee * prenom.iNbOcc
+            If prenom.bFem Then prenom.rAnneeTotFem = prenom.iAnnee * prenom.iNbOcc
 
             Dim sCle$ = prenom.sPrenom
             If dicoE.ContainsKey(sCle) Then
@@ -427,29 +433,35 @@ Fin:
             iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
 
         AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
+            iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil)
         AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
+            iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil, sbBilan, bTriAlphab:=True)
 
         AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0,
+            iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil)
         AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0,
+            iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil, sbBilan, bTriAlphab:=True)
 
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
             dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0,
+            iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil)
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
             dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0, iNbLignesMaxPrenoms,
+            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0,
+            iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil, sbBilan, bTriAlphab:=True)
 
@@ -634,7 +646,8 @@ Fin:
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
-        For Each prenom In dicoH.Trier("")
+        Dim aPrenomsH = dicoH.Trier("")
+        For Each prenom In aPrenomsH
 
             If dicoE.ContainsKey(prenom.sPrenom) Then
                 Dim prenom0 = dicoE(prenom.sPrenom)
@@ -663,6 +676,65 @@ Fin:
                 MsgBoxStyle.Exclamation, sTitreAppli)
         End If
         Dim iVerifMF% = iNbPrenomsVerifMF + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerifMF <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iVerifMF) & " <> " & sFormaterNum(iNbPrenomsTot))
+            MsgBox("Décompte faux : " & iVerifMF & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+
+        ' Détecter et retirer les variantes sous le seuil de fréquence relative min.
+
+        ' Détecter (calculer la fréquence avec les variantes)
+        For Each prenom In aPrenomsH
+            If prenom.dicoVariantesH.Count <= 1 Then Continue For
+            For Each kvp In prenom.dicoVariantesH
+                Dim prenomH = kvp.Value
+                prenomH.rFreqRelativeVariante = prenomH.iNbOcc / prenom.iNbOcc
+                If prenomH.rFreqRelativeVariante < rSeuilFreqRelVariante Then
+                    prenomH.bVarianteDecomptee = True
+                End If
+            Next
+        Next
+
+        ' Retirer les variantes trop minoritaires
+        Dim lstPrenomsRetires As New List(Of clsPrenom)
+        For Each prenom In aPrenomsH
+            If prenom.dicoVariantesH.Count <= 1 Then Continue For
+            Dim lst As New List(Of String)
+            For Each kvp In prenom.dicoVariantesH
+                Dim prenomH = kvp.Value
+                If prenomH.bVarianteDecomptee Then
+                    prenom.Retirer(prenomH)
+                    prenom.Calculer(iNbPrenomsTot)
+                    lst.Add(kvp.Key)
+                    lstPrenomsRetires.Add(prenomH)
+                End If
+            Next
+            For Each sCle In lst
+                prenom.dicoVariantesH.Remove(sCle)
+            Next
+            If prenom.dicoVariantesH.Count <= 1 Then prenom.bMixteHomophone = False
+        Next
+
+        ' Vérifier le nouveau calcul
+        iNbPrenomsVerif = 0
+        iNbPrenomsVerifMF = 0
+        For Each prenom In aPrenomsH
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+        Next
+        For Each prenom In lstPrenomsRetires
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+        Next
+
+        iVerif = iNbPrenomsVerif + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerif <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iNbPrenomsVerif) & " <> " & sFormaterNum(iNbPrenomsTotOk))
+            MsgBox("Décompte faux : " & iVerif & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+        iVerifMF = iNbPrenomsVerifMF + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
         If iVerifMF <> iNbPrenomsTot Then
             Debug.WriteLine(sFormaterNum(iVerifMF) & " <> " & sFormaterNum(iNbPrenomsTot))
             MsgBox("Décompte faux : " & iVerifMF & " <> " & iNbPrenomsTot,
@@ -745,17 +817,17 @@ Fin:
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante)
         Dim sbMD As New StringBuilder ' Syntaxe MarkDown
         sbMD.AppendLine("Synthèse statistique des prénoms fréquents")
         sbMD.AppendLine()
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbMD.AppendLine(sEnteteMarkDown())
 
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms fréquents"))
 
         Dim iNbPrenoms% = 0
@@ -811,18 +883,18 @@ Fin:
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante)
 
         Dim sbMD As New StringBuilder ' Syntaxe MarkDown
         sbMD.AppendLine("Synthèse statistique des prénoms mixtes épicènes")
         sbMD.AppendLine()
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbMD.AppendLine(sEnteteMarkDown())
 
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes épicènes"))
 
         Dim iNbPrenomsMixtes% = 0
@@ -885,19 +957,20 @@ Fin:
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante)
 
         Dim sbMD As New StringBuilder ' Syntaxe MarkDown
         sbMD.AppendLine("Synthèse statistique des prénoms mixtes homophones")
         sbMD.AppendLine()
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
-        sbMD.AppendLine(sEnteteMarkDown())
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
+        sbMD.AppendLine(sEnteteMarkDown(bColonneFreqVariante:=True))
 
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
-        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes homophones"))
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
+        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes homophones",
+            bColonneFreqVariante:=True))
 
         Dim iNbPrenomsMixtes% = 0
         Dim sTri$ = "bMixteHomophone desc, rFreqTotale desc"
@@ -947,6 +1020,7 @@ Fin:
             If bVariantes Then
                 Dim iNumVariante% = 0
                 For Each prenomV In prenom.dicoVariantesH.Trier("iNbOcc desc")
+                    If prenomV.bVarianteDecomptee Then Continue For
                     iNumVariante += 1
                     sb.AppendLine(sLigneDebug(prenomV, prenomV.sPrenom, iNbPrenomsMixtes, sFormatFreq))
                     Dim bGras = False
@@ -961,9 +1035,11 @@ Fin:
                         If prenomH.bMixteHomophone Then bItalique = True
                     End If
                     sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante, bGras, bItalique, bSuffixeNumVariante:=True))
+                        sFormatFreq, iNumVariante, bGras, bItalique,
+                        bSuffixeNumVariante:=True, bColonneFreqVariante:=True))
                     sbWK.AppendLine(sLigneWiki(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
-                        sFormatFreq, iNumVariante, bGras, bItalique, bSuffixeNumVariante:=True))
+                        sFormatFreq, iNumVariante, bGras, bItalique,
+                        bSuffixeNumVariante:=True, bColonneFreqVariante:=True))
                 Next
             End If
 
@@ -1010,19 +1086,19 @@ Fin:
 
         Dim sb As New StringBuilder
         AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante)
 
         Dim sbMD As New StringBuilder ' Syntaxe MarkDown
         sbMD.AppendLine(
             "Synthèse statistique des prénoms masculins ou féminins (spécifiquement genrés)")
         sbMD.AppendLine()
         AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbMD.AppendLine(sEnteteMarkDown())
 
         Dim sbWK As New StringBuilder ' Syntaxe Wiki
         AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMin, rSeuilFreqRel, bDoublerRAL:=True)
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVariante, bDoublerRAL:=True)
         sbWK.AppendLine(sEnteteWiki(
             "Synthèse statistique des prénoms masculins ou féminins (spécifiquement genrés)"))
 
@@ -1110,18 +1186,30 @@ Fin:
 
     End Sub
 
-    Private Function sEnteteMarkDown$()
+    Private Function sEnteteMarkDown$(Optional bColonneFreqVariante As Boolean = False)
+
+        Dim sColonneFreqVariante$ = ""
+        Dim sColonneFreqVariante2$ = ""
+        If bColonneFreqVariante Then
+            sColonneFreqVariante = "Fréq. rel. var.|"
+            sColonneFreqVariante2 = "--:|"
+        End If
 
         Dim s$ = ""
-        s &= vbLf & "|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|"
-        s &= vbLf & "|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|"
+        s &= vbLf & "|n° |Occurrences|Prénom|Année moyenne|Année moyenne masc.|Année moyenne fém.|Occurrences masc.|Occurrences fém.|Fréq.|Fréq. rel. masc.|Fréq. rel. fém.|" & sColonneFreqVariante
+        s &= vbLf & "|--:|--:|:--|:-:|:-:|:-:|--:|--:|--:|--:|--:|" & sColonneFreqVariante2
         Return s
 
     End Function
 
-    Private Function sEnteteWiki$(sTitre$)
+    Private Function sEnteteWiki$(sTitre$, Optional bColonneFreqVariante As Boolean = False)
 
         ' https://fr.wikipedia.org/wiki/Aide:Insérer_un_tableau_(wikicode,_avancé)
+
+        Dim sColonneFreqVariante$ = ""
+        If bColonneFreqVariante Then
+            sColonneFreqVariante = vbLf & "! scope='col' | Fréq. rel. var."
+        End If
 
         Dim s$ = ""
         s &= vbLf & "{|class='wikitable sortable' style='text-align:center; width:80%;'"
@@ -1137,6 +1225,7 @@ Fin:
         s &= vbLf & "! scope='col' | Fréq."
         s &= vbLf & "! scope='col' | Fréq. rel. masc."
         s &= vbLf & "! scope='col' | Fréq. rel. fém."
+        s &= sColonneFreqVariante
         Return s
 
     End Function
@@ -1145,6 +1234,7 @@ Fin:
 
         Dim sGenre$ = "(f) ="
         If prenom.iNbOccMasc < prenom.iNbOccFem Then sGenre = "(m) ="
+
         Dim s$ =
             iNumPrenom &
             " : " & sFormaterNum(prenom.iNbOcc) & " : " & sPrenom &
@@ -1156,6 +1246,7 @@ Fin:
             ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
             ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
             ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
+            ", freq. rel. v. " & prenom.rFreqRelativeVariante.ToString("0%") &
             ", mixte épicène=" & prenom.bMixteEpicene
         Return s
 
@@ -1165,7 +1256,8 @@ Fin:
             Optional iNumVariante% = -1,
             Optional bGras As Boolean = False,
             Optional bItalique As Boolean = False,
-            Optional bSuffixeNumVariante As Boolean = False)
+            Optional bSuffixeNumVariante As Boolean = False,
+            Optional bColonneFreqVariante As Boolean = False)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
@@ -1173,6 +1265,10 @@ Fin:
         If bGras Then sMiseEnForme = sGras ' Gras
         If bItalique Then sMiseEnForme = sItaliqueMD ' Italique
         If bGras AndAlso bItalique Then sMiseEnForme = sItaliqueGrasMD ' Italique en gras
+        Dim sColonneFreqVariante$ = ""
+        If bColonneFreqVariante Then
+            sColonneFreqVariante = "|" & prenom.rFreqRelativeVariante.ToString(sFormatFreqRelVariante)
+        End If
 
         Dim s$ =
             "|" & iNumPrenom & sNumVariante &
@@ -1185,7 +1281,9 @@ Fin:
             "|" & sFormaterNum(prenom.iNbOccFem) &
             "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
             "|" & prenom.rFreqRelativeMasc.ToString("0%") &
-            "|" & prenom.rFreqRelativeFem.ToString("0%")
+            "|" & prenom.rFreqRelativeFem.ToString("0%") &
+            sColonneFreqVariante
+
         Return s
 
     End Function
@@ -1194,7 +1292,8 @@ Fin:
             Optional iNumVariante% = -1,
             Optional bGras As Boolean = False,
             Optional bItalique As Boolean = False,
-            Optional bSuffixeNumVariante As Boolean = False)
+            Optional bSuffixeNumVariante As Boolean = False,
+            Optional bColonneFreqVariante As Boolean = False)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
@@ -1202,6 +1301,10 @@ Fin:
         If bGras Then sMiseEnForme = sGras ' Gras
         If bItalique Then sMiseEnForme = sItaliqueWiki ' Italique
         If bGras AndAlso bItalique Then sMiseEnForme = sItaliqueGrasWiki ' Italique en gras
+        Dim sColonneFreqVariante$ = ""
+        If bColonneFreqVariante Then
+            sColonneFreqVariante = "||" & prenom.rFreqRelativeVariante.ToString(sFormatFreqRelVariante)
+        End If
 
         Dim s$ = "|-" & vbLf &
                 "|" & iNumPrenom & sNumVariante &
@@ -1214,7 +1317,8 @@ Fin:
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccFem) &
                 "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
                 "||" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "||" & prenom.rFreqRelativeFem.ToString("0%")
+                "||" & prenom.rFreqRelativeFem.ToString("0%") &
+                sColonneFreqVariante
         Return s
 
     End Function
@@ -1432,7 +1536,8 @@ Suite:
     End Sub
 
     Private Sub AfficherInfo(sb As StringBuilder,
-            iNbPrenomsTotOk%, iNbPrenomsTot%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%, iSeuilMin%, rSeuilFreqRel!,
+            iNbPrenomsTotOk%, iNbPrenomsTot%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
+            iSeuilMin%, rSeuilFreqRel!, rSeuilFreqRelVariante!,
             Optional bDoublerRAL As Boolean = False)
 
         sb.AppendLine("Date début = 1900")
@@ -1456,7 +1561,12 @@ Suite:
             If bDoublerRAL Then sb.AppendLine("")
         End If
         If rSeuilFreqRel > 0 Then
-            sb.AppendLine("Fréquence relative min. = " & rSeuilFreqRel.ToString("0.0%"))
+            sb.AppendLine("Fréquence relative min. genre = " & rSeuilFreqRel.ToString("0.0%"))
+            If bDoublerRAL Then sb.AppendLine("")
+        End If
+        If rSeuilFreqRelVariante > 0 Then
+            sb.AppendLine("Fréquence relative min. variante = " &
+                rSeuilFreqRelVariante.ToString(sFormatFreqRelVariante))
             If bDoublerRAL Then sb.AppendLine("")
         End If
 

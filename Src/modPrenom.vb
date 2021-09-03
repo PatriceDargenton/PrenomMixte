@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "29/08/2021"
+    Public Const sDateVersionAppli$ = "03/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -404,7 +404,7 @@ Fin:
             sbGP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
             sbGPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
         Next
-        Dim sCheminGP$ = sDossierAppli & "\PrenomsGenresPotentielsRestants.txt"
+        Dim sCheminGP$ = sDossierAppli & "\PrenomsSpecifiquementGenresPotentielsRestants.txt"
         EcrireFichier(sCheminGP, sbGP)
 
     End Sub
@@ -538,7 +538,7 @@ Fin:
             End If
         Next
 
-        Dim sCheminPG$ = sDossierAppli & "\PrenomsGenresEtMixtesHomophones.txt"
+        Dim sCheminPG$ = sDossierAppli & "\PrenomsSpecifiquementGenresEtMixtesHomophones.txt"
         EcrireFichier(sCheminPG, sbPG)
 
     End Sub

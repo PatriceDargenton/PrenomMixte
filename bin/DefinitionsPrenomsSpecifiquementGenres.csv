@@ -48,6 +48,8 @@ constant;constance
 corentine;corentin
 denise;denis
 dominique;dominiquette ' 81 occurrences seulement pour dominiquette
+dominique;dominico
+dominique;dominica
 dorian;doriane
 dorothée;théodore
 edwige;edwig ' 6 occurrences seulement pour edwig
@@ -73,6 +75,7 @@ france;francette
 francie;franciette
 francille;francillette
 francine;francinette ' 55 occurrences seulement pour francinette
+'francine;france ' on a déjà regroupé france avec francette
 gaëtan;gaëtanne
 gastonne;gastonnette
 gatien;gatienne
@@ -129,7 +132,7 @@ lise;lisette
 lore;lorette
 louise;louis
 louise;louïsa
-louise;louïse
+'louise;louïse ' homophone plutôt
 louise;louisette
 luce;lucette
 lucien;lucienne

@@ -611,14 +611,28 @@ Fin:
                 If IsNothing(sChamp) Then sChamp = ""
                 If sChamp.Length = 0 Then Exit For
                 Select Case iNumChamp
-                    Case 1 : sValeurCorrigee = sChamp
-                    Case 2 : sValeurOrig = sChamp
+                    Case 1 : sValeurCorrigee = sChamp.Trim
+                    Case 2 : sValeurOrig = sChamp.Trim
                 End Select
                 If sValeurOrig.Contains("'") Then ' Commentaire à la fin de la ligne
                     Dim iPosQuote% = sValeurOrig.IndexOf("'")
                     sValeurOrig = sValeurOrig.Substring(0, iPosQuote)
                     sValeurOrig = sValeurOrig.TrimEnd
                 End If
+
+                ' Vérifier la casse : pas de majuscule dans ces fichiers
+                Dim bMajuscule = False
+                For Each cCar In sValeurOrig
+                    If Char.IsUpper(cCar) Then bMajuscule = True : Exit For
+                Next
+                For Each cCar In sValeurCorrigee
+                    If Char.IsUpper(cCar) Then bMajuscule = True : Exit For
+                Next
+                If bMajuscule Then
+                    MsgBox("Majuscule : " & sLigne & vbLf & IO.Path.GetFileName(sChemin),
+                        MsgBoxStyle.Information, "Prénom Mixte")
+                End If
+
             Next
 
             ' Vérifier les doublons

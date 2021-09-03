@@ -48,8 +48,17 @@ Public Module modPrenom
 
     ' Seuils de fréquence relative min.
     'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
+    'Const sFormatFreqRel$ = "0.0%" ' 0.1%
     Const rSeuilFreqRel# = 0.01 ' 1% (par exemple 1% de masc. et 99% de fém.)
     'Const rSeuilFreqRel# = 0.02 ' 2% (par exemple 2% de masc. et 98% de fém.)
+    Const sFormatFreqRel$ = "0%"    '   1%
+
+    Const rSeuilFreqRelPrenomsEpicenes# = rSeuilFreqRel
+
+    ' Le filtre n'est pas programmé, il faut rajouter la condition, le cas échéant :
+    Const rSeuilFreqRelPrenomsFrequents# = 0
+    Const rSeuilFreqRelPrenomsHomophones# = 0
+    Const rSeuilFreqRelPrenomsGenres# = 0
 
     ' Fréquence relative minimale de la variante (homophone ou spécifiquement genrée)
     '  par rapport à la somme des variantes
@@ -161,7 +170,8 @@ Public Module modPrenom
             dicoDefinitionsPrenomsGenres,
             dicoE, sbCPMD, sbHPMD, sbGPMD)
 
-        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
+        FiltrerPrenomMixteEpicene(dicoE, iNbPrenomsTot,
+            iSeuilMinPrenomsEpicenes, rSeuilFreqRelPrenomsEpicenes,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
         FiltrerPrenomMixteHomophone(dicoH, dicoE, iNbPrenomsTot,
@@ -431,41 +441,49 @@ Fin:
 
         AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms)
+            iSeuilMinPrenomsFrequents, rSeuilFreqRelPrenomsFrequents,
+            iNbLignesMaxPrenoms)
         ' Pour le bilan général, conserver l'ordre alphab. pour vérifier la non régression
         AfficherSynthesePrenomsFrequents(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, 0, iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
+            iSeuilMinPrenomsFrequents, rSeuilFreqRelPrenomsFrequents,
+            iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
 
-        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
+        AfficherSyntheseEpicene(sDossierAppli, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsEpicenes, rSeuilFreqRelPrenomsEpicenes,
             iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil)
-        AfficherSyntheseEpicene(sDossierAppli, dicoE, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores,
-            iNbPrenomsIgnoresDate, iSeuilMinPrenomsEpicenes, rSeuilFreqRel,
+        AfficherSyntheseEpicene(sDossierAppli, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsEpicenes, rSeuilFreqRelPrenomsEpicenes,
             iNbLignesMaxPrenoms,
             dicoCorrectionsPrenoms, dicoCorrectionsPrenomsUtil, sbBilan, bTriAlphab:=True)
 
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0,
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsHomophones, rSeuilFreqRelPrenomsHomophones,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil)
-        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsHomophones, 0,
+        AfficherSyntheseHomophone(sDossierAppli, dicoH, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsHomophones, rSeuilFreqRelPrenomsHomophones,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsMixtesHomophonesUtil, sbBilan, bTriAlphab:=True)
 
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
-            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0,
+            dicoG, dicoE, dicoH,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsSpecifiquementGenres, rSeuilFreqRelPrenomsGenres,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil)
         AfficherSyntheseSpecifiquementGenre(sDossierAppli,
-            dicoG, dicoE, dicoH, iNbPrenomsTotOk, iNbPrenomsTot,
-            iNbPrenomsIgnores, iNbPrenomsIgnoresDate, iSeuilMinPrenomsSpecifiquementGenres, 0,
+            dicoG, dicoE, dicoH,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsSpecifiquementGenres, rSeuilFreqRelPrenomsGenres,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsGenres,
             dicoDefinitionsPrenomsGenresUtil, sbBilan, bTriAlphab:=True)
@@ -1313,8 +1331,8 @@ Fin:
             ", " & sFormaterNum(prenom.iNbOccMasc) & " (m)" &
             ", " & sFormaterNum(prenom.iNbOccFem) & " (f)" &
             ", freq. tot.=" & prenom.rFreqTotale.ToString(sFormatFreq) &
-            ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString("0%") &
-            ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString("0%") &
+            ", freq. rel. m. " & sGenre & prenom.rFreqRelativeMasc.ToString(sFormatFreqRel) &
+            ", freq. rel. f. " & sGenre & prenom.rFreqRelativeFem.ToString(sFormatFreqRel) &
             ", mixte épicène=" & prenom.bMixteEpicene
         Return s
 
@@ -1352,8 +1370,8 @@ Fin:
             "|" & sFormaterNum(prenom.iNbOccMasc) &
             "|" & sFormaterNum(prenom.iNbOccFem) &
             "|" & prenom.rFreqTotale.ToString(sFormatFreq) &
-            "|" & prenom.rFreqRelativeMasc.ToString("0%") &
-            "|" & prenom.rFreqRelativeFem.ToString("0%") &
+            "|" & prenom.rFreqRelativeMasc.ToString(sFormatFreqRel) &
+            "|" & prenom.rFreqRelativeFem.ToString(sFormatFreqRel) &
             sColonneFreqVariante
 
         Return s
@@ -1392,8 +1410,8 @@ Fin:
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccMasc) &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccFem) &
                 "||" & prenom.rFreqTotale.ToString(sFormatFreq) &
-                "||" & prenom.rFreqRelativeMasc.ToString("0%") &
-                "||" & prenom.rFreqRelativeFem.ToString("0%") &
+                "||" & prenom.rFreqRelativeMasc.ToString(sFormatFreqRel) &
+                "||" & prenom.rFreqRelativeFem.ToString(sFormatFreqRel) &
                 sColonneFreqVariante
         Return s
 
@@ -1637,7 +1655,8 @@ Suite:
             If bDoublerRAL Then sb.AppendLine("")
         End If
         If rSeuilFreqRel > 0 Then
-            sb.AppendLine("Fréquence relative min. genre = " & rSeuilFreqRel.ToString("0%"))
+            sb.AppendLine("Fréquence relative min. genre = " &
+                rSeuilFreqRel.ToString(sFormatFreqRel))
             If bDoublerRAL Then sb.AppendLine("")
         End If
         If rSeuilFreqRelVariante > 0 Then

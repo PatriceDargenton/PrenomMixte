@@ -337,40 +337,25 @@ Fin:
 
             ' Détection des prénoms homophones potentiels restants
             Dim sPrenomF1$ = prenom.sPrenom & "e" ' Ex.: Renée : René
-            Dim sPrenomF1Min$ = sPrenomF1.ToLower
-            If dicoE.ContainsKey(sPrenomF1) AndAlso
-               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF1Min) AndAlso
-               Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF1Min) AndAlso
-               Not sdHP.ContainsKey(sPrenomF1) Then
-                sdHP.Add(sPrenomF1, prenom.sPrenom)
-            End If
+            AjoutPrenomsHomophonesPotentielsRestants(
+                sPrenomF1, prenom.sPrenom, dicoE,
+                dicoDefinitionsPrenomsMixtesHomophones, sdHP)
             Dim sPrenomF2$ = prenom.sPrenom & "le" ' Ex.: Gabrielle : Gabriel
-            Dim sPrenomF2Min$ = sPrenomF2.ToLower
-            If dicoE.ContainsKey(sPrenomF2) AndAlso
-                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomF2Min) AndAlso
-                Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomF2Min) AndAlso
-                Not sdHP.ContainsKey(sPrenomF2) Then
-                sdHP.Add(sPrenomF2, prenom.sPrenom)
-            End If
+            AjoutPrenomsHomophonesPotentielsRestants(
+                sPrenomF2, prenom.sPrenom, dicoE,
+                dicoDefinitionsPrenomsMixtesHomophones, sdHP)
 
             ' Détection des prénoms spécifiquement genrés potentiels restants
             Dim sPrenomF3$ = prenom.sPrenom & "tte" ' Ex.: Antoinette : Antoine
-            Dim sPrenomF3Min = sPrenomF3.ToLower
-            If dicoE.ContainsKey(sPrenomF3) AndAlso
-                Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF3Min) AndAlso
-                Not dicoDefinitionsPrenomsGenres.ContainsValue(sPrenomF3Min) AndAlso
-                Not sdGP.ContainsKey(sPrenomF3) Then
-                sdGP.Add(sPrenomF3, prenom.sPrenom)
-            End If
+            AjoutPrenomsSpecifiquementGenresPotentielsRestants(
+                sPrenomF3, prenom.sPrenom, dicoE,
+                dicoDefinitionsPrenomsGenres, sdGP)
 
             Dim sPrenomF4$ = prenom.sPrenom & "ne" ' Ex.: Fabien : Fabienne
-            Dim sPrenomF4Min = sPrenomF4.ToLower
-            If dicoE.ContainsKey(sPrenomF4) AndAlso
-                Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomF4Min) AndAlso
-                Not dicoDefinitionsPrenomsGenres.ContainsValue(sPrenomF4Min) AndAlso
-                Not sdGP.ContainsKey(sPrenomF4) Then
-                sdGP.Add(sPrenomF4, prenom.sPrenom)
-            End If
+            AjoutPrenomsSpecifiquementGenresPotentielsRestants(
+                sPrenomF4, prenom.sPrenom, dicoE,
+                dicoDefinitionsPrenomsGenres, sdGP)
+
         Next
 
         Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")
@@ -416,6 +401,38 @@ Fin:
         Next
         Dim sCheminGP$ = sDossierAppli & "\PrenomsSpecifiquementGenresPotentielsRestants.txt"
         EcrireFichier(sCheminGP, sbGP)
+
+    End Sub
+
+    Private Sub AjoutPrenomsHomophonesPotentielsRestants(
+            sPrenomPot$, sPrenom$,
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoDefinitionsPrenomsMixtesHomophones As DicoTri(Of String, String),
+            sdHO As SortedDictionary(Of String, String))
+
+        Dim sPrenomPotMin = sPrenomPot.ToLower
+        If dicoE.ContainsKey(sPrenomPot) AndAlso
+           Not dicoDefinitionsPrenomsMixtesHomophones.ContainsKey(sPrenomPotMin) AndAlso
+           Not dicoDefinitionsPrenomsMixtesHomophones.ContainsValue(sPrenomPotMin) AndAlso
+           Not sdHO.ContainsKey(sPrenomPot) Then
+            sdHO.Add(sPrenomPot, sPrenom)
+        End If
+
+    End Sub
+
+    Private Sub AjoutPrenomsSpecifiquementGenresPotentielsRestants(
+            sPrenomPot$, sPrenom$,
+            dicoE As DicoTri(Of String, clsPrenom),
+            dicoDefinitionsPrenomsGenres As DicoTri(Of String, String),
+            sdGP As SortedDictionary(Of String, String))
+
+        Dim sPrenomPotMin = sPrenomPot.ToLower
+        If dicoE.ContainsKey(sPrenomPot) AndAlso
+           Not dicoDefinitionsPrenomsGenres.ContainsKey(sPrenomPotMin) AndAlso
+           Not dicoDefinitionsPrenomsGenres.ContainsValue(sPrenomPotMin) AndAlso
+           Not sdGP.ContainsKey(sPrenomPot) Then
+            sdGP.Add(sPrenomPot, sPrenom)
+        End If
 
     End Sub
 
@@ -720,6 +737,7 @@ Fin:
         Next
 
         ' Retirer les variantes trop minoritaires
+        ' Autre solution : cumuler sur une variante "Autres", si on ne veut pas les décompter
         Dim lstPrenomsRetires As New List(Of clsPrenom)
         For Each prenom In aPrenomsH
             If prenom.dicoVariantesH.Count <= 1 Then Continue For

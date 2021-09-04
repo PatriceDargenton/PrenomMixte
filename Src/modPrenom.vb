@@ -42,11 +42,12 @@ Public Module modPrenom
         My.Application.Info.Version.Minor &
         My.Application.Info.Version.Build
 
-    Public Const sFichierPrenomsInsee$ = "nat2019.csv"
-    Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
-    Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"
+    Public Const sFichierPrenomsInsee$ = "nat2020.csv"
+    Public Const sFichierPrenomsInseeCorrige$ = "nat2020_corrige.csv"
+    Public Const sFichierPrenomsInseeZip$ = "nat2020_csv.zip"
+    Const iDateFin% = 2020
     Const iDateMinExport% = 1900
-    Const iDateMaxExport% = 2019
+    Const iDateMaxExport% = 2020
 
     ' Seuils de fréquence relative min.
     'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
@@ -1668,7 +1669,7 @@ Suite:
 
         sb.AppendLine("Date début = 1900")
         If bDoublerRAL Then sb.AppendLine("")
-        sb.AppendLine("Date fin   = 2019")
+        sb.AppendLine("Date fin   = " & iDateFin)
         If bDoublerRAL Then sb.AppendLine("")
         sb.AppendLine("Nb. total de prénoms identifiés et datés = " & sFormaterNum(iNbPrenomsTotOk))
         If bDoublerRAL Then sb.AppendLine("")

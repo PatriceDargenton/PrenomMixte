@@ -16,7 +16,7 @@ Synthèse statistique des [prénoms mixtes](https://fr.wikipedia.org/wiki/Préno
 
 # Téléchargement
 
-Le fichier nat2019.csv peut être téléchargé ici :
+Le fichier nat2020.csv peut être téléchargé ici :
 
 https://www.insee.fr/fr/statistiques/2540004
 
@@ -26,7 +26,7 @@ et doit être placé dézipé dans le dossier PrenomMixte\bin de la solution.
 
 # Synthèse statistique des prénoms mixtes épicènes
 
-On ne peut pas définir le type mixte sans prendre en compte au moins un seuil. D'une part un seuil concernant le nombre minimal d'occurrences du prénom parmi les 86 millions de prénoms attribués en France en un peu plus d'un siècle, et d'autre part la fréquence relative minimale entre masculin et féminin : un prénom vraiment mixte devrait au moins concerner par exemple plus de 1% des cas (1% de masculin et 99% de féminin, ou alors l'inverse), ou peut-être 10 % des cas (10% de masculin et 90% de féminin) en étant plus strict, pour avoir une véritable signification statistique. Si on n'applique aucun seuil, on arrive à près de 2 000 prénoms mixtes épicènes, mais chaque occurrence devient pratiquement une exception en soi. Voici les résultats avec un réglage du premier seuil à 2 000 occurrences minimum (avec une fréquence relative minimale de 1 %), soit 211 prénoms mixtes épicènes (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_mixtes_épicènes) pour une liste sans seuil avec 1432 prenoms).
+On ne peut pas définir le type mixte sans prendre en compte au moins un seuil. D'une part un seuil concernant le nombre minimal d'occurrences du prénom parmi les 86 millions de prénoms attribués en France en un peu plus d'un siècle, et d'autre part la fréquence relative minimale entre masculin et féminin : un prénom vraiment mixte devrait au moins concerner par exemple plus de 1% des cas (1% de masculin et 99% de féminin, ou alors l'inverse), ou peut-être 10 % des cas (10% de masculin et 90% de féminin) en étant plus strict, pour avoir une véritable signification statistique. Si on n'applique aucun seuil, on arrive à près de 2 000 prénoms mixtes épicènes, mais chaque occurrence devient pratiquement une exception en soi. Voici les résultats avec un réglage du premier seuil à 2 000 occurrences minimum (avec une fréquence relative minimale de 1 %), soit 217 prénoms mixtes épicènes (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_mixtes_épicènes) pour une liste sans seuil minimum d'occurrences avec 1460 prenoms).
 
 ## Prénoms mixtes épicènes avec au moins 2 000 occurrences
 
@@ -274,7 +274,7 @@ Fréquence relative min. genre = 1%
 
 # Synthèse statistique des prénoms mixtes homophones
 
-Les associations homophones sont programmées explicitement : il faut connaitre la prononciation pour pouvoir regrouper les prénoms qui se prononcent pareil. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (un prénom peut être à la fois ***épicène et homophone***). Si la fréquence d'une variante est inférieure à 1% à celles de ses homophones, elle est retirée et décomptée.
+Les associations homophones sont programmées explicitement : il faut connaitre la prononciation pour pouvoir regrouper les prénoms qui se prononcent pareil. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (seulement celui qui a été choisi dans le fichier de définition comme étant le prénom pivot). Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% à celles de ses homophones, elle est retirée et décomptée (il s'agit souvent d'une orthographe fantaisiste).
 
 Date début = 1900
 
@@ -606,7 +606,7 @@ Fréquence relative min. variante = 1%
 
 # Synthèse statistique des prénoms masculins ou féminins ‒ spécifiquement genrés
 
-Les associations spécifiquement genrées sont programmées explicitement : il faut connaitre l'étymologie pour pouvoir regrouper les prénoms qui ont la même racine. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (un prénom peut être à la fois ***épicène et homophone***). Si la fréquence d'une variante est inférieure à 1% à celles de ses homophones, elle est retirée et décomptée.
+Les associations spécifiquement genrées sont programmées explicitement : il faut connaitre l'étymologie pour pouvoir regrouper les prénoms qui ont la même racine. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (seulement celui qui a été choisi dans le fichier de définition comme étant le prénom pivot). Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% à celles de ses homogènes, elle est retirée et décomptée. On n'affiche que les prénoms avec au moins 20 000 occurrences, ce qui donne 71 prénoms (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires) pour une liste sans seuil minimum d'occurrences avec 92 prenoms).
 
 Date début = 1900
 
@@ -872,7 +872,7 @@ Fréquence relative min. variante = 1%
 
 # Synthèse statistique des prénoms fréquents
 
-En appliquant aucun seuil, on trouve 32 346 prénoms distincts, mais un peu moins si on corrige quelques accents. Et 359 prénoms avec au moins 50 000 occurrences (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_fréquents) pour un seuil à 4000 avec 1362 prenoms) :
+En appliquant aucun seuil, on trouve 32 346 prénoms distincts, mais un peu moins si on corrige quelques accents. Et 359 prénoms avec au moins 50 000 occurrences (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_fréquents) pour un seuil à 4000 avec 1383 prenoms) :
 
 Date début = 1900
 

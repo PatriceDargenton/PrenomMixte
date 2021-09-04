@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "03/09/2021"
+    Public Const sDateVersionAppli$ = "04/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -45,6 +45,8 @@ Public Module modPrenom
     Public Const sFichierPrenomsInsee$ = "nat2019.csv"
     Public Const sFichierPrenomsInseeCorrige$ = "nat2019_corrige.csv"
     Public Const sFichierPrenomsInseeZip$ = "nat2019_csv.zip"
+    Const iDateMinExport% = 1900
+    Const iDateMaxExport% = 2019
 
     ' Seuils de fréquence relative min.
     'Const rSeuilFreqRel# = 0.001 ' 0.1% (par exemple 0.1% de masc. et 99.9% de fém.)
@@ -76,8 +78,6 @@ Public Module modPrenom
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
-    Const iDateMinExport% = 1900
-    Const iDateMaxExport% = 2019
 
     Const sGrasMD$ = "**"
     Const sGrasWiki$ = "**"
@@ -182,7 +182,7 @@ Public Module modPrenom
 
 Export:
         If bExporter Then
-            EcrireFichierFiltre(sDossierAppli, asLignes, dicoE, dicoH, dicoG,
+            Exporter(sDossierAppli, asLignes, dicoE, dicoH, dicoG,
                 dicoCorrectionsPrenoms,
                 dicoCorrectionsPrenomsUtil,
                 dicoDefinitionsPrenomsMixtesHomophones,
@@ -1537,7 +1537,7 @@ Fin:
 
     End Sub
 
-    Private Sub EcrireFichierFiltre(sDossierAppli$, asLignes$(),
+    Private Sub Exporter(sDossierAppli$, asLignes$(),
         dicoE As DicoTri(Of String, clsPrenom),
         dicoH As DicoTri(Of String, clsPrenom),
         dicoG As DicoTri(Of String, clsPrenom),

@@ -747,7 +747,8 @@ frédérico;frederico
 frédérik;frederik
 frédérique;frederique
 frédy;fredy
-gabriël;gabriel
+'gabriel;gabriël ' non supporté dans ce sens (gabriël est minoritaire)
+'gabrielle;gabriëlle ' non trouvé
 gabrièle;gabriele
 gabryël;gabryel
 gaël;gael
@@ -986,6 +987,7 @@ jérémiah;jeremiah
 jéremie;jeremie
 jéremy;jeremy
 jérome;jerome
+'jérome;jérôme ' 90% de jérome et 10% de jérôme, mais pour le moment on ne peut pas corriger qu'un seul accent, sinon la vérification échoue
 jéromine;jeromine
 jéssica;jessica
 jéssim;jessim

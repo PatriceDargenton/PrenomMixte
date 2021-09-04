@@ -14,22 +14,20 @@ Public Class clsPrenom : Implements ICloneable
         Return DirectCast(Me.IClone(), clsPrenom)
     End Function
 
-    Public sPrenom$, sPrenomOrig$, sPrenomHomophone$
-    ' Spécifiquement genré (masc. ou fém., par ex.: antoine, antoinette)
-    Public sPrenomSpecifiquementGenre$
+    Public sPrenom$, sPrenomOrig$, sPrenomHomophone$, sPrenomSimilaire$
     Public sAnnee$, sCodeSexe$, sNbOcc$
     Public bMasc As Boolean
     Public bFem As Boolean
     Public bMixteEpicene As Boolean
     Public bMixteHomophone As Boolean
-    Public bSpecifiquementGenre As Boolean
+    Public bSimilaire As Boolean
     Public iNbOccMasc%, iNbOccFem%, iNbOcc%
     Public rFreqRelative#, rFreqRelativeMasc#, rFreqRelativeFem#
 
-    ' Fréquence relative de la variante (homophone ou spécifiquement genré)
+    ' Fréquence relative de la variante (homophone ou similaire)
     '  par rapport à la somme des variantes
-    Public rFreqRelativeVarianteH#, rFreqRelativeVarianteG#
-    Public bVarianteDecompteeH, bVarianteDecompteeG As Boolean
+    Public rFreqRelativeVarianteH#, rFreqRelativeVarianteS#
+    Public bVarianteDecompteeH, bVarianteDecompteeS As Boolean
 
     Public rFreqTotale#, rFreqTotaleMasc#, rFreqTotaleFem#
     Public iAnnee%
@@ -37,7 +35,7 @@ Public Class clsPrenom : Implements ICloneable
     Public rAnneeTot#, rAnneeTotMasc#, rAnneeTotFem#
     Public bSelect As Boolean
     Public dicoVariantesH As New DicoTri(Of String, clsPrenom)
-    Public dicoVariantesG As New DicoTri(Of String, clsPrenom)
+    Public dicoVariantesS As New DicoTri(Of String, clsPrenom)
 
     Public Sub Calculer(iNbPrenomsTot%)
         If iNbPrenomsTot > 0 Then

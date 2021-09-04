@@ -9,7 +9,7 @@ Synthèse statistique des [prénoms mixtes](https://fr.wikipedia.org/wiki/Préno
 - [Synthèse statistique des prénoms mixtes épicènes](#synth%C3%A8se-statistique-des-pr%C3%A9noms-mixtes-%C3%A9pic%C3%A8nes)
     - [Prénoms mixtes épicènes avec au moins 2 000 occurrences](#pr%C3%A9noms-mixtes-%C3%A9pic%C3%A8nes-avec-au-moins-2-000-occurrences)
 - [Synthèse statistique des prénoms mixtes homophones](#synth%C3%A8se-statistique-des-pr%C3%A9noms-mixtes-homophones)
-- [Synthèse statistique des prénoms masculins ou féminins ‒ spécifiquement genrés](#synth%C3%A8se-statistique-des-pr%C3%A9noms-masculins-ou-f%C3%A9minins-%E2%80%92-sp%C3%A9cifiquement-genr%C3%A9s)
+- [Synthèse statistique des prénoms similaires](#synth%C3%A8se-statistique-des-pr%C3%A9noms-similaires)
 - [Synthèse statistique des prénoms fréquents](#synth%C3%A8se-statistique-des-pr%C3%A9noms-fr%C3%A9quents)
 
 <!-- /TOC -->
@@ -604,9 +604,9 @@ Fréquence relative min. variante = 1%
 |91.1|17 233|*Astrid*|1983|1981|1983|16|17 217|0.020%|0%|100%|86%
 |91.2|2 918|Astride|1959|0|1959|0|2 918|0.003%|0%|100%|14%
 
-# Synthèse statistique des prénoms masculins ou féminins ‒ spécifiquement genrés
+# Synthèse statistique des prénoms similaires
 
-Les associations spécifiquement genrées sont programmées explicitement : il faut connaitre l'étymologie pour pouvoir regrouper les prénoms qui ont la même racine. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (seulement celui qui a été choisi dans le fichier de définition comme étant le prénom pivot). Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% à celles de ses homogènes, elle est retirée et décomptée. On n'affiche que les prénoms avec au moins 20 000 occurrences, ce qui donne 71 prénoms (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires) pour une liste sans seuil minimum d'occurrences avec 92 prenoms).
+Les associations similaires sont programmées explicitement : il faut connaitre l'étymologie pour pouvoir regrouper les prénoms qui ont la même racine. Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique (seulement celui qui a été choisi dans le fichier de définition comme étant le prénom pivot). Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% à celles de ses homogènes, elle est retirée et décomptée. On n'affiche que les prénoms avec au moins 20 000 occurrences, ce qui donne 71 prénoms (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires) pour une liste sans seuil minimum d'occurrences avec 92 prenoms).
 
 Date début = 1900
 

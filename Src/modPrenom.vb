@@ -1433,13 +1433,20 @@ Fin:
             sColonneFreqVariante = "||" & prenom.rFreqRelativeVarianteG.ToString(sFormatFreqRelVariante)
         End If
 
+        ' Ne rien afficher si 0, car cela perturbe le tri dans le wiki
+        ' (le vide est trié aussi en 1er, pareil pour -, 9999 est bien trié en dernier, mais bon...)
+        Dim sAnneeMoyMasc$ = ""
+        Dim sAnneeMoyFem$ = ""
+        If prenom.rAnneeMoyMasc > 0 Then sAnneeMoyMasc = prenom.rAnneeMoyMasc.ToString("0")
+        If prenom.rAnneeMoyFem > 0 Then sAnneeMoyFem = prenom.rAnneeMoyFem.ToString("0")
+
         Dim s$ = "|-" & vbLf &
                 "|" & iNumPrenom & sNumVariante &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOcc) &
                 "||" & sMiseEnForme & sPrenom & sMiseEnForme &
                 "||" & prenom.rAnneeMoy.ToString("0") &
-                "||" & prenom.rAnneeMoyMasc.ToString("0") &
-                "||" & prenom.rAnneeMoyFem.ToString("0") &
+                "||" & sAnneeMoyMasc &
+                "||" & sAnneeMoyFem &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccMasc) &
                 "|| align='right' | " & sFormaterNumWiki(prenom.iNbOccFem) &
                 "||" & prenom.rFreqTotale.ToString(sFormatFreq) &

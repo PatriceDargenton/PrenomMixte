@@ -21,6 +21,7 @@ Public Class clsPrenom : Implements ICloneable
     Public bMixteEpicene As Boolean
     Public bMixteHomophone As Boolean
     Public bSimilaire As Boolean
+    Public bUnigenre As Boolean
     Public iNbOccMasc%, iNbOccFem%, iNbOcc%
     Public rFreqRelative#, rFreqRelativeMasc#, rFreqRelativeFem#
 

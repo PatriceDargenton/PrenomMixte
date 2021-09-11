@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "05/09/2021"
+    Public Const sDateVersionAppli$ = "11/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -110,6 +110,7 @@ Public Module modPrenom
         ' Vérifier si le fichier de correction des prénoms mixtes corrige bien uniquement les accents
         For Each kvp In dicoCorrectionsPrenoms
             Dim sPrenomOrig$ = kvp.Key
+            sPrenomOrig = sEnleverAccents(sPrenomOrig) ' Pour pouvoir corriger aussi : jérôme en jérome
             Dim sPrenomCorrige$ = kvp.Value
             Dim sVerif$ = sEnleverAccents(sPrenomCorrige)
             If sVerif <> sPrenomOrig Then
@@ -1593,7 +1594,16 @@ Fin:
                 sPrenom = sPrenom.ToUpper
                 If prenom.sPrenomOrig <> sPrenom Then
                     sPrenom = sEnleverAccents(sPrenom, bMinuscule:=False)
-                    If prenom.sPrenomOrig <> sPrenom Then
+
+                    ' Ex.: jérôme corrigé en jérome
+                    Dim sPrenomOrigSansAccent$ = sEnleverAccents(prenom.sPrenomOrig, bMinuscule:=False)
+                    If sPrenomOrigSansAccent <> prenom.sPrenomOrig Then
+                        'Debug.WriteLine(prenom.sPrenomOrig)
+                        ' Pour les corrections spéciales, on est obligé de rétablir tel quel
+                        sPrenom = prenom.sPrenomOrig.ToUpper
+                    End If
+
+                    If sPrenomOrigSansAccent <> sPrenom Then
                         ' Vérifier si tous les accents sont bien retirés
                         Debug.WriteLine(sPrenom)
                         Stop ' Provoque l'arrêt du test, comme une exception

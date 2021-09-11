@@ -1122,8 +1122,8 @@ Fin:
                 ' Gras : épicène
                 ' Italique : homophone
                 ' Gras+Italique : épicène + homophone
-                sPrenomMD = sListerCleTxtDico(lst, dicoE, bWiki:=False)
-                sPrenomWiki = sListerCleTxtDico(lst, dicoE, bWiki:=True)
+                sPrenomMD = sListerCleTxtDico(lst, dicoE, bWiki:=False, bHomophoneEnItalique:=False)
+                sPrenomWiki = sListerCleTxtDico(lst, dicoE, bWiki:=True, bHomophoneEnItalique:=False)
 
             End If
 
@@ -1146,14 +1146,11 @@ Fin:
                         If prenomE.bMixteEpicene Then bGras = True
                     End If
                     Dim bItalique = False
-                    'If dicoH.ContainsKey(prenomV.sPrenom) Then
-                    '    Dim prenomH = dicoH(prenomV.sPrenom)
+                    ' Inutile, car dans la synthèse homophone, tous les prénoms sont au moins homophones
+                    'If dicoE.ContainsKey(prenomV.sPrenom) Then
+                    '    Dim prenomH = dicoE(prenomV.sPrenom)
                     '    If prenomH.bMixteHomophone Then bItalique = True
                     'End If
-                    If dicoE.ContainsKey(prenomV.sPrenom) Then
-                        Dim prenomH = dicoE(prenomV.sPrenom)
-                        If prenomH.bMixteHomophone Then bItalique = True
-                    End If
                     sbMD.AppendLine(sLigneMarkDown(prenomV, prenomV.sPrenom, iNbPrenomsMixtes,
                         sFormatFreq, iNumVariante, bGras, bItalique,
                         bSuffixeNumVariante:=True, bColonneFreqVarianteH:=True))
@@ -1244,8 +1241,8 @@ Fin:
                 ' Gras : épicène
                 ' Italique : homophone
                 ' Gras+Italique : épicène + homophone
-                sPrenomMD = sListerCleTxtDico(lst, dicoE, bWiki:=False)
-                sPrenomWiki = sListerCleTxtDico(lst, dicoE, bWiki:=True)
+                sPrenomMD = sListerCleTxtDico(lst, dicoE, bWiki:=False, bHomophoneEnItalique:=True)
+                sPrenomWiki = sListerCleTxtDico(lst, dicoE, bWiki:=True, bHomophoneEnItalique:=True)
             End If
 
             sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsSimilaires, sFormatFreq))
@@ -1836,8 +1833,7 @@ Suite:
     Private Function sListerCleTxtDico$(
             lstTxt As List(Of KeyValuePair(Of String, clsPrenom)),
             dicoE As DicoTri(Of String, clsPrenom),
-            bWiki As Boolean)
-            'dicoH As DicoTri(Of String, clsPrenom),
+            bWiki As Boolean, bHomophoneEnItalique As Boolean)
 
         Dim sb As New StringBuilder("")
         Dim iNumOcc% = 0
@@ -1846,13 +1842,11 @@ Suite:
             Dim sPrenom$ = kvp.Key
 
             Dim bGras = False
-            'If dicoE.ContainsKey(sPrenom) AndAlso dicoE(sPrenom).bMixteEpicene Then bGras = True
             Dim bItalique = False
-            'If dicoH.ContainsKey(sPrenom) AndAlso dicoH(sPrenom).bMixteHomophone Then bItalique = True
             If dicoE.ContainsKey(sPrenom) Then
                 Dim prenomE = dicoE(sPrenom)
                 If prenomE.bMixteEpicene Then bGras = True
-                If prenomE.bMixteHomophone Then bItalique = True
+                If prenomE.bMixteHomophone AndAlso bHomophoneEnItalique Then bItalique = True
             End If
 
             Dim sMEF$ = ""

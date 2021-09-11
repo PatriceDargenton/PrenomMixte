@@ -361,6 +361,11 @@ Fin:
                 sPrenomF4, prenom.sPrenom, dicoE,
                 dicoDefinitionsPrenomsSimilaires, sdSP)
 
+            Dim sPrenomF5$ = prenom.sPrenom & "ia" ' Ex.: Victor : Victoria
+            AjoutPrenomsSimilairesPotentielsRestants(
+                sPrenomF5, prenom.sPrenom, dicoE,
+                dicoDefinitionsPrenomsSimilaires, sdSP)
+
         Next
 
         Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")

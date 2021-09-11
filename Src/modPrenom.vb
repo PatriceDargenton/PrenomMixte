@@ -75,6 +75,7 @@ Public Module modPrenom
     Const iSeuilMinPrenomsEpicenes% = 2000
     Const iSeuilMinPrenomsHomophones% = 20000
     Const iSeuilMinPrenomsSimilaires% = 20000
+    Const iSeuilMinPrenomsUnigenre% = 10000
 
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
@@ -844,11 +845,11 @@ Fin:
 
         AfficherSynthesePrenomFrequentEtUnigenre(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, rSeuilFreqRelPrenomsFrequents,
+            iSeuilMinPrenomsUnigenre, rSeuilFreqRelPrenomsFrequents,
             iNbLignesMaxPrenoms, bUnigenre:=True)
         AfficherSynthesePrenomFrequentEtUnigenre(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsFrequents, rSeuilFreqRelPrenomsFrequents,
+            iSeuilMinPrenomsUnigenre, rSeuilFreqRelPrenomsFrequents,
             iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True, bUnigenre:=True)
 
         AfficherSyntheseEpicene(sDossierAppli, dicoE,
@@ -950,11 +951,11 @@ Fin:
 
             If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
 
-            iNbPrenoms += 1
-            If iNbLignesMax > 0 AndAlso iNbPrenoms > iNbLignesMax Then Exit For
-
             If bUnigenre AndAlso Not prenom.bUnigenre Then Continue For
             prenom.bSelect = True
+
+            iNbPrenoms += 1
+            If iNbLignesMax > 0 AndAlso iNbPrenoms > iNbLignesMax Then Exit For
 
             sb.AppendLine(sLigneDebug(prenom, prenom.sPrenom, iNbPrenoms, sFormatFreq))
 
@@ -1040,6 +1041,7 @@ Fin:
         For Each kvp In dicoCorrectionsPrenoms
             If Not dicoCorrectionsPrenomsUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom non trouvée : " & kvp.Key
+                Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1169,6 +1171,7 @@ Fin:
         For Each kvp In dicoDefinitionsPrenomsMixtesHomophones
             If Not dicoDefinitionsPrenomsMixtesHomophonesUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom (liste homophone) non trouvée : " & kvp.Key
+                Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1222,7 +1225,11 @@ Fin:
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoS.Trier(sTri)
 
+            'If dicoE.ContainsKey(prenom.sPrenom) Then
+            '    If Not dicoE(prenom.sPrenom).bSimilaire Then Continue For
+            'End If
             If Not prenom.bSimilaire Then Continue For
+
             If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
 
             iNbPrenomsSimilaires += 1
@@ -1289,6 +1296,7 @@ Fin:
         For Each kvp In dicoDefinitionsPrenomsSimilaires
             If Not dicoDefinitionsPrenomsSimilairesUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom (liste des prénoms similaires) non trouvée : " & kvp.Key
+                Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1759,8 +1767,9 @@ Suite:
             ' Vérifier les doublons
             Dim sCle$ = sValeurCorrigee & ";" & sValeurOrig
             If hsDoublons.Contains(sCle) Then
-                MsgBox("Doublon : " & sCle & vbLf & IO.Path.GetFileName(sChemin),
-                    MsgBoxStyle.Information, "Prénom Mixte")
+                Dim sMsg$ = "Doublon : " & sCle & vbLf & IO.Path.GetFileName(sChemin)
+                Debug.WriteLine(sMsg)
+                MsgBox(sMsg, MsgBoxStyle.Information, "Prénom Mixte")
             Else
                 hsDoublons.Add(sCle)
             End If

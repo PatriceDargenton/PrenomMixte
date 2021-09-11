@@ -2,12 +2,12 @@ PrénomHomophoneMajoritaire;PrénomHomophoneMinoritaire
 aaron;aarone
 abel;abelle
 abi;abie
+abigaël;abbigaëlle
 abigaël;abbygaël
 abigaël;abbygaëlle
 abigaël;abigaëlle
 abigaël;abygaël
 abigaël;abygaëlle
-abigaël;abbigaëlle
 abigaël;aby-gaëlle
 achil;achile
 achil;achille
@@ -39,6 +39,7 @@ amauri;amaurie
 amayel;amayelle
 amédé;amédée
 amel;amelle
+améthys;amethys
 anabel;anabele ' 3 occurrences seulement pour anabele
 anabel;anabelle
 anaé;anaée
@@ -49,6 +50,7 @@ anatoli;anatolie
 andré;andrée
 andy;andie
 anel;anelle
+anélie;anelie
 aness;anesse
 angel;angelle
 angi;angie
@@ -70,8 +72,6 @@ anni;annie
 annick;annicke
 anselm;anselme
 antoni;antonie
-améthys;amethys
-anélie;anelie
 april;aprile
 arian;ariane
 arielle;ariel
@@ -145,8 +145,8 @@ cassidi;cassidie
 cathy;cati
 cathy;catie
 cécil;cécile
-célicia;celicia
 célian;céliane
+célicia;celicia
 célyan;célyane
 chanaël;chanaëlle
 chancel;chancelle
@@ -162,6 +162,7 @@ christabel;christabelle
 christelle;christel
 christelle;chrystel
 christelle;chrystelle
+christelle;christèle
 christiane;christianne
 christoph;christophe
 cindy;cindi
@@ -186,8 +187,8 @@ daniel;danièle
 daniel;danielle
 dany;danie
 dany;dannie
-dany;danye
 dany;danny
+dany;danye
 daphné;daphnée
 david;davide
 désiré;désirée
@@ -210,6 +211,7 @@ edmée;edmé
 élie;éllie
 élise;éliz
 élise;élize
+éloïse;héloïse
 elon;elone
 elvin;elvine
 elvir;elvire
@@ -233,6 +235,8 @@ farid;faride ' 518 occurrences seulement pour faride
 fay;faye
 fidel;fidele
 flore;flor ' 112 occurrences seulement pour flor
+franck;franc
+franck;frank
 francky;francki
 francky;franckie
 francky;franki
@@ -253,7 +257,7 @@ germinal;germinale
 gertrude;gertrud
 ghassan;ghassane
 gille;gil
-gisel;giselle
+giselle;gisèle
 guénaëlle;guénaël
 guénaëlle;guenhael
 guénaëlle;guenhaelle
@@ -284,12 +288,13 @@ janick;jannick
 jean-cyril;jean-cyrille
 jéhan;jéhane
 jéhan;jéhanne
-jérémi;jérémie
+jérémy;jérémi
+jérémy;jérémie
+'jérome;jérôme ' si on ne corrige pas l'accent circonflexe (90% de jérome et 10% de jérôme)
 jesabel;jesabelle
 jessy;jesse
 jessy;jessie
 jessy;jessye
-'jérome;jérôme ' si on ne corrige pas l'accent circonflexe (90% de jérome et 10% de jérôme)
 joachim;joachime
 joe;jo
 joé;joée
@@ -341,6 +346,8 @@ louane;louhann
 louane;louhanne
 lou-anne;lou-ann
 louise;louïse
+luca;lucas
+luca;luka
 lucie;luci
 lyam;lyame
 maé;maée
@@ -352,6 +359,10 @@ maélane;maëlan
 maélane;maëlane
 maélane;maëlann
 maélane;maëlanne
+maëllis;maëlis
+maëllis;maëlys
+maëllis;maëliss
+maëllis;maëlisse
 magalie;magali
 mahame;maham
 maïssane;maïssan
@@ -388,6 +399,7 @@ mary-anne;mary-ann
 maud;maude
 max;maxe
 maxim;maxime
+mélodie;mélody
 mégane;mégan
 mégane;meggan
 mégane;meggane
@@ -477,6 +489,8 @@ rayan;rayane
 rayan;rayhan
 rayan;rayhane
 rayen;rayene
+rémi;rémie
+rémi;rémy
 rené;renée
 rihane;rihan
 rodolph;rodolphe
@@ -550,6 +564,7 @@ terri;terrie
 théodor;théodore
 thibaud;thibault
 thibaud;thibaut
+'thierry;thiery 0.4% de thiery : 35 lignes seulement
 tifani;tifanie
 tifenn;tifenne
 tiffani;tiffanie
@@ -558,6 +573,7 @@ timothée;thimoté
 timothée;thimotée
 timothée;timoté
 timothée;timotée  ' 41 occurrences seulement pour timotée
+timothée;timothé
 timothée;tymothé
 timothée;tymothée ' 37 occurrences seulement pour tymothée
 tiphen;tiphene

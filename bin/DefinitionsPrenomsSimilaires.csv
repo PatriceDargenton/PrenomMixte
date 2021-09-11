@@ -20,6 +20,7 @@ aure;aurette ' 7 occurrences seulement pour aurette
 aurélie;aurèle
 aurélie;aurélia
 aurélie;aurélien
+benjamin;benjamine
 bérangère;béranger
 bernadette;bernard
 bernarde;bernardette
@@ -48,9 +49,9 @@ coline;colinette ' 12 occurrences seulement pour colinette
 constant;constance
 corentine;corentin
 denise;denis
-dominique;dominiquette ' 81 occurrences seulement pour dominiquette
-dominique;dominico
 dominique;dominica
+dominique;dominico
+dominique;dominiquette ' 81 occurrences seulement pour dominiquette
 dorian;doriane
 dorothée;théodore
 edwige;edwig ' 6 occurrences seulement pour edwig
@@ -75,8 +76,12 @@ florian;florianne
 france;francette
 francie;franciette
 francille;francillette
-francine;francinette ' 55 occurrences seulement pour francinette
 'francine;france ' on a déjà regroupé france avec francette
+francine;francinette ' 55 occurrences seulement pour francinette
+franck;franka
+franck;franki
+franck;frankie
+franck;franky
 françois;françoise
 gaëtan;gaëtanne
 gastonne;gastonnette
@@ -86,8 +91,8 @@ georgine;georginette ' 3 occurrences seulement pour georginette
 gérald;géraldine
 germain;germaine
 ghislaine;ghislain
-gille;gillette
 gilbert;gilberte
+gille;gillette
 gine;ginette ' 3 occurrences seulement pour gine
 gracie;graciette
 guilhemine;guilhem
@@ -99,6 +104,7 @@ henri;henrie ' 49 occurrences seulement pour henrie
 henri;henriette
 henri;henry
 herveline;hervé
+hubert;huberte
 hugues;huguette
 ive;ivette ' 9 occurrences seulement pour ive et 536 pour ivette
 jacquemine;jacqueminette
@@ -109,16 +115,16 @@ jeanne;jane
 jeanne;jean
 jeanne;jeannette
 jeanne;jeannine
-jéromine;jérôme
+jéromine;jérome
 jocelyne;jocelyn
 joffre;joffrette
 johan;johanna
 joseph;joséphine
 josse;jossette
 joze;jozette
-julie;julette ' 6 occurrences seulement pour julette
 julie;jule
 julie;jules
+julie;julette ' 6 occurrences seulement pour julette
 julie;juliette
 julien;julienne
 julien;juliette
@@ -144,6 +150,17 @@ luce;lucette
 lucien;lucienne
 lyne;lynette ' 69 occurrences seulement pour lynette
 lyse;lysette ' 13 occurrences seulement pour lysette
+maël;maëlys
+maël;maëlisse
+maël;maëliss
+maël;maëlis
+maël;maëllys
+maël;maëlyss
+maël;maëlysse
+maël;maélys
+maël;maélis
+maël;maélyss
+maël;maélysse
 margo;margotte ' 49 occurrences seulement pour margotte
 marie;mariette
 marie-anne;marie-annette ' 169 occurrences seulement pour marie-annette
@@ -201,6 +218,7 @@ roge;rogette
 roland;rolande
 rose;rosette
 serge;sergette ' 74 occurrences seulement pour sergette
+séverin;séverine
 simone;simon
 simone;simonette ' 31 occurrences seulement pour simonette
 simone;simonne
@@ -213,8 +231,8 @@ théodora;théodore
 toine;toinette
 valentine;valentin
 valérian;valérianne
-victor;victorine
 victor;victoria
+victor;victorine
 yole;yolette
 yves;yvette
 yvonne;yvon

@@ -1,16 +1,16 @@
 PrénomCorrigé;PrénomOrigine
+abbigaëlle;abbigaelle
 abbygaël;abbygael
 abbygaëlle;abbygaelle
 abby-gaëlle;abby-gaelle
 abbygaïl;abbygail
-abbigaëlle;abbigaelle
-aby-gaëlle;aby-gaelle
 abélia;abelia
 abigaël;abigael
 abigaëlle;abigaelle
 abigaïl;abigail
 abygaël;abygael
 abygaëlle;abygaelle
+aby-gaëlle;aby-gaelle
 abygaïl;abygail
 açelya;acelya
 'âdam;adam ' adam reste majoritaire
@@ -395,6 +395,7 @@ chloée;chloee
 chouaïb;chouaib
 chrislène;chrislene
 chrismaël;chrismael
+'christèle;christele ' non trouvé
 chrystèle;chrystele
 çinar;cinar
 circé;circe
@@ -489,7 +490,7 @@ djéna;djena
 djénaba;djenaba
 djénéba;djeneba
 djimé;djime
-dolorés;dolores
+dolorès;dolores
 dorothée;dorothee
 douâa;douaa
 édan;edan
@@ -750,8 +751,8 @@ frédérik;frederik
 'frédérique;frederique ' non trouvé dans le fichier 2020
 frédy;fredy
 'gabriel;gabriël ' non supporté dans ce sens (gabriël est minoritaire)
-'gabrielle;gabriëlle ' non trouvé
 gabrièle;gabriele
+'gabrielle;gabriëlle ' non trouvé
 gabryël;gabryel
 gaël;gael
 gaëla;gaela
@@ -986,8 +987,11 @@ jénna;jenna
 jephté;jephte
 jérémi;jeremi
 jérémiah;jeremiah
-jéremie;jeremie
-jéremy;jeremy
+jérémie;jéremie
+jérémie;jeremie
+jérémy;jeremy
+jérémy;jéremy
+jérémy;jerémy
 jérome;jerome
 jérome;jérôme ' 90% de jérome et 10% de jérôme (on peut aussi ajouter la variante jérôme comme homophone)
 jéromine;jeromine
@@ -1391,12 +1395,12 @@ lounéa;lounea
 lounés;lounes
 lourenço;lourenco
 lovaïna;lovaina
-lùca;luca
-lùcas;lucas
-lùcia;lucia
+luca;lùca
+lucas;lùcas
+lucia;lùcia
 lucrèce;lucrece
-lùis;luis
-lùka;luka
+luis;lùis
+luka;lùka
 lùna;luna
 luqmân;luqman
 lutèce;lutece
@@ -1432,6 +1436,7 @@ maéline;maeline
 maélio;maelio
 maélis;maelis
 maëlise;maelise
+maëlis;maelis
 maëliss;maeliss
 maëlisse;maelisse
 maëlla;maella
@@ -1440,10 +1445,12 @@ maëlle;maelle
 maëllia;maellia
 maëllie;maellie
 maëlline;maelline
+maëllis;maellis
 maélly;maelly
 maëllya;maellya
 maëllyne;maellyne
 maëllys;maellys
+maëlys;maelys
 maélo;maelo
 maé-lou;mae-lou
 maëlou;maelou
@@ -1777,7 +1784,7 @@ mylàn;mylan
 myléna;mylena
 mylène;mylene
 nacéra;nacera
-nadége;nadege
+nadège;nadege
 nadèje;nadeje
 nadiège;nadiege
 naé;nae
@@ -2035,6 +2042,7 @@ réhan;rehan
 réhane;rehane
 réjane;rejane
 rémi;remi
+rémie;remie
 rémy;remy
 rénald;renald
 rénato;renato
@@ -2082,7 +2090,7 @@ salmân;salman
 salomé;salome
 salomée;salomee
 samaël;samael
-samuël;samuel
+samuel;samuël
 sanâ;sana
 sanâa;sanaa
 sanaé;sanae
@@ -2234,7 +2242,7 @@ stéphy;stephy
 stérenn;sterenn
 stévan;stevan
 stève;steve
-stéven;steven
+steven;stéven
 sulaymân;sulayman
 süleyman;suleyman
 sümeyra;sumeyra
@@ -2335,8 +2343,8 @@ théssa;thessa
 thïa;thia
 thïago;thiago
 thiéfaine;thiefaine
-thiérry;thierry
-thiéry;thiery
+thierry;thiérry
+thiery;thiéry
 thiméo;thimeo
 thimoté;thimote
 thimotée;thimotee

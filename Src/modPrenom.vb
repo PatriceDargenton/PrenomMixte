@@ -182,7 +182,7 @@ Public Module modPrenom
         FiltrerPrenomSimilaire(dicoS, dicoE, dicoH, iNbPrenomsTot,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
-        FiltrerPrenomUnigenre(dicoE, dicoH, dicoS, iNbPrenomsTot,
+        FiltrerPrenomUnigenre(dicoE, iNbPrenomsTot,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
 Export:
@@ -205,7 +205,7 @@ Export:
             dicoDefinitionsPrenomsSimilaires,
             dicoDefinitionsPrenomsSimilairesUtil,
             dicoE, dicoH, dicoS,
-            iNbLignes, iNbLignesOk, iNbPrenomsTot, iNbPrenomsTotOk,
+            iNbPrenomsTot, iNbPrenomsTotOk,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             sbCPMD, sbHPMD, sbSPMD,
             sCheminCorrectionsPrenoms,
@@ -388,10 +388,10 @@ Fin:
         For Each kvp In sdHP
             Dim sPrenom = kvp.Key
             Dim sPrenomC = kvp.Value
-            Dim iNbOcc% = 0, iNbOccC% = 0, iNbOccM% = 0
+            Dim iNbOcc% = 0, iNbOccC% = 0
             If dicoE.ContainsKey(sPrenom) Then iNbOcc = dicoE(sPrenom).iNbOcc
             If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
-            iNbOccM = Math.Max(iNbOcc, iNbOccC)
+            Dim iNbOccM% = Math.Max(iNbOcc, iNbOccC)
             If iNbOccM < iSeuilMinPrenomsHomophonesPotentiels Then Continue For
             sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
             sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
@@ -782,8 +782,6 @@ Fin:
 
     Private Sub FiltrerPrenomUnigenre(
             dicoE As DicoTri(Of String, clsPrenom),
-            dicoH As DicoTri(Of String, clsPrenom),
-            dicoS As DicoTri(Of String, clsPrenom),
             iNbPrenomsTot%, iNbPrenomsTotOk%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%)
 
         Dim iNbPrenomsVerif% = 0
@@ -829,7 +827,6 @@ Fin:
             dicoE As DicoTri(Of String, clsPrenom),
             dicoH As DicoTri(Of String, clsPrenom),
             dicoS As DicoTri(Of String, clsPrenom),
-            iNbLignes%, iNbLignesOk%,
             iNbPrenomsTot%, iNbPrenomsTotOk%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             sbCPMD As StringBuilder, sbHPMD As StringBuilder, sbSPMD As StringBuilder,

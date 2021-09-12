@@ -9,7 +9,7 @@ Imports System.Reflection
 
 Public Class UniversalComparer(Of T) : Implements IComparer, IComparer(Of T)
 
-Private sortKeys() As SortKey
+Private ReadOnly sortKeys() As SortKey
 Private m_bMsg As Boolean = False
 Private ReadOnly m_sTri$ = ""
 

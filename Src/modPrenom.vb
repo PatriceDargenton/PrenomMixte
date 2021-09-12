@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "11/09/2021"
+    Public Const sDateVersionAppli$ = "12/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -329,7 +329,7 @@ Fin:
         Dim sdHP As New SortedDictionary(Of String, String) ' Prénoms homophones potentiels
         Dim sdSP As New SortedDictionary(Of String, String) ' Prénoms similaires potentiels
 
-        For Each prenom In dicoE.Trier("")
+        For Each prenom In dicoE.Trier()
 
             ' Détection des corrections d'accent potentielles restantes
             Dim sPrenomSansAccent$ = sEnleverAccents(prenom.sPrenom, bMinuscule:=False)
@@ -482,8 +482,10 @@ Fin:
         Next
         For Each kvp In dicoDefinitionsPrenomsSimilaires
             If hsCles.Contains(kvp.Value) Then
-                MsgBox("Fusion des prénoms similaires + mixtes homophones :" & vbLf &
-                    "clé inversée : " & kvp.Value, MsgBoxStyle.Exclamation, sTitreAppli)
+                Dim sMsg$ = "Fusion des prénoms similaires + mixtes homophones :" & vbLf &
+                    "clé inversée : " & kvp.Value
+                Debug.WriteLine(sMsg)
+                MsgBox(sMsg, MsgBoxStyle.Exclamation, sTitreAppli)
                 sbPS.AppendLine(
                     "Fusion des prénoms similaires + mixtes homophones : clé inversée : " &
                     kvp.Value)
@@ -501,7 +503,7 @@ Fin:
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
-        For Each prenom In dico.Trier("")
+        For Each prenom In dico.Trier()
 
             prenom.Calculer(iNbPrenomsTot)
 
@@ -542,7 +544,7 @@ Fin:
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
-        Dim aPrenomsH = dicoH.Trier("")
+        Dim aPrenomsH = dicoH.Trier()
         For Each prenom In aPrenomsH
 
             If dicoE.ContainsKey(prenom.sPrenom) Then
@@ -556,11 +558,6 @@ Fin:
 
             If prenom.dicoVariantesH.Count > 1 Then
                 prenom.bMixteHomophone = True
-                ' Marquer aussi l'original pour l'export
-                'If dicoE.ContainsKey(prenom.sPrenomHomophone) Then
-                '    Dim prenomH = dicoE(prenom.sPrenomHomophone)
-                '    prenomH.bMixteHomophone = True
-                'End If
                 ' Marquer l'ensemble des variantes directement dans le dico épicène
                 For Each prenom0 In prenom.dicoVariantesH.Trier()
                     Dim sPrenomE = prenom0.sPrenom
@@ -618,7 +615,17 @@ Fin:
             For Each sCle In lst
                 prenom.dicoVariantesH.Remove(sCle)
             Next
-            If prenom.dicoVariantesH.Count <= 1 Then prenom.bMixteHomophone = False
+            If prenom.dicoVariantesH.Count <= 1 Then
+                prenom.bMixteHomophone = False
+                ' Reporter dans l'ensemble des variantes directement dans le dico épicène
+                For Each prenom0 In prenom.dicoVariantesH.Trier()
+                    Dim sPrenomE = prenom0.sPrenom
+                    If dicoE.ContainsKey(sPrenomE) Then
+                        Dim prenom1 = dicoE(sPrenomE)
+                        prenom1.bMixteHomophone = False
+                    End If
+                Next
+            End If
         Next
 
         ' Vérifier le nouveau calcul
@@ -656,7 +663,7 @@ Fin:
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
-        Dim aPrenomsS = dicoS.Trier("")
+        Dim aPrenomsS = dicoS.Trier()
         For Each prenom In aPrenomsS
 
             If dicoE.ContainsKey(prenom.sPrenom) Then
@@ -782,7 +789,7 @@ Fin:
 
         Dim iNbPrenomsVerif% = 0
         Dim iNbPrenomsVerifMF% = 0
-        Dim aPrenomsE = dicoE.Trier("")
+        Dim aPrenomsE = dicoE.Trier()
         For Each prenom In aPrenomsE
 
             iNbPrenomsVerif += prenom.iNbOcc
@@ -945,7 +952,7 @@ Fin:
 
         Dim iNbPrenoms% = 0
         Dim sTri$ = "iNbOcc desc"
-        If bUnigenre Then sTri = "bUnigenre desc, rFreqTotale desc"
+        If bUnigenre Then sTri = "bUnigenre desc, rFreqTotale desc, sPrenom"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoE.Trier(sTri)
 
@@ -1015,7 +1022,7 @@ Fin:
         sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms mixtes épicènes"))
 
         Dim iNbPrenomsMixtes% = 0
-        Dim sTri$ = "bMixteEpicene desc, rFreqTotale desc"
+        Dim sTri$ = "bMixteEpicene desc, rFreqTotale desc, sPrenom"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoE.Trier(sTri)
 
@@ -1091,7 +1098,7 @@ Fin:
             bColonneFreqVariante:=True))
 
         Dim iNbPrenomsMixtes% = 0
-        Dim sTri$ = "bMixteHomophone desc, rFreqTotale desc"
+        Dim sTri$ = "bMixteHomophone desc, rFreqTotale desc, sPrenom"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoH.Trier(sTri)
 
@@ -1221,7 +1228,7 @@ Fin:
             bColonneFreqVariante:=True))
 
         Dim iNbPrenomsSimilaires% = 0
-        Dim sTri$ = "bSimilaire desc, rFreqTotale desc"
+        Dim sTri$ = "bSimilaire desc, rFreqTotale desc, sPrenom"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoS.Trier(sTri)
 

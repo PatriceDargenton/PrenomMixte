@@ -1,6 +1,6 @@
 Prénom;PrénomAutreGenre
 adrienne;adrien
-alban;albanne
+albane;alban
 alberte;albert
 albertine;albert
 alexandre;alexandra
@@ -129,6 +129,7 @@ julie;juliette
 julien;julienne
 julien;juliette
 justin;justine
+karim;karima
 laure;laurette
 laurent;laurence
 lazare;lazarette
@@ -154,6 +155,7 @@ maël;maëlys
 maël;maëlisse
 maël;maëliss
 maël;maëlis
+'maël;maëllis ' maëllis est déjà le pivot pour les homophones (mais seulement 133 occurrences : 0.3% de perdu, pas grave)
 maël;maëllys
 maël;maëlyss
 maël;maëlysse

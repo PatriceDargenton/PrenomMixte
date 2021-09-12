@@ -82,8 +82,7 @@ Public Module modPrenom
     Const iNbLignesMaxPrenoms% = 0 ' 32346 prénoms en tout (reste quelques accents à corriger)
 
     Const sGrasMD$ = "**"
-    Const sGrasWiki$ = "**"
-    'Const sGrasWiki$ = "'''" ' Ancienne version de MédiaWiki (1.26.3)
+    Const sGrasWiki$ = "'''"
     Const sItaliqueMD$ = "*"
     Const sItaliqueWiki$ = "''"
     Const sItaliqueGrasMD$ = "***"

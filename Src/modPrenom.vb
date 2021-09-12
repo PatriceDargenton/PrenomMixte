@@ -75,7 +75,7 @@ Public Module modPrenom
     Const iSeuilMinPrenomsEpicenes% = 2000
     Const iSeuilMinPrenomsHomophones% = 20000
     Const iSeuilMinPrenomsSimilaires% = 20000
-    Const iSeuilMinPrenomsUnigenre% = 10000
+    Const iSeuilMinPrenomsUnigenre% = 20000
 
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000

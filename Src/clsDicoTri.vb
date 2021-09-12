@@ -1,5 +1,6 @@
 ﻿
-' Classe Dictionary triable
+' clsDicoTri.vb : Classe Dictionary triable
+' -------------
 
 Imports System.Runtime.Serialization
 

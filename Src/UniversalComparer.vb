@@ -1,4 +1,7 @@
 
+' UniversalComparer.vb
+' --------------------
+
 Imports System.Collections.Generic
 Imports System.Reflection
 

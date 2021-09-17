@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "12/09/2021"
+    Public Const sDateVersionAppli$ = "17/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -62,20 +62,26 @@ Public Module modPrenom
     Const rSeuilFreqRelPrenomsFrequents# = 0
     Const rSeuilFreqRelPrenomsHomophones# = 0
     Const rSeuilFreqRelPrenomsSimilaires# = 0
+    Const rSeuilFreqRelPrenomsAccentues# = 0
 
-    ' Fréquence relative minimale de la variante (homophone ou spécifiquement genrée)
+    ' Fréquence relative minimale de la variante (homophone, similaire ou accentuée)
     '  par rapport à la somme des variantes
     Const sFormatFreqRelVariante$ = "0%"
     Const rSeuilFreqRelVariante# = 0.01 ' 1%
     'Const sFormatFreqRelVariante$ = "0.0%"
     'Const rSeuilFreqRelVariante# = 0.001 ' 0.1%
+    'Const sFormatFreqRelVariante$ = "0.00%"
+    'Const rSeuilFreqRelVariante# = 0.0001 ' 0.01%
+    Const sFormatFreqRelVarianteA$ = "0.0%"
+    Const rSeuilFreqRelVarianteA# = 0.001 ' 0.1%
 
     Const iSeuilMinPrenomsFrequents% = 50000 ' 4000 minimum pour une page wiki (sinon ça plante)
     ' Nombre minimal d'occurrences du prénom sur plus d'un siècle
     Const iSeuilMinPrenomsEpicenes% = 2000
     Const iSeuilMinPrenomsHomophones% = 20000
     Const iSeuilMinPrenomsSimilaires% = 20000
-    Const iSeuilMinPrenomsUnigenre% = 20000
+    Const iSeuilMinPrenomsUnigenres% = 20000
+    Const iSeuilMinPrenomsAccentues% = 20000 ' 2000 minimum pour une page wiki (sinon ça plante)
 
     ' Seuil min. pour la détection des prénoms homophones potentiels
     Const iSeuilMinPrenomsHomophonesPotentiels% = 10000
@@ -141,6 +147,8 @@ Public Module modPrenom
         Dim dicoE As New DicoTri(Of String, clsPrenom) ' épicène
         Dim dicoH As New DicoTri(Of String, clsPrenom) ' homophone
         Dim dicoS As New DicoTri(Of String, clsPrenom) ' similaire
+        Dim dicoA As New DicoTri(Of String, clsPrenom) ' accent
+        Dim dicoG As New DicoTri(Of String, clsPrenom) ' général (accent non corrigé)
 
         Dim iNbLignes% = 0
         Dim iNbLignesOk% = 0
@@ -156,7 +164,7 @@ Public Module modPrenom
             dicoDefinitionsPrenomsMixtesHomophonesUtil,
             dicoDefinitionsPrenomsSimilaires,
             dicoDefinitionsPrenomsSimilairesUtil,
-            dicoE, dicoH, dicoS, bTest,
+            dicoE, dicoH, dicoS, dicoA, dicoG, bTest,
             iNbLignes, iNbLignesOk, iNbPrenomsTot, iNbPrenomsTotOk,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
@@ -185,6 +193,9 @@ Public Module modPrenom
         FiltrerPrenomUnigenre(dicoE, iNbPrenomsTot,
             iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
 
+        FiltrerPrenomAccent(dicoA, dicoG, iNbPrenomsTot,
+            iNbPrenomsTotOk, iNbPrenomsIgnores, iNbPrenomsIgnoresDate)
+
 Export:
         If bExporter Then
             Exporter(sDossierAppli, asLignes, dicoE,
@@ -204,7 +215,7 @@ Export:
             dicoDefinitionsPrenomsMixtesHomophonesUtil,
             dicoDefinitionsPrenomsSimilaires,
             dicoDefinitionsPrenomsSimilairesUtil,
-            dicoE, dicoH, dicoS,
+            dicoE, dicoH, dicoS, dicoA,
             iNbPrenomsTot, iNbPrenomsTotOk,
             iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             sbCPMD, sbHPMD, sbSPMD,
@@ -228,6 +239,8 @@ Fin:
             dicoE As DicoTri(Of String, clsPrenom),
             dicoH As DicoTri(Of String, clsPrenom),
             dicoS As DicoTri(Of String, clsPrenom),
+            dicoA As DicoTri(Of String, clsPrenom),
+            dicoG As DicoTri(Of String, clsPrenom),
             bTest As Boolean,
             ByRef iNbLignes%, ByRef iNbLignesOk%,
             ByRef iNbPrenomsTot%, ByRef iNbPrenomsTotOk%,
@@ -311,6 +324,36 @@ Fin:
                 Next
             Else
                 dicoS.Add(sCleS, prenomS)
+            End If
+
+            ' Dico des prénoms en général (sans correction d'accent)
+            Dim prenomG = prenom.Clone()
+            ' Ne pas ajouter le prénom avec l'accent corrigé, mais celui tel quel à l'origine
+            prenomG.sPrenom = prenomG.sPrenomOrigNorm
+            Dim sCleG$ = prenomG.sPrenom
+            If dicoG.ContainsKey(sCleG) Then
+                Dim prenom0 = dicoG(sCleG)
+                prenom0.Ajouter(prenomG)
+            Else
+                dicoG.Add(sCleG, prenomG)
+            End If
+
+            ' Dico des prénoms accentués (sans correction d'accent)
+            Dim prenomA = prenomG.Clone()
+            If Not prenomA.dicoVariantesA.ContainsKey(prenomA.sPrenom) Then
+                prenomA.dicoVariantesA.Add(prenomA.sPrenom, prenomG)
+            End If
+            Dim sCleA$ = prenomA.sPrenomOrigNormSansAccent
+            If dicoA.ContainsKey(sCleA) Then
+                Dim prenom0 = dicoA(sCleA)
+                prenom0.Ajouter(prenomG)
+                For Each kvp In prenomA.dicoVariantesA
+                    If Not prenom0.dicoVariantesA.ContainsKey(kvp.Key) Then
+                        prenom0.dicoVariantesA.Add(kvp.Key, prenomG)
+                    End If
+                Next
+            Else
+                dicoA.Add(sCleA, prenomA)
             End If
 
         Next
@@ -817,6 +860,144 @@ Fin:
 
     End Sub
 
+    Private Sub FiltrerPrenomAccent(
+            dicoA As DicoTri(Of String, clsPrenom),
+            dicoG As DicoTri(Of String, clsPrenom),
+            iNbPrenomsTot%, iNbPrenomsTotOk%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%)
+
+        Dim iNbPrenomsVerif% = 0
+        Dim iNbPrenomsVerifMF% = 0
+
+        Dim aPrenomsG = dicoG.Trier()
+        For Each prenom In aPrenomsG
+            prenom.Calculer(iNbPrenomsTot)
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+        Next
+
+        Dim iVerif% = iNbPrenomsVerif + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerif <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iNbPrenomsVerif) & " <> " & sFormaterNum(iNbPrenomsTotOk))
+            MsgBox("Décompte faux : " & iVerif & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+        Dim iVerifMF% = iNbPrenomsVerifMF + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerifMF <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iVerifMF) & " <> " & sFormaterNum(iNbPrenomsTot))
+            MsgBox("Décompte faux : " & iVerifMF & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+
+        iNbPrenomsVerif = 0
+        iNbPrenomsVerifMF = 0
+        Dim aPrenomsA = dicoA.Trier()
+        For Each prenom In aPrenomsA
+
+            prenom.Calculer(iNbPrenomsTot)
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+
+            ' Définition de accentué : au moins une variante accentuée
+            If prenom.dicoVariantesA.Count > 1 Then
+                prenom.bAccent = True
+                ' Utile si on veut exporter le booléen bAccent :
+                ' Marquer l'ensemble des variantes directement, dans le dico général
+                'For Each prenom0 In prenom.dicoVariantesA.Trier()
+                '    Dim sPrenomA = prenom0.sPrenom
+                '    If dicoG.ContainsKey(sPrenomA) Then
+                '        Dim prenom1 = dicoG(sPrenomA)
+                '        prenom1.bAccent = True
+                '    End If
+                'Next
+            End If
+
+        Next
+
+        iVerif = iNbPrenomsVerif + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerif <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iNbPrenomsVerif) & " <> " & sFormaterNum(iNbPrenomsTotOk))
+            MsgBox("Décompte faux : " & iVerif & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+        iVerifMF = iNbPrenomsVerifMF + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerifMF <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iVerifMF) & " <> " & sFormaterNum(iNbPrenomsTot))
+            MsgBox("Décompte faux : " & iVerifMF & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+
+        ' Détecter et retirer les variantes sous le seuil de fréquence relative min.
+
+        ' Détecter (calculer la fréquence avec les variantes)
+        For Each prenom In aPrenomsA
+            If prenom.dicoVariantesA.Count <= 1 Then Continue For
+            For Each kvp In prenom.dicoVariantesA
+                Dim prenomA = kvp.Value
+                prenomA.rFreqRelativeVarianteA = prenomA.iNbOcc / prenom.iNbOcc
+                If prenomA.rFreqRelativeVarianteA < rSeuilFreqRelVarianteA Then
+                    prenomA.bVarianteDecompteeA = True
+                End If
+            Next
+        Next
+
+        ' Retirer les variantes trop minoritaires
+        Dim lstPrenomsRetires As New List(Of clsPrenom)
+        For Each prenom In aPrenomsA
+            If prenom.dicoVariantesA.Count <= 1 Then Continue For
+            Dim lst As New List(Of String)
+            For Each kvp In prenom.dicoVariantesA
+                Dim prenomA = kvp.Value
+                If prenomA.bVarianteDecompteeA Then
+                    prenom.Retirer(prenomA)
+                    prenom.Calculer(iNbPrenomsTot)
+                    lst.Add(kvp.Key)
+                    lstPrenomsRetires.Add(prenomA)
+                End If
+            Next
+            For Each sCle In lst
+                prenom.dicoVariantesA.Remove(sCle)
+            Next
+            If prenom.dicoVariantesA.Count <= 1 Then
+                prenom.bAccent = False
+                ' Utile si on veut exporter le booléen bAccent :
+                ' Reporter dans l'ensemble des variantes directement dans le dico général
+                'For Each prenom0 In prenom.dicoVariantesA.Trier()
+                '    Dim sPrenomE = prenom0.sPrenom
+                '    If dicoG.ContainsKey(sPrenomE) Then
+                '        Dim prenom1 = dicoG(sPrenomE)
+                '        prenom1.bAccent = False
+                '    End If
+                'Next
+            End If
+        Next
+
+        ' Vérifier le nouveau calcul
+        iNbPrenomsVerif = 0
+        iNbPrenomsVerifMF = 0
+        For Each prenom In aPrenomsA
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+        Next
+        For Each prenom In lstPrenomsRetires
+            iNbPrenomsVerif += prenom.iNbOcc
+            iNbPrenomsVerifMF += prenom.iNbOccMasc + prenom.iNbOccFem
+        Next
+
+        iVerif = iNbPrenomsVerif + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerif <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iNbPrenomsVerif) & " <> " & sFormaterNum(iNbPrenomsTotOk))
+            MsgBox("Décompte faux : " & iVerif & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+        iVerifMF = iNbPrenomsVerifMF + iNbPrenomsIgnores + iNbPrenomsIgnoresDate
+        If iVerifMF <> iNbPrenomsTot Then
+            Debug.WriteLine(sFormaterNum(iVerifMF) & " <> " & sFormaterNum(iNbPrenomsTot))
+            MsgBox("Décompte faux : " & iVerifMF & " <> " & iNbPrenomsTot,
+                MsgBoxStyle.Exclamation, sTitreAppli)
+        End If
+
+    End Sub
+
     Private Sub AfficherSyntheses(sDossierAppli$,
             dicoCorrectionsPrenoms As DicoTri(Of String, String),
             dicoCorrectionsPrenomsUtil As DicoTri(Of String, String),
@@ -827,6 +1008,7 @@ Fin:
             dicoE As DicoTri(Of String, clsPrenom),
             dicoH As DicoTri(Of String, clsPrenom),
             dicoS As DicoTri(Of String, clsPrenom),
+            dicoA As DicoTri(Of String, clsPrenom),
             iNbPrenomsTot%, iNbPrenomsTotOk%,
             iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             sbCPMD As StringBuilder, sbHPMD As StringBuilder, sbSPMD As StringBuilder,
@@ -848,11 +1030,11 @@ Fin:
 
         AfficherSynthesePrenomFrequentEtUnigenre(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsUnigenre, rSeuilFreqRelPrenomsFrequents,
+            iSeuilMinPrenomsUnigenres, rSeuilFreqRelPrenomsFrequents,
             iNbLignesMaxPrenoms, bUnigenre:=True)
         AfficherSynthesePrenomFrequentEtUnigenre(sDossierAppli, dicoE, iNbPrenomsTotOk,
             iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
-            iSeuilMinPrenomsUnigenre, rSeuilFreqRelPrenomsFrequents,
+            iSeuilMinPrenomsUnigenres, rSeuilFreqRelPrenomsFrequents,
             iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True, bUnigenre:=True)
 
         AfficherSyntheseEpicene(sDossierAppli, dicoE,
@@ -885,14 +1067,25 @@ Fin:
             iSeuilMinPrenomsSimilaires, rSeuilFreqRelPrenomsSimilaires,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsSimilaires,
-            dicoDefinitionsPrenomsSimilairesUtil) ' dicoH,
+            dicoDefinitionsPrenomsSimilairesUtil)
         AfficherSyntheseSimilaire(sDossierAppli,
             dicoS, dicoE,
             iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
             iSeuilMinPrenomsSimilaires, rSeuilFreqRelPrenomsSimilaires,
             iNbLignesMaxPrenoms,
             dicoDefinitionsPrenomsSimilaires,
-            dicoDefinitionsPrenomsSimilairesUtil, sbBilan, bTriAlphab:=True) 'dicoH,
+            dicoDefinitionsPrenomsSimilairesUtil, sbBilan, bTriAlphab:=True)
+
+        AfficherSyntheseAccent(sDossierAppli,
+            dicoA, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsAccentues, rSeuilFreqRelPrenomsAccentues,
+            iNbLignesMaxPrenoms)
+        AfficherSyntheseAccent(sDossierAppli,
+            dicoA, dicoE,
+            iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMinPrenomsAccentues, rSeuilFreqRelPrenomsAccentues,
+            iNbLignesMaxPrenoms, sbBilan, bTriAlphab:=True)
 
         sbBilan.AppendLine("Liste des corrections d'accent").
             AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
@@ -948,6 +1141,7 @@ Fin:
 
         Dim iNbPrenoms% = 0
         Dim sTri$ = "iNbOcc desc"
+        ' En cas d'égalité parfaite, on trie aussi par prénom, pour pouvoir suivre facilement les modifications
         If bUnigenre Then sTri = "bUnigenre desc, rFreqTotale desc, sPrenom"
         If bTriAlphab Then sTri = "sPrenom"
         For Each prenom In dicoE.Trier(sTri)
@@ -1319,6 +1513,112 @@ Fin:
 
     End Sub
 
+    Private Sub AfficherSyntheseAccent(sDossierAppli$,
+            dicoA As DicoTri(Of String, clsPrenom),
+            dicoE As DicoTri(Of String, clsPrenom),
+            iNbPrenomsTotOk%, iNbPrenomsTot%,
+            iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
+            iSeuilMin%, rSeuilFreqRel!, iNbLignesMax%,
+            Optional sbBilan As StringBuilder = Nothing, Optional bTriAlphab As Boolean = False)
+
+        ' Produire la synthèse statistique des prénoms accentués
+
+        Dim sb As New StringBuilder
+        AfficherInfo(sb, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVarianteA)
+
+        Dim sbMD As New StringBuilder ' Syntaxe MarkDown
+        sbMD.AppendLine("Synthèse statistique des prénoms accentués")
+        sbMD.AppendLine()
+        AfficherInfo(sbMD, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVarianteA, bDoublerRAL:=True,
+            sFormatFreqRelVarianteLoc:=sFormatFreqRelVarianteA)
+        sbMD.AppendLine(sEnteteMarkDown(bColonneFreqVariante:=True))
+
+        Dim sbWK As New StringBuilder ' Syntaxe Wiki
+        AfficherInfo(sbWK, iNbPrenomsTotOk, iNbPrenomsTot, iNbPrenomsIgnores, iNbPrenomsIgnoresDate,
+            iSeuilMin, rSeuilFreqRel, rSeuilFreqRelVarianteA, bDoublerRAL:=True,
+            sFormatFreqRelVarianteLoc:=sFormatFreqRelVarianteA)
+        sbWK.AppendLine(sEnteteWiki("Synthèse statistique des prénoms accentués",
+            bColonneFreqVariante:=True))
+
+        Dim iNbPrenomsAccentues% = 0
+        Dim sTri$ = "bAccent desc, rFreqTotale desc, sPrenom"
+        If bTriAlphab Then sTri = "sPrenom"
+        For Each prenom In dicoA.Trier(sTri)
+
+            If Not prenom.bAccent Then Continue For
+
+            If iSeuilMin > 0 AndAlso prenom.iNbOcc < iSeuilMin Then Continue For
+
+            iNbPrenomsAccentues += 1
+            If iNbLignesMax > 0 AndAlso iNbPrenomsAccentues > iNbLignesMax Then Exit For
+
+            prenom.bSelect = True
+
+            Dim sPrenom$ = prenom.sPrenom
+            Dim sPrenomMD$ = sPrenom
+            Dim sPrenomWiki$ = sPrenom
+            Dim bVariantes = False
+            If prenom.dicoVariantesA.Count > 1 Then
+                bVariantes = True
+                Dim lst = prenom.dicoVariantesA.ToList
+                ' Mêmes conditions que pour la liste des prénoms fréquents :
+                ' Gras : épicène
+                ' Italique : homophone
+                ' Gras+Italique : épicène + homophone
+                sPrenomMD = sListerCleTxtDico(lst, dicoE, bWiki:=False, bHomophoneEnItalique:=True)
+                sPrenomWiki = sListerCleTxtDico(lst, dicoE, bWiki:=True, bHomophoneEnItalique:=True)
+            End If
+
+            sb.AppendLine(sLigneDebug(prenom, sPrenom, iNbPrenomsAccentues, sFormatFreq))
+            sbMD.AppendLine(sLigneMarkDown(prenom, sPrenomMD, iNbPrenomsAccentues, sFormatFreq,
+                iNumVariante:=0, bSuffixeNumVariante:=True))
+            sbWK.AppendLine(sLigneWiki(prenom, sPrenomWiki, iNbPrenomsAccentues, sFormatFreq,
+                iNumVariante:=0, bSuffixeNumVariante:=True))
+
+            If bVariantes Then
+                Dim iNumVariante% = 0
+                For Each prenomV In prenom.dicoVariantesA.Trier("iNbOcc desc")
+                    If prenomV.bVarianteDecompteeS Then Continue For
+                    iNumVariante += 1
+                    Dim sPrenomV$ = prenomV.sPrenom
+                    sb.AppendLine(sLigneDebug(prenomV, sPrenomV, iNbPrenomsAccentues, sFormatFreq))
+                    Dim bGras = False
+                    If dicoE.ContainsKey(sPrenomV) Then
+                        Dim prenomE = dicoE(sPrenomV)
+                        If prenomE.bMixteEpicene Then bGras = True
+                    End If
+                    Dim bItalique = False
+                    If dicoE.ContainsKey(sPrenomV) Then
+                        Dim prenomH = dicoE(sPrenomV)
+                        If prenomH.bMixteHomophone Then bItalique = True
+                    End If
+                    sbMD.AppendLine(sLigneMarkDown(prenomV, sPrenomV, iNbPrenomsAccentues,
+                        sFormatFreq, iNumVariante, bGras, bItalique,
+                        bSuffixeNumVariante:=True, bColonneFreqVarianteA:=True))
+                    sbWK.AppendLine(sLigneWiki(prenomV, sPrenomV, iNbPrenomsAccentues,
+                        sFormatFreq, iNumVariante, bGras, bItalique,
+                        bSuffixeNumVariante:=True, bColonneFreqVarianteA:=True))
+                Next
+            End If
+
+        Next
+        sbWK.AppendLine("|}")
+
+        'Debug.WriteLine(sb.ToString)
+
+        If bTriAlphab Then
+            sbBilan.Append(sbMD).AppendLine().AppendLine(sSautDeLigneMD).AppendLine(sSautDeLigneMD).AppendLine()
+        Else
+            Dim sCheminMD$ = sDossierAppli & "\PrenomsAccentues.md"
+            EcrireFichier(sCheminMD, sbMD)
+            Dim sCheminWK$ = sDossierAppli & "\PrenomsAccentues.wiki"
+            EcrireFichier(sCheminWK, sbWK)
+        End If
+
+    End Sub
+
     Private Function sEnteteMarkDown$(Optional bColonneFreqVariante As Boolean = False)
 
         Dim sColonneFreqVariante$ = ""
@@ -1390,7 +1690,8 @@ Fin:
             Optional bItalique As Boolean = False,
             Optional bSuffixeNumVariante As Boolean = False,
             Optional bColonneFreqVarianteH As Boolean = False,
-            Optional bColonneFreqVarianteS As Boolean = False)
+            Optional bColonneFreqVarianteS As Boolean = False,
+            Optional bColonneFreqVarianteA As Boolean = False)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
@@ -1404,6 +1705,9 @@ Fin:
         End If
         If bColonneFreqVarianteS Then
             sColonneFreqVariante = "|" & prenom.rFreqRelativeVarianteS.ToString(sFormatFreqRelVariante)
+        End If
+        If bColonneFreqVarianteA Then
+            sColonneFreqVariante = "|" & prenom.rFreqRelativeVarianteA.ToString(sFormatFreqRelVarianteA)
         End If
 
         Dim s$ =
@@ -1430,7 +1734,8 @@ Fin:
             Optional bItalique As Boolean = False,
             Optional bSuffixeNumVariante As Boolean = False,
             Optional bColonneFreqVarianteH As Boolean = False,
-            Optional bColonneFreqVarianteS As Boolean = False)
+            Optional bColonneFreqVarianteS As Boolean = False,
+            Optional bColonneFreqVarianteA As Boolean = False)
 
         Dim sMiseEnForme$ = ""
         Dim sNumVariante$ = ""
@@ -1444,6 +1749,9 @@ Fin:
         End If
         If bColonneFreqVarianteS Then
             sColonneFreqVariante = "||" & prenom.rFreqRelativeVarianteS.ToString(sFormatFreqRelVariante)
+        End If
+        If bColonneFreqVarianteA Then
+            sColonneFreqVariante = "||" & prenom.rFreqRelativeVarianteA.ToString(sFormatFreqRelVarianteA)
         End If
 
         ' Ne rien afficher si 0, car cela perturbe le tri dans le wiki
@@ -1500,7 +1808,8 @@ Fin:
         Next
         If Not bOk Then Return False
 
-        Dim sPrenom = sPrenomOrig.ToLower
+        Dim sPrenomOrigMin = sPrenomOrig.ToLower
+        Dim sPrenom = sPrenomOrigMin
 
         If dicoCorrectionsPrenoms.ContainsKey(sPrenom) Then
             Dim sPrenomCorrige$ = dicoCorrectionsPrenoms(sPrenom)
@@ -1533,6 +1842,8 @@ Fin:
         prenom.sPrenomHomophone = FirstCharToUpper(sPrenomHomophone)
         prenom.sPrenomSimilaire = FirstCharToUpper(sPrenomSimilaires)
         prenom.sPrenomOrig = sPrenomOrig
+        prenom.sPrenomOrigNorm = FirstCharToUpper(sPrenomOrigMin)
+        prenom.sPrenomOrigNormSansAccent = sEnleverAccents(prenom.sPrenomOrigNorm, bMinuscule:=False)
 
         prenom.sCodeSexe = sCodeSexe
         prenom.sAnnee = sAnnee
@@ -1675,7 +1986,8 @@ Suite:
     Private Sub AfficherInfo(sb As StringBuilder,
             iNbPrenomsTotOk%, iNbPrenomsTot%, iNbPrenomsIgnores%, iNbPrenomsIgnoresDate%,
             iSeuilMin%, rSeuilFreqRel!, rSeuilFreqRelVariante!,
-            Optional bDoublerRAL As Boolean = False)
+            Optional bDoublerRAL As Boolean = False,
+            Optional sFormatFreqRelVarianteLoc$ = sFormatFreqRelVariante)
 
         sb.AppendLine("Date début = 1900")
         If bDoublerRAL Then sb.AppendLine("")
@@ -1704,7 +2016,7 @@ Suite:
         End If
         If rSeuilFreqRelVariante > 0 Then
             sb.AppendLine("Fréquence relative min. variante = " &
-                rSeuilFreqRelVariante.ToString(sFormatFreqRelVariante))
+                rSeuilFreqRelVariante.ToString(sFormatFreqRelVarianteLoc))
             If bDoublerRAL Then sb.AppendLine("")
         End If
 

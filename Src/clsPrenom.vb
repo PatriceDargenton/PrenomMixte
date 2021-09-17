@@ -15,6 +15,7 @@ Public Class clsPrenom : Implements ICloneable
     End Function
 
     Public sPrenom$, sPrenomOrig$, sPrenomHomophone$, sPrenomSimilaire$
+    Public sPrenomOrigNorm$, sPrenomOrigNormSansAccent$
     Public sAnnee$, sCodeSexe$, sNbOcc$
     Public bMasc As Boolean
     Public bFem As Boolean
@@ -22,13 +23,14 @@ Public Class clsPrenom : Implements ICloneable
     Public bMixteHomophone As Boolean
     Public bSimilaire As Boolean
     Public bUnigenre As Boolean
+    Public bAccent As Boolean
     Public iNbOccMasc%, iNbOccFem%, iNbOcc%
     Public rFreqRelative#, rFreqRelativeMasc#, rFreqRelativeFem#
 
-    ' Fréquence relative de la variante (homophone ou similaire)
+    ' Fréquence relative de la variante (homophone, similaire ou accentuée)
     '  par rapport à la somme des variantes
-    Public rFreqRelativeVarianteH#, rFreqRelativeVarianteS#
-    Public bVarianteDecompteeH, bVarianteDecompteeS As Boolean
+    Public rFreqRelativeVarianteH#, rFreqRelativeVarianteS#, rFreqRelativeVarianteA#
+    Public bVarianteDecompteeH, bVarianteDecompteeS, bVarianteDecompteeA As Boolean
 
     Public rFreqTotale#, rFreqTotaleMasc#, rFreqTotaleFem#
     Public iAnnee%
@@ -37,6 +39,7 @@ Public Class clsPrenom : Implements ICloneable
     Public bSelect As Boolean
     Public dicoVariantesH As New DicoTri(Of String, clsPrenom)
     Public dicoVariantesS As New DicoTri(Of String, clsPrenom)
+    Public dicoVariantesA As New DicoTri(Of String, clsPrenom)
 
     Public Sub Calculer(iNbPrenomsTot%)
         If iNbPrenomsTot > 0 Then

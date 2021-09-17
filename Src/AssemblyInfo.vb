@@ -7,7 +7,7 @@ Imports System.Reflection
 Imports System.Runtime.InteropServices
 
 <Assembly: AssemblyTitle("PrenomMixte")>
-<Assembly: AssemblyDescription("Synthèse statistique des prénoms mixtes et prénoms fréquents")>
+<Assembly: AssemblyDescription("Synthèse statistique des prénoms mixtes")> 
 <Assembly: AssemblyCompany("ORS Production")> 
 <Assembly: AssemblyProduct("PrenomMixte")> 
 <Assembly: AssemblyCopyright("Copyright © 2021 ORS Production")> 
@@ -18,5 +18,5 @@ Imports System.Runtime.InteropServices
 'Le GUID suivant est pour l'ID de la typelib si ce projet est exposé à COM
 <Assembly: Guid("501febdc-e766-4e85-ae12-7bd11e6d1045")>
 
-<Assembly: AssemblyVersion("1.0.2")>
+<Assembly: AssemblyVersion("1.0.3")> 
 <Assembly: AssemblyFileVersion("1.0.1")> 

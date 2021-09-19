@@ -1,18 +1,23 @@
 Prénom;PrénomAutreGenre
 adrienne;adrien
 albane;alban
-alberte;albert
-albertine;albert
+albert;alberte
+albert;albertine
+alex;aléxia
+alex;aléxis
 alexandre;alexandra
 alexandre;alexandrine
+alice;alicia
 alie;aliette ' 41 occurrences seulement pour alie
 allie;alliette
 aloïse;aloïs
 alphonse;alphonsine
+angèle;angélina
 anice;anicette
 anne;annette
 anne-julie;anne-juliette
 anthelme;anthelmette
+anthony;antonin
 antoine;antoinette
 aude;audette ' 106 occurrences seulement pour audette
 augustin;augustine
@@ -28,6 +33,7 @@ blanche;blanchette ' 48 occurrences seulement pour blanchette
 brune;brunette
 camille;camillette ' 3 occurrences seulement pour camillette
 catherine;catherinette
+cécile;cécilia
 célestin;céleste
 célestin;célestine
 charlie;charlène
@@ -37,8 +43,10 @@ charlie;charline
 charlie;charlotte
 christiane;christian
 christin;christine
+christophe;christopher
 claire;clairette
 claude;claudette
+claude;claudia
 claude;claudie
 claude;claudine
 claude;claudy
@@ -63,6 +71,7 @@ edwige;edwig ' 6 occurrences seulement pour edwig
 ernest;ernestine
 etienne;etiennette
 eugène;eugénie
+éva;évan
 fabien;fabienne
 fauve;fauvette
 fernande;fernand
@@ -83,6 +92,7 @@ franck;franki
 franck;frankie
 franck;franky
 françois;françoise
+gaëtan;gaëtane
 gaëtan;gaëtanne
 gastonne;gastonnette
 gatien;gatienne
@@ -99,6 +109,7 @@ guilhemine;guilhem
 guillaume;guillaumette
 guillaume;guillemette
 gwenvaëlla;gwenvaël
+hélène;élena
 helie;heliette
 henri;henrie ' 49 occurrences seulement pour henrie
 henri;henriette
@@ -112,7 +123,9 @@ jacques;jackie
 jacques;jacqueline
 jacques;jacquette
 jeanne;jane
+jeanne;janine
 jeanne;jean
+jeanne;jeanine
 jeanne;jeannette
 jeanne;jeannine
 jéromine;jérome
@@ -130,7 +143,9 @@ julien;julienne
 julien;juliette
 justin;justine
 karim;karima
+laure;laura
 laure;laurette
+laure;laurine
 laurent;laurence
 lazare;lazarette
 léon;léone
@@ -149,20 +164,21 @@ louise;louïsa
 louise;louisette
 luce;lucette
 lucien;lucienne
+lydia;lydie
 lyne;lynette ' 69 occurrences seulement pour lynette
 lyse;lysette ' 13 occurrences seulement pour lysette
-maël;maëlys
-maël;maëlisse
-maël;maëliss
+maël;maélis
 maël;maëlis
+maël;maëliss
+maël;maëlisse
 'maël;maëllis ' maëllis est déjà le pivot pour les homophones (mais seulement 133 occurrences : 0.3% de perdu, pas grave)
 maël;maëllys
-maël;maëlyss
-maël;maëlysse
 maël;maélys
-maël;maélis
+maël;maëlys
 maël;maélyss
+maël;maëlyss
 maël;maélysse
+maël;maëlysse
 margo;margotte ' 49 occurrences seulement pour margotte
 marie;mariette
 marie-anne;marie-annette ' 169 occurrences seulement pour marie-annette
@@ -185,6 +201,7 @@ marise;marisette ' 72 occurrences seulement pour marisette
 martine;martin
 maryne;marynette ' 11 occurrences seulement pour marynette
 maryse;marysette
+mathieu;mathias
 maurice;mauricette
 maxette;maxe
 maximilien;maximilienne
@@ -204,6 +221,7 @@ nordine;nordi ' 66 occurrences seulement pour nordi
 nordine;nordin
 ode;odette ' 67 occurrences seulement pour ode
 olive;olivette
+olivier;olivia
 pascal;pascaline
 patricia;patrice
 paul;paula
@@ -225,10 +243,13 @@ simone;simon
 simone;simonette ' 31 occurrences seulement pour simonette
 simone;simonne
 stéphane;stéphanie
+stève;steven
 suze;suzette ' 3 occurrences seulement pour suze
 sylvaine;sylvain
 sylvie;sylve ' 10 occurrences seulement pour sylve
 sylvie;sylvette
+sylvie;sylvia
+sylvie;sylviane
 théodora;théodore
 toine;toinette
 valentine;valentin

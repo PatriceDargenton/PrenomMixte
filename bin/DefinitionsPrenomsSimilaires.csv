@@ -50,7 +50,7 @@ claude;claudia
 claude;claudie
 claude;claudine
 claude;claudy
-claudinette;claudine
+'claudinette;claudine ' déjà similaire à claude !
 clément;clémence
 clément;clémentine
 coline;colinette ' 12 occurrences seulement pour colinette
@@ -62,6 +62,7 @@ dominique;dominico
 dominique;dominiquette ' 81 occurrences seulement pour dominiquette
 dorian;doriane
 dorothée;théodore
+dorothée;théodora
 edwige;edwig ' 6 occurrences seulement pour edwig
 élie;éliette
 émile;émilie
@@ -138,7 +139,7 @@ joze;jozette
 julie;jule
 julie;jules
 julie;julette ' 6 occurrences seulement pour julette
-julie;juliette
+'julie;juliette ' déjà similaire à julien
 julien;julienne
 julien;juliette
 justin;justine
@@ -168,17 +169,17 @@ lydia;lydie
 lyne;lynette ' 69 occurrences seulement pour lynette
 lyse;lysette ' 13 occurrences seulement pour lysette
 maël;maélis
-maël;maëlis
-maël;maëliss
-maël;maëlisse
+'maël;maëlis ' inutile
+maël;maëliss ' utile
+maël;maëlisse ' utile
 'maël;maëllis ' maëllis est déjà le pivot pour les homophones (mais seulement 133 occurrences : 0.3% de perdu, pas grave)
-maël;maëllys
-maël;maélys
-maël;maëlys
-maël;maélyss
-maël;maëlyss
-maël;maélysse
-maël;maëlysse
+maël;maëllys ' utile
+maël;maélys ' utile
+maël;maëlys ' utile
+maël;maélyss ' très utile : regroupement !
+'maël;maëlyss  ' inutile
+'maël;maélysse ' inutile
+'maël;maëlysse ' inutile
 margo;margotte ' 49 occurrences seulement pour margotte
 marie;mariette
 marie-anne;marie-annette ' 169 occurrences seulement pour marie-annette
@@ -250,7 +251,7 @@ sylvie;sylve ' 10 occurrences seulement pour sylve
 sylvie;sylvette
 sylvie;sylvia
 sylvie;sylviane
-théodora;théodore
+'théodora;théodore ' cf. dorothée
 toine;toinette
 valentine;valentin
 valérian;valérianne

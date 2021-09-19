@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "17/09/2021"
+    Public Const sDateVersionAppli$ = "19/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -1238,7 +1238,7 @@ Fin:
         For Each kvp In dicoCorrectionsPrenoms
             If Not dicoCorrectionsPrenomsUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom non trouvée : " & kvp.Key
-                Debug.WriteLine(sLigne)
+                If Not bTriAlphab Then Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1368,7 +1368,7 @@ Fin:
         For Each kvp In dicoDefinitionsPrenomsMixtesHomophones
             If Not dicoDefinitionsPrenomsMixtesHomophonesUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom (liste homophone) non trouvée : " & kvp.Key
-                Debug.WriteLine(sLigne)
+                If Not bTriAlphab Then Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1493,7 +1493,7 @@ Fin:
         For Each kvp In dicoDefinitionsPrenomsSimilaires
             If Not dicoDefinitionsPrenomsSimilairesUtil.ContainsKey(kvp.Key) Then
                 Dim sLigne$ = "Correction de prénom (liste des prénoms similaires) non trouvée : " & kvp.Key
-                Debug.WriteLine(sLigne)
+                If Not bTriAlphab Then Debug.WriteLine(sLigne)
                 sb.AppendLine(sLigne)
                 sbMD.AppendLine(sLigne)
                 sbWK.AppendLine(sLigne)
@@ -1832,6 +1832,12 @@ Fin:
         Dim sPrenomSimilaires = sPrenom
         If dicoDefinitionsPrenomsSimilaires.ContainsKey(sPrenom) Then
             Dim sPrenomS$ = dicoDefinitionsPrenomsSimilaires(sPrenom)
+            ' Ne pas alerter si la clé est déjà dans le dico h ? Mais on a besoin d'associer
+            '  les similaires en plus des homophones, donc pas possible :
+            'If Not dicoDefinitionsPrenomsSimilairesUtil.ContainsKey(sPrenom) AndAlso
+            '   Not dicoDefinitionsPrenomsMixtesHomophonesUtil.ContainsKey(sPrenom) Then
+            '    dicoDefinitionsPrenomsSimilairesUtil.Add(sPrenom, sPrenomS)
+            'End If
             If Not dicoDefinitionsPrenomsSimilairesUtil.ContainsKey(sPrenom) Then
                 dicoDefinitionsPrenomsSimilairesUtil.Add(sPrenom, sPrenomS)
             End If
@@ -2035,15 +2041,13 @@ Suite:
         Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
         If IsNothing(asLignes) Then Return dico
 
+        Dim hsDoublonsCorrection As New HashSet(Of String)
         Dim hsDoublons As New HashSet(Of String)
         Dim iNbLignes% = 0
         For Each sLigne As String In asLignes
             iNbLignes += 1
             If iNbLignes = 1 Then Continue For ' Entête
             If sLigne.StartsWith("'") Then Continue For ' Commentaire
-            'If sLigne.StartsWith("michel;michelle") Then
-            '    Debug.WriteLine("!")
-            'End If
             Dim asChamps() As String
             asChamps = Split(sLigne, ";"c)
             Dim iNumChampMax% = asChamps.GetUpperBound(0)
@@ -2087,6 +2091,16 @@ Suite:
                 MsgBox(sMsg, MsgBoxStyle.Information, "Prénom Mixte")
             Else
                 hsDoublons.Add(sCle)
+            End If
+
+            ' Vérifier les doublons sur les corrections : on ne peut corriger que d'une seule façon
+            Dim sCleCorrection$ = sValeurOrig
+            If hsDoublonsCorrection.Contains(sCleCorrection) Then
+                Dim sMsg$ = "Doublon : " & sCleCorrection & vbLf & IO.Path.GetFileName(sChemin)
+                Debug.WriteLine(sMsg)
+                MsgBox(sMsg, MsgBoxStyle.Information, "Prénom Mixte")
+            Else
+                hsDoublonsCorrection.Add(sCleCorrection)
             End If
 
             If String.IsNullOrEmpty(sValeurCorrigee) OrElse

@@ -1,12 +1,11 @@
 
 Synthèse statistique des [prénoms mixtes](https://fr.wikipedia.org/wiki/Prénom_mixte)
-==
+---
 
 Il n'existe pas de dictionnaire académique des prénoms (si ? en tout cas il y a un dictionnaire des prénoms dans MS-Word), car il s'agit d'une question de multiculturalisme lié à l'immigration. On pourrait établir un dictionnaire des prénoms français, qui définirait l'orthographe recommandée pour chaque prénom. Au niveau de la francophonie, ces dictionnaires pourraient éventuellement converger vers un consensus, ... ou pas ! Et au niveau des cultures en dehors de la francophonie, on ne pourrait tout simplement pas définir une norme unique pour toutes ces cultures. Imaginons que M. Groçon émigre à l'étranger, il voudra absolument que son ç cédille soit préservé, n'est-ce pas ? Mais est-ce qu'au moins on pourra saisir ce ç cédille dans le système informatique de l'état en question ? Il en est de même pour les prénoms d'autres cultures qui arrivent en France. Bref, c'est probablement la raison pour laquelle il y a tant d'orthographes fantaisistes comme on va le voir ici, dans un pays qui aime pourtant tellement les normes et les standards...
 
 <!-- TOC -->
 
-- [Synthèse statistique des prénoms mixtes](#synth%C3%A8se-statistique-des-pr%C3%A9noms-mixtes)
 - [Téléchargement](#t%C3%A9l%C3%A9chargement)
 - [Synthèse statistique des prénoms mixtes épicènes](#synth%C3%A8se-statistique-des-pr%C3%A9noms-mixtes-%C3%A9pic%C3%A8nes)
 - [Synthèse statistique des prénoms mixtes homophones](#synth%C3%A8se-statistique-des-pr%C3%A9noms-mixtes-homophones)

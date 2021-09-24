@@ -335,3 +335,4 @@ ASALocalRun/
 
 # Ignore Archive subdirectory
 Archive/
+/PrenomMixte.vbproj.*

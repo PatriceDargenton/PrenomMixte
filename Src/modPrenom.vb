@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "19/09/2021"
+    Public Const sDateVersionAppli$ = "24/09/2021"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
@@ -174,7 +174,7 @@ Public Module modPrenom
 
         If bTest Then GoTo Export
 
-        DetectionAnomalies(sDossierAppli,
+        DetectionAnomalies(sDossierAppli, sCheminDefPrenomsSimilaires,
             dicoCorrectionsPrenoms,
             dicoDefinitionsPrenomsMixtesHomophones,
             dicoDefinitionsPrenomsSimilaires,
@@ -360,7 +360,7 @@ Fin:
 
     End Sub
 
-    Private Sub DetectionAnomalies(sDossierAppli$,
+    Private Sub DetectionAnomalies(sDossierAppli$, sCheminDefPrenomsSimilaires$,
         dicoCorrectionsPrenoms As DicoTri(Of String, String),
         dicoDefinitionsPrenomsMixtesHomophones As DicoTri(Of String, String),
         dicoDefinitionsPrenomsSimilaires As DicoTri(Of String, String),
@@ -411,46 +411,123 @@ Fin:
 
         Next
 
-        Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent")
-        sbCPMD = New StringBuilder("Liste des corrections potentielles d'accent")
+        Dim sbCP As New StringBuilder("Liste des corrections potentielles d'accent (ex.:rené;rene)")
+        sbCPMD = New StringBuilder("Liste des corrections potentielles d'accent (ex.:rené;rene)")
         sbCP.AppendLine()
         sbCPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
+        Dim dicoCP As New DicoTri(Of String, clsPrenom)
         For Each kvp In sdCP
             Dim sPrenom = kvp.Key
             Dim sPrenomC = kvp.Value
-            sbCP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbCPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+            If dicoE.ContainsKey(sPrenomC) Then
+                Dim prenom = dicoE(sPrenomC)
+                prenom.sPrenomPotentiel = sPrenom
+                dicoCP.Add(sPrenomC, prenom)
+            End If
+        Next
+        Dim sTri$ = "iNbOcc desc, sPrenom"
+        Dim sTriP$ = "iNbOccPotentiel desc, sPrenom"
+        Const bVerification = False ' Pour vérifier si on obtient pareil qu'avant
+        If bVerification Then sTri = "" : sTriP = ""
+        For Each prenom In dicoCP.Trier(sTri)
+            Dim sPrenom = prenom.sPrenomPotentiel
+            Dim sPrenomC = prenom.sPrenom
+            If bVerification Then
+                sbCP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+                sbCPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+            Else
+                Dim iNbOccP% = 0
+                If dicoE.ContainsKey(sPrenom) Then iNbOccP = dicoE(sPrenom).iNbOcc
+                sbCP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower &
+                    " ' " & prenom.iNbOcc & ", " & iNbOccP)
+                sbCPMD.AppendLine(sPrenom & " (" & iNbOccP & ") : " &
+                    sPrenomC & " (" & prenom.iNbOcc & ")").AppendLine()
+            End If
         Next
         Dim sCheminCP$ = sDossierAppli & "\CorrectionsPotentielles.txt"
         EcrireFichier(sCheminCP, sbCP)
 
-        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels restants")
-        sbHPMD = New StringBuilder("Liste des prénoms homophones potentiels restants")
+        Dim hsAssocSim = LireAssociations(sCheminDefPrenomsSimilaires)
+        Dim dicoHP As New DicoTri(Of String, clsPrenom)
+        Dim sbHP As New StringBuilder("Liste des prénoms homophones potentiels restants (ex.:rené;renée)")
+        sbHPMD = New StringBuilder("Liste des prénoms homophones potentiels restants (ex.:rené;renée)")
         sbHP.AppendLine()
         sbHPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
         For Each kvp In sdHP
             Dim sPrenom = kvp.Key
             Dim sPrenomC = kvp.Value
             Dim iNbOcc% = 0, iNbOccC% = 0
-            If dicoE.ContainsKey(sPrenom) Then iNbOcc = dicoE(sPrenom).iNbOcc
-            If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
+            If Not dicoE.ContainsKey(sPrenom) Then Continue For
+            If Not dicoE.ContainsKey(sPrenomC) Then Continue For
+            Dim prenom = dicoE(sPrenom)
+            Dim prenomC = dicoE(sPrenomC)
+            iNbOcc = dicoE(sPrenom).iNbOcc
+            iNbOccC = dicoE(sPrenomC).iNbOcc
             Dim iNbOccM% = Math.Max(iNbOcc, iNbOccC)
             If iNbOccM < iSeuilMinPrenomsHomophonesPotentiels Then Continue For
-            sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+
+            If Not bVerification Then
+                ' Si cela forme une entrée existante pour les prénoms similaires,
+                '  alors ce n'est pas une entrée pertinente pour les prénoms homophones potentiels
+                Dim sCleS1$ = sPrenomC.ToLower & ";" & sPrenom.ToLower
+                Dim sCleS2$ = sPrenom.ToLower & ";" & sPrenomC.ToLower
+                If hsAssocSim.Contains(sCleS1) Then Continue For
+                If hsAssocSim.Contains(sCleS2) Then Continue For
+            End If
+
+            prenom.sPrenomPotentiel = sPrenomC
+            prenom.iNbOccPotentiel = Math.Min(iNbOcc, iNbOccC)
+            dicoHP.Add(sPrenom, prenom)
+        Next
+        For Each prenom In dicoHP.Trier(sTriP)
+            Dim sPrenomC = prenom.sPrenomPotentiel
+            Dim sPrenom = prenom.sPrenom
+            If bVerification Then
+                sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+                sbHPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+            Else
+                Dim iNbOccC% = 0
+                If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
+                sbHP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower &
+                    " ' " & iNbOccC & ", " & prenom.iNbOcc)
+                sbHPMD.AppendLine(sPrenom & " (" & prenom.iNbOcc & ") : " &
+                    sPrenomC & " (" & iNbOccC & ")").AppendLine()
+            End If
         Next
         Dim sCheminHP$ = sDossierAppli & "\PrenomsMixtesHomophonesPotentiels.txt"
         EcrireFichier(sCheminHP, sbHP)
 
-        Dim sbSP As New StringBuilder("Liste des prénoms similaires potentiels restants")
-        sbSPMD = New StringBuilder("Liste des prénoms similaires potentiels restants")
+        Dim dicoSP As New DicoTri(Of String, clsPrenom)
+        Dim sbSP As New StringBuilder("Liste des prénoms similaires potentiels restants (ex.:jean;jeanne)")
+        sbSPMD = New StringBuilder("Liste des prénoms similaires potentiels restants (ex.:jean;jeanne)")
         sbSP.AppendLine()
         sbSPMD.AppendLine().AppendLine().AppendLine(sSautDeLigneMD).AppendLine()
         For Each kvp In sdSP
             Dim sPrenom = kvp.Key
             Dim sPrenomC = kvp.Value
-            sbSP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
-            sbSPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+            If dicoE.ContainsKey(sPrenom) Then
+                Dim prenom = dicoE(sPrenom)
+                prenom.sPrenomPotentiel = sPrenomC
+                Dim iNbOccC% = 0
+                If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
+                prenom.iNbOccPotentiel = Math.Min(prenom.iNbOcc, iNbOccC)
+                If Not dicoSP.ContainsKey(sPrenom) Then dicoSP.Add(sPrenom, prenom)
+            End If
+        Next
+        For Each prenom In dicoSP.Trier(sTriP)
+            Dim sPrenomC = prenom.sPrenomPotentiel
+            Dim sPrenom = prenom.sPrenom
+            If bVerification Then
+                sbSP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower)
+                sbSPMD.AppendLine(sPrenom & " : " & sPrenomC).AppendLine()
+            Else
+                Dim iNbOccC% = 0
+                If dicoE.ContainsKey(sPrenomC) Then iNbOccC = dicoE(sPrenomC).iNbOcc
+                sbSP.AppendLine(sPrenomC.ToLower & ";" & sPrenom.ToLower &
+                    " ' " & iNbOccC & ", " & prenom.iNbOcc)
+                sbSPMD.AppendLine(sPrenom & " (" & prenom.iNbOcc & ") : " &
+                    sPrenomC & " (" & iNbOccC & ")").AppendLine()
+            End If
         Next
         Dim sCheminSP$ = sDossierAppli & "\PrenomsSimilairesPotentielsRestants.txt"
         EcrireFichier(sCheminSP, sbSP)
@@ -2078,7 +2155,7 @@ Suite:
                 Next
                 If bMajuscule Then
                     MsgBox("Majuscule : " & sLigne & vbLf & IO.Path.GetFileName(sChemin),
-                        MsgBoxStyle.Information, "Prénom Mixte")
+                        MsgBoxStyle.Information, sTitreAppli)
                 End If
 
             Next
@@ -2088,7 +2165,7 @@ Suite:
             If hsDoublons.Contains(sCle) Then
                 Dim sMsg$ = "Doublon : " & sCle & vbLf & IO.Path.GetFileName(sChemin)
                 Debug.WriteLine(sMsg)
-                MsgBox(sMsg, MsgBoxStyle.Information, "Prénom Mixte")
+                MsgBox(sMsg, MsgBoxStyle.Information, sTitreAppli)
             Else
                 hsDoublons.Add(sCle)
             End If
@@ -2098,7 +2175,7 @@ Suite:
             If hsDoublonsCorrection.Contains(sCleCorrection) Then
                 Dim sMsg$ = "Doublon : " & sCleCorrection & vbLf & IO.Path.GetFileName(sChemin)
                 Debug.WriteLine(sMsg)
-                MsgBox(sMsg, MsgBoxStyle.Information, "Prénom Mixte")
+                MsgBox(sMsg, MsgBoxStyle.Information, sTitreAppli)
             Else
                 hsDoublonsCorrection.Add(sCleCorrection)
             End If
@@ -2109,6 +2186,46 @@ Suite:
         Next
 
         Return dico
+
+    End Function
+
+    Private Function LireAssociations(sChemin$) As HashSet(Of String)
+
+        Dim hsDoublons As New HashSet(Of String)
+        Dim asLignes$() = IO.File.ReadAllLines(sChemin, Encoding.UTF8)
+        If IsNothing(asLignes) Then Return hsDoublons
+
+        Dim iNbLignes% = 0
+        For Each sLigne As String In asLignes
+            iNbLignes += 1
+            If iNbLignes = 1 Then Continue For ' Entête
+            If sLigne.StartsWith("'") Then Continue For ' Commentaire
+            Dim asChamps() As String
+            asChamps = Split(sLigne, ";"c)
+            Dim iNumChampMax% = asChamps.GetUpperBound(0)
+            Dim iNumChamp% = 0
+            Dim sValeurOrig$ = ""
+            Dim sValeurCorrigee$ = ""
+            For Each sChamp As String In asChamps
+                iNumChamp += 1
+                If IsNothing(sChamp) Then sChamp = ""
+                If sChamp.Length = 0 Then Exit For
+                Select Case iNumChamp
+                    Case 1 : sValeurCorrigee = sChamp.Trim
+                    Case 2 : sValeurOrig = sChamp.Trim
+                End Select
+                If sValeurOrig.Contains("'") Then ' Commentaire à la fin de la ligne
+                    Dim iPosQuote% = sValeurOrig.IndexOf("'")
+                    sValeurOrig = sValeurOrig.Substring(0, iPosQuote)
+                    sValeurOrig = sValeurOrig.TrimEnd
+                End If
+
+            Next
+            Dim sCle$ = sValeurCorrigee & ";" & sValeurOrig
+            If Not hsDoublons.Contains(sCle) Then hsDoublons.Add(sCle)
+        Next
+
+        Return hsDoublons
 
     End Function
 

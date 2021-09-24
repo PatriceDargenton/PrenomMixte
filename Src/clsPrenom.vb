@@ -15,7 +15,7 @@ Public Class clsPrenom : Implements ICloneable
     End Function
 
     Public sPrenom$, sPrenomOrig$, sPrenomHomophone$, sPrenomSimilaire$
-    Public sPrenomOrigNorm$, sPrenomOrigNormSansAccent$
+    Public sPrenomOrigNorm$, sPrenomOrigNormSansAccent$, sPrenomPotentiel$
     Public sAnnee$, sCodeSexe$, sNbOcc$
     Public bMasc As Boolean
     Public bFem As Boolean
@@ -24,7 +24,7 @@ Public Class clsPrenom : Implements ICloneable
     Public bSimilaire As Boolean
     Public bUnigenre As Boolean
     Public bAccent As Boolean
-    Public iNbOccMasc%, iNbOccFem%, iNbOcc%
+    Public iNbOccMasc%, iNbOccFem%, iNbOcc%, iNbOccPotentiel%
     Public rFreqRelative#, rFreqRelativeMasc#, rFreqRelativeFem#
 
     ' Fréquence relative de la variante (homophone, similaire ou accentuée)

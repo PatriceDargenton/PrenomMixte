@@ -13,6 +13,7 @@ Il n'existe pas de dictionnaire académique des prénoms (si ? en tout cas il y 
 - [Synthèse statistique des prénoms unigenres](#synth%C3%A8se-statistique-des-pr%C3%A9noms-unigenres)
 - [Synthèse statistique des prénoms accentués](#synth%C3%A8se-statistique-des-pr%C3%A9noms-accentu%C3%A9s)
 - [Synthèse statistique des prénoms fréquents](#synth%C3%A8se-statistique-des-pr%C3%A9noms-fr%C3%A9quents)
+- [Liens externes](#liens-externes)
 
 <!-- /TOC -->
 
@@ -658,7 +659,7 @@ Fréquence relative min. variante = 1%
 
 Les associations similaires sont programmées explicitement : il faut connaitre l'étymologie pour pouvoir regrouper les prénoms qui ont la même racine. Par exemple les prénoms Maël et Maëlle sont homophones, et les prénoms Maëliss, Maëlisse, Maëllys, Maélys et Maëlys sont aussi homophones. On voit que ces deux séries sont apparentées. Pour regrouper ces deux séries dans la synthèse des prénoms similaires, il faut choisir un prénom pivot. Le plus logique serait de choisir le prénom pivot Maélys dans l'association Maël-Maélys, car c'est le plus fréquent, mais au moment de regrouper les prénoms similaires, on ajoute automatiquement tous les prénoms homophones, pour éviter d'avoir à refaire ces associations. Or l'association ne peut fonctionner que dans un seul sens, via ce qu'on appelle un dictionnaire : il s'agit d'une structure informatique qui associe une clé à une valeur, ici une variante (la clé) à un prénom pivot (la valeur), pour pouvoir avoir plusieurs variantes pour une même valeur pivot. On voit bien qu'en regroupant les dictionnaires homophones et similaires, l'élément Maélys va se retrouver des deux côtés du dictionnaire, c'est-à-dire à la fois clé et valeur, ce qui sera évidement refusé par le logiciel. La solution à ce problème consiste à choisir un autre pivot pour l'une des deux séries homophones, à savoir un variant dont la fréquence est trop faible pour être retenue, ce qui ne faussera pas le décompte. Ici on choisi donc le pivot Maëllis au lieu de Maélys comme pivot homophone (Maëllis a seulement 133 occurrences, soit 0.3% des variantes, il ne sera donc pas inclus dans le décompte). 
 
-Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique. Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% relativement à celles de ses homogènes (similaires), elle est retirée et décomptée. On n'affiche que les prénoms avec au moins 20 000 occurrences, ce qui donne 81 prénoms (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires) pour une liste avec un seuil minimum d'occurrences à 1000 avec 92 prenoms).
+Les prénoms mixtes **épicènes** sont affichés en gras, et les prénoms mixtes *homophones* en italique. Un prénom peut être à la fois ***épicène et homophone***. Si la fréquence d'une variante est inférieure à 1% relativement à celles de ses homogènes (similaires), elle est retirée et décomptée. On n'affiche que les prénoms avec au moins 20 000 occurrences, ce qui donne 81 prénoms (voir le résultat [ici](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires) pour une liste avec un seuil minimum d'occurrences à 1000 avec 102 prenoms).
 
 Date début = 1900
 
@@ -2089,3 +2090,11 @@ Fréquence relative min. variante = 1%
 |361|50 548|Félix|1947|1947|1937|50 278|270|0.058%|99%|1%
 |362|50 338|*Frédérique*|1968|1972|1968|337|50 001|0.058%|1%|99%
 |363|50 197|Alicia|2002|0|2002|0|50 197|0.058%|0%|100%
+
+# Liens externes
+
+- [Wikipédia - Prénom mixte](https://fr.wikipedia.org/wiki/Prénom_mixte)
+- [Synthèse statistique des prénoms mixtes épicènes (liste complète)](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_mixtes_épicènes)
+- [Synthèse statistique des prénoms similaires avec au moins 1000 occurrences](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_similaires)
+- [Synthèse statistique des prénoms accentués avec au moins 2000 occurrences](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_accentués)
+- [Synthèse statistique des prénoms fréquents avec au moins 4000 occurrences](http://patrice.dargenton.free.fr/wiki/index.php?title=Synthèse_statistique_des_prénoms_fréquents)

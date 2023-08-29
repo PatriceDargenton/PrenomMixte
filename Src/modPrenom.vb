@@ -35,7 +35,7 @@ Public Module modPrenom
 #End If
 
     Public Const sTitreAppli$ = "Prénom mixte"
-    Public Const sDateVersionAppli$ = "24/09/2021"
+    Public Const sDateVersionAppli$ = "29/08/2023"
 
     Public ReadOnly sVersionAppli$ =
         My.Application.Info.Version.Major & "." &
